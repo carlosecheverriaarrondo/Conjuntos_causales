@@ -68,7 +68,8 @@ indefinidamente).
 
 ## Estado actual
 
-Goal 1 en marcha/pendiente de relanzar en este ordenador. Goals 2-4 no
+Goal 1 completado (2026-09-29): paquete `causets/`, 43 tests pasando,
+figura en `figures/goal1_mm_convergence.png`; ver README. Goals 2-4 no
 lanzados todavía — el Goal 2 está completamente especificado y listo;
 los Goals 3 y 4 son esbozos que se desarrollarán en detalle antes de
 lanzarlos, revisando primero si hay literatura más reciente relevante
