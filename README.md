@@ -10,6 +10,8 @@ source venv/bin/activate
 python -m pytest -q                      # tests (≈3 min)
 python scripts/goal1_convergence.py      # figura figures/goal1_mm_convergence.png
 python scripts/goal2_bd_action.py        # figura figures/goal2_bd_action.png
+python scripts/goal3_fluctuations.py run  # cálculo largo (~20 min) -> figures/goal3_results.json
+python scripts/goal3_fluctuations.py plot # figura figures/goal3_fluctuations.png
 ```
 
 ## Estructura
@@ -93,6 +95,127 @@ integral doble (cuadratura de Gauss-Legendre).
 - La cuadratura de de Sitter está verificada hasta ℓH = 0.05 en 4D (resolución
   1 y 2 coinciden a 10⁻⁴ relativo); por debajo, la cancelación entre términos
   O(1) exige más precisión de la implementada.
+
+## Goal 3: fluctuaciones de la acción BD (formalismo de Moradi-Yazdi-Zilhão)
+
+Referencia: H. Moradi, Y. K. Yazdi & M. Zilhão, "Fluctuations and Correlations
+in Causal Set Theory", Class. Quantum Grav. 42 (2025) 045017, arXiv:2407.03395
+(MYZ; ecuaciones citadas según la v2 del arXiv). Código: `causets/fluctuations.py`
+(formalismo), `causets/geometry.py` (geometrías), `tests/test_fluctuations.py`,
+`scripts/goal3_fluctuations.py`.
+
+**Qué acción.** Todo el Goal 3 trata la acción BD **local** (ε = 1), que es la
+que MYZ descomponen: S = a_N N + Σ_{k<n_d} a_k N_k con a = (1, −2, 4, −2) en 2D
+y (4/√6)(1, −1, 9, −16, 8) en 4D (normalización del Goal 2; la de MYZ, ec. 5.4,
+difiere en una constante global, p. ej. factor −√6/2 en 4D). La acción
+suavizada (ε < 1) depende de todas las N_n y **no** se ha tratado (trabajo
+futuro): ningún resultado de esta sección se refiere a ella.
+
+**Qué se implementó del artículo.**
+- Indicadores ζ_i (cardinalidad, MYZ 3.2/3.4) y χ (ocupación, 3.16):
+  `cardinality_indicator`, `occupation_indicator`. Las reglas de correlación
+  ζ-χ (3.31) y ζ-ζ con solapamiento (3.15, 3.34) se verifican directamente
+  contra sprinklings (tests).
+- (ΔS)² = aᵀ M a con M_ij = K_ij − L_iL_j = Cov(N_i, N_j), i, j = −1…n_d−1
+  (MYZ 5.9-5.10), L_i por (5.15), M_{−1,−1} = ρV (5.20), M_{−1,j} de (5.26-5.27)
+  — que se reduce a la identidad exacta M_{−1,j} = (j+2)L_j − (j+1)L_{j+1} — y
+  K_ij = J¹+…+J⁶ (5.29-5.36) con las subregiones de D_2, D_3, D_6 (5.40-5.44)
+  detectadas configuración a configuración.
+- Lo que MYZ dejan como trabajo futuro: **evaluar las integrales**. Se hace por
+  Monte Carlo con muestreo de importancia adaptado a la medida de volumen de
+  intervalos casi nulos; J⁶ se evalúa ya restada L_iL_j (parte conexa) y
+  partida en patrones (un extremo dentro del otro intervalo / sólo
+  solapamiento) para evitar colas pesadas.
+- **Minkowski 2D:** |A∩B| tiene forma cerrada (rectángulos en coordenadas de
+  cono de luz) → predicción exacta salvo el error MC, que se reporta.
+- **4D y de Sitter:** |A∩B| no tiene forma cerrada (MYZ sólo parametrizan
+  J⁻(x₁)∩J⁻(x₂) en 2D, apéndice C.1). Se estima con K puntos MC y se usa la
+  fórmula exacta de ⟨ζζ⟩ ("plugin"): sesgo O(1/K), medido comparando K. Hay
+  también un modo insesgado (realización de Poisson local + ensayos
+  geométricos para 1/|A∩B|), pero su varianza lo hace inútil en 4D.
+
+**Decisión sobre N ≳ 2¹⁶ y termalización.** Cunningham & Krioukov (2018)
+necesitan N grandes y termalización porque muestrean *dinámica* de causets con
+cadenas de Markov. Aquí no hay cadena: cada sprinkling de Poisson es una
+muestra independiente y exacta del ensemble, así que no hay termalización
+posible ni necesaria. Y la predicción de MYZ es exacta a densidad finita, así
+que la comparación es significativa a cualquier ρV: se usan ρV = 25…400 (2D)
+con 4000 sprinklings por punto; el error del estimador de la varianza se
+estima como std(d²)/√M con d = S − ⟨S⟩.
+
+**Resultados en Minkowski 2D** (predicción exacta; margen de los tests fijado a
+priori: |sim − pred| < 4σ_combinada):
+
+| ρV | (ΔS)² predicción MYZ | (ΔS)² simulación (4000 sprinklings) | z | (ΔS)²/ρV |
+|---|---|---|---|---|
+| 25 | 638 ± 8 | 651 ± 17 | 0.64 | 26 |
+| 50 | 1968 ± 24 | 1971 ± 48 | 0.06 | 39 |
+| 100 | 5401 ± 68 | 5626 ± 126 | 1.56 | 54 |
+| 200 | 14 099 ± 177 | 14 029 ± 317 | −0.19 | 70 |
+| 400 | 34 734 ± 468 | 36 121 ± 830 | 1.46 | 87 |
+
+Todas las densidades cumplen |z| < 4 (máximo 1.56). Los tests
+(`tests/test_fluctuations.py`, ρV = 50 y 100) verifican además las reglas de
+correlación ζ-χ (3.31) y ζ-ζ (3.34) contra sprinklings, y la fila M_{−1,j}
+de la matriz de covarianza. Se comprobó que los tests pueden fallar: al
+eliminar el patrón c0 de J⁶ los dos tests de varianza fallan.
+Ajuste: (ΔS)² ∝ (ρV)^1.44 en este rango, es decir, ΔS ∝ (ρV)^0.72.
+
+![Goal 3](figures/goal3_fluctuations.png)
+
+**Minkowski 4D (preliminar).** ρV = 50, 6000 sprinklings, predicción plugin:
+
+| K (puntos para \|A∩B\|) | (ΔS)² predicción | (ΔS)² simulación | z |
+|---|---|---|---|
+| 256 | 10 142 ± 1000 | 10 542 ± 251 | 0.39 |
+| 1024 | 9 616 ± 582 | 10 542 ± 251 | 1.46 |
+
+Son compatibles, pero la predicción tiene un error del 6-10 % y un sesgo
+O(1/K) que no se ha acotado con precisión en 4D. En Minkowski 2D, donde se
+puede comparar con el cálculo exacto, el sesgo medido fue de ~+465 con K = 64
+y ~+200 con K = 256 (ρV = 100, sobre ~5400). Es una verificación preliminar,
+no estricta, y no tiene test automatizado.
+
+**de Sitter 2D (exploratorio, no es una verificación).** MYZ no tratan de
+Sitter. La extensión supone que su formalismo vale para cualquier variedad
+(así lo afirman en el resumen) y usa: coordenadas conformes, donde la
+relación causal es la de Minkowski; la medida física a(η)² d²x; y volúmenes
+de intervalos exactos por simetría máxima. La región es η ∈ [−4, −0.3], H = 1,
+con plugin K = 256:
+
+| ρV | (ΔS)² predicción | (ΔS)² simulación | z |
+|---|---|---|---|
+| 50 | 2292 ± 161 | 1977 ± 47 | −1.88 |
+| 100 | 4872 ± 408 | 5845 ± 136 | 2.26 |
+
+Ambas quedan dentro de 4σ, pero con z de signos opuestos, errores del 7-8 %
+y el sesgo de K = 256. No permiten afirmar un acuerdo fino: el resultado se
+toma como una prueba de que el código funciona en geometría curva, no como una
+predicción validada.
+
+**Trabajo futuro.** Una fórmula de |A∩B| en 4D (o una cuadratura
+determinista) que elimine el sesgo plugin; la acción suavizada; más
+densidades en 4D para medir el escalado; y FLRW (Goal 4).
+
+**¿Validan estos resultados usar las fluctuaciones para modelar Everpresent Λ?**
+
+**No, con la acción local y en Minkowski los números no lo respaldan.**
+Everpresent Λ supone fluctuaciones de tipo Poisson: δN ~ √N, de donde sale
+ΔΛ ~ V^(−1/2). Si Λ se identificara con las fluctuaciones de la acción a
+través del término −2ΛV (MYZ ec. 4.6), haría falta ΔS ~ √(ρV). Lo que se mide
+es otra cosa:
+- En 2D, (ΔS)² ∝ (ρV)^1.44, es decir, ΔS ∝ (ρV)^0.72. Eso daría
+  ΔΛ ∝ V^(−0.28), no V^(−1/2).
+- La varianza es de 26 a 87 veces mayor que ρV en 2D (y ~210 veces en 4D a
+  ρV = 50). Está dominada por las correlaciones entre intervalos (términos
+  J², J³, J⁴, J⁶), no por el término de Poisson de N.
+
+Esto **no** descarta la idea en general. Queda abierto para: la acción
+suavizada (pensada precisamente para reducir fluctuaciones); espaciotiempos
+FLRW; y otras formas de extraer Λ que no sean la varianza total de S en un
+diamante. Una hipótesis no comprobada aquí es que la mayor parte de la
+varianza venga de intervalos casi nulos pegados a la frontera del diamante;
+si fuera así, restar términos de frontera podría cambiar el escalado.
 
 ## Referencias
 

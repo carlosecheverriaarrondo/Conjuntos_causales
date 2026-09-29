@@ -73,7 +73,13 @@ Goal 1 completado (2026-09-29): paquete `causets/`, figura en
 Goal 2 completado (2026-09-29): acción BD 2D/4D (local y suavizada),
 valores esperados exactos a densidad finita, verificación en Minkowski y
 de Sitter; 83 tests pasando; ver README.
-Goals 3-4 no lanzados: son esbozos que se desarrollarán en detalle antes de
-lanzarlos, revisando primero si hay literatura más reciente relevante
-(en particular, verificar si el grupo de Yazdi ha publicado avances sobre
-la evaluación numérica de fluctuaciones antes de lanzar el Goal 3).
+Goal 3 completado (2026-09-29): formalismo de Moradi-Yazdi-Zilhão en
+`causets/fluctuations.py` para la acción BD LOCAL (la suavizada queda
+pendiente). Minkowski 2D verificado con predicción exacta (5 densidades,
+|z| ≤ 1.56; tests). 4D preliminar (plugin, compatible, error 6-10 %) y de
+Sitter 2D exploratorio. Conclusión: con la acción local en Minkowski,
+ΔS ∝ (ρV)^0.72 (2D), no de tipo Poisson: no respalda Everpresent Λ tal
+cual; ver README. La búsqueda de literatura del grupo de Yazdi se hizo
+(sept. 2026) y no encontró nada publicado.
+Goal 4 no lanzado: es un esbozo que se desarrollará en detalle antes de
+lanzarlo.

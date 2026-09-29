@@ -1,0 +1,88 @@
+/goal Implementar los kernels analíticos de fluctuación de la acción de
+Benincasa-Dowker (BD) sobre el simulador ya construido (Goal 1: sprinkling +
+invariantes; Goal 2: acción BD local y suavizada, completado y verificado
+con 83 tests pasando, incluida la recuperación de la curvatura de de Sitter
+en el límite continuo). Sigue el formalismo de Moradi, Yazdi & Zilhão
+(Class. Quantum Grav. 42, 2025, 045017; arXiv:2407.03395). Antes de
+implementar, lee
+references/moradi_yazdi_zilhao_2025_fluctuations_causal_sets.pdf para
+extraer las definiciones exactas de ζ y χ.
+
+REVISIÓN DE LITERATURA YA REALIZADA: la búsqueda de publicaciones
+recientes del grupo de Yazdi sobre la evaluación numérica de estas
+fluctuaciones ya se hizo (septiembre 2026, fuera de esta sesión) -- no se
+encontró evidencia de que se haya publicado ya. Sigue siendo un hueco
+abierto en la literatura. NO repitas esta búsqueda; procede directamente
+a la implementación.
+
+Este es el tercer bloque del proyecto -- el
+cuarto extenderá este cálculo a espaciotiempos FLRW y lo conectará con el
+modelo Everpresent Λ, así que estructura el código de forma reutilizable
+para esa extensión (módulo separado para los kernels de fluctuación, que
+reciba como entrada un sprinkling/causal set ya generado, no acoplado a
+Minkowski específicamente).
+
+NOTA IMPORTANTE: la acción BD estándar tiene fluctuaciones grandes incluso
+para causal sets típicos -- esto ya lo documenta la literatura de
+simuladores existentes (Cunningham & Krioukov, 2018) como motivo de que se
+requieran N grandes (≳2^16) y tiempos de termalización largos en
+experimentos Monte Carlo. Si el Goal 2 ya implementó una versión suavizada
+("smeared") de la acción con fluctuaciones reducidas, ten en cuenta que el
+formalismo de Moradi-Yazdi-Zilhão puede aplicarse a la acción local
+estándar, a la suavizada, o a ambas -- sé explícito en el código sobre cuál
+se está calculando en cada caso, y no mezcles resultados de una y otra sin
+dejarlo documentado.
+
+FASE 1 -- Formalismo de fluctuación
+- Implementar las funciones "Cardinality Indicator" (ζ) y "Occupation
+  Indicator" (χ) descritas en Moradi-Yazdi-Zilhão (2025), que caracterizan
+  correlaciones entre intervalos causales de distinta cardinalidad dentro
+  del causal set.
+- A partir de estas funciones, construir el cálculo de la varianza de la
+  acción BD: (ΔS)² = ⟨S²⟩ − ⟨S⟩², descomponiéndola en las contribuciones
+  de correlación entre pares de elementos, tal como se describe en el
+  paper de referencia.
+- Documentar explícitamente en el código qué aproximaciones o casos
+  especiales del paper se implementan primero (empezar por el caso más
+  simple, según recomiendan los propios autores), y sobre cuál versión de
+  la acción (local o suavizada) se aplica el cálculo.
+
+FASE 2 -- Verificación en Minkowski
+- Evaluar numéricamente (ΔS)² sobre los sprinklings ya generados en
+  Minkowski 2D y 4D (reutilizando el generador de la Fase 1 del proyecto).
+- Dado que la acción local tiene fluctuaciones grandes, considera si N≳2^16
+  y/o tiempos de termalización mayores son necesarios para una comparación
+  significativa contra la predicción analítica; documenta esta decisión.
+- Comparar el resultado numérico contra la predicción analítica del paper
+  de Moradi-Yazdi-Zilhão, dentro de una tolerancia estadística razonable,
+  ejecutando múltiples realizaciones independientes para estimar el error
+  estadístico del propio estimador numérico.
+- Generar una gráfica de (ΔS)² numérico vs. predicción analítica en
+  función de N, mostrando el grado de acuerdo.
+
+FASE 3 -- Extensión preliminar a de Sitter
+- Adaptar el cálculo de fluctuaciones al sprinkling en de Sitter ya
+  disponible del Goal 2, como paso previo al Goal 4 (FLRW).
+- Si el paper de referencia no cubre explícitamente el caso de Sitter,
+  documentar claramente qué extensión o supuesto adicional se está
+  haciendo, y tratar este resultado como preliminar/exploratorio, no como
+  verificación contra una predicción analítica conocida.
+
+CRITERIO DE ÉXITO:
+- Tests automatizados que verifican que (ΔS)² calculado numéricamente en
+  Minkowski reproduce la predicción analítica del paper de referencia
+  dentro de un margen estadístico definido explícitamente en el código
+  (no ajustado a posteriori para que el test pase).
+- El código falla explícitamente (no en silencio) si la discrepancia
+  numérico-analítica supera ese margen.
+- Documentación clara del formalismo implementado, con referencia exacta
+  al paper (Moradi, Yazdi & Zilhão, Class. Quantum Grav. 42, 2025, 045017,
+  arXiv:2407.03395), incluyendo qué partes del paper se implementaron,
+  sobre qué versión de la acción, y cuáles quedan como trabajo futuro.
+- Un resumen final (README o informe) que indique explícitamente si el
+  resultado de Minkowski valida o no la viabilidad de usar estas
+  fluctuaciones para modelar Everpresent Λ -- sin forzar una conclusión
+  positiva si los números no la respaldan.
+
+LÍMITE DE SEGURIDAD: detente y reporta el estado si tras 25 turnos no hay
+progreso verificable hacia el criterio de éxito.
