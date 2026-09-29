@@ -42,7 +42,9 @@ autores de la literatura de referencia dejaron como "trabajo futuro".
 Cada goal se lanza como comando `/goal` independiente, con su propio
 criterio de éxito y un límite de seguridad de 25 turnos (detente y reporta
 el estado si no hay progreso verificable en ese margen, en vez de iterar
-indefinidamente).
+indefinidamente). "Turno" = cada ronda de llamadas a herramientas del
+asistente (no cada mensaje del usuario). Al llegar al límite, avisa y pide
+confirmación aunque haya progreso, en vez de seguir sin decir nada.
 
 ## Convenciones del proyecto
 
@@ -53,16 +55,22 @@ indefinidamente).
   docstring del módulo correspondiente.
 - Antes de dar por completado un criterio de éxito, ejecuta los tests y
   muestra el resultado real (no asumas que pasan).
+- Los márgenes estadísticos de los tests se fijan antes de ver los
+  resultados (hasta ahora: 4σ combinada). Comprueba que los tests pueden
+  fallar introduciendo un error deliberado (y restaurando el código).
+- Los cálculos largos van en scripts que guardan resultados intermedios
+  (p. ej. JSON en `figures/`), lanzados en segundo plano.
 
 ## Referencias principales
 
 - Myrheim, J. (1978) — dimensión de Myrheim-Meyer.
 - Reid, D. D. (2003), Phys. Rev. D 67, 024034 (arXiv:gr-qc/0207103) —
   formulación práctica del estimador de dimensión.
-- Benincasa, D. & Dowker, F. (2010), Phys. Rev. Lett. 104 — acción
+- Benincasa, D. & Dowker, F. (2010), Phys. Rev. Lett. 104, 181301 — acción
   discreta de Benincasa-Dowker.
-- Moradi, Yazdi & Zilhão (2024/2025), Class. Quantum Grav. 42,
-  arXiv:2407.03395 — kernels analíticos de fluctuación de la acción BD.
+- Moradi, Yazdi & Zilhão, Class. Quantum Grav. 42 (2025) 045017,
+  arXiv:2407.03395 — formalismo de fluctuaciones de la acción BD (sólo da
+  el formalismo, sin valores numéricos). PDF en `references/`.
 - Das, Nasiri & Yazdi, JCAP 10 (2023) 047 y JCAP 10 (2024) 076 —
   modelo fenomenológico Everpresent Λ (Model 1).
 
@@ -72,7 +80,7 @@ Goal 1 completado (2026-09-29): paquete `causets/`, figura en
 `figures/goal1_mm_convergence.png`; ver README.
 Goal 2 completado (2026-09-29): acción BD 2D/4D (local y suavizada),
 valores esperados exactos a densidad finita, verificación en Minkowski y
-de Sitter; 83 tests pasando; ver README.
+de Sitter; ver README.
 Goal 3 completado (2026-09-29): formalismo de Moradi-Yazdi-Zilhão en
 `causets/fluctuations.py` para la acción BD LOCAL (la suavizada queda
 pendiente). Minkowski 2D verificado con predicción exacta (5 densidades,
@@ -81,5 +89,15 @@ Sitter 2D exploratorio. Conclusión: con la acción local en Minkowski,
 ΔS ∝ (ρV)^0.72 (2D), no de tipo Poisson: no respalda Everpresent Λ tal
 cual; ver README. La búsqueda de literatura del grupo de Yazdi se hizo
 (sept. 2026) y no encontró nada publicado.
+Total: 93 tests pasando (suite completa ~4 min).
+
 Goal 4 no lanzado: es un esbozo que se desarrollará en detalle antes de
-lanzarlo.
+lanzarlo. Pendientes del Goal 3 que le afectan:
+- Fluctuaciones de la acción SUAVIZADA (ε < 1): no implementadas; es la
+  candidata natural a fluctuaciones más pequeñas.
+- |A∩B| en 4D sin forma cerrada: el estimador "plugin" tiene sesgo O(1/K);
+  hace falta una cuadratura determinista para resultados 4D fiables.
+- Escalado en 4D: sólo hay una densidad (ρV = 50).
+- FLRW puede seguir el patrón de `DeSitterGeometry` (coordenadas conformes,
+  peso a(η)^d, volúmenes de intervalos), pero sin simetría máxima los
+  volúmenes de intervalos no se reducen a un invariante.
