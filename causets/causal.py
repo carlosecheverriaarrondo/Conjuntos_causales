@@ -39,6 +39,28 @@ def minkowski_causal_matrix(coords: np.ndarray) -> np.ndarray:
     return C
 
 
+def minkowski_future_counts(coords: np.ndarray) -> np.ndarray:
+    """Para cada punto y, el número de puntos z del conjunto con y ≺ z.
+
+    Equivale a ``minkowski_causal_matrix(coords).sum(axis=1)`` pero sin
+    almacenar la matriz N x N (memoria O(N * chunk)). Si todos los puntos
+    están en el pasado de un vértice x (sprinkling del intervalo J-(x)), este
+    número es la cardinalidad del intervalo abierto entre y y x.
+    """
+    coords = np.asarray(coords, dtype=float)
+    n = len(coords)
+    t, x = coords[:, 0], coords[:, 1:]
+    counts = np.empty(n, dtype=np.int64)
+    for start in range(0, n, _CHUNK):
+        stop = min(start + _CHUNK, n)
+        dt = t[None, :] - t[start:stop, None]
+        dx2 = np.zeros_like(dt)
+        for k in range(x.shape[1]):
+            dx2 += (x[None, :, k] - x[start:stop, None, k]) ** 2
+        counts[start:stop] = np.count_nonzero((dt > 0) & (dt * dt >= dx2), axis=1)
+    return counts
+
+
 def partial_order_violations(C: np.ndarray) -> dict[str, int]:
     """Cuenta las violaciones de los axiomas de orden parcial estricto.
 

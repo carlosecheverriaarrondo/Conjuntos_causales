@@ -57,8 +57,8 @@ indefinidamente).
 ## Referencias principales
 
 - Myrheim, J. (1978) — dimensión de Myrheim-Meyer.
-- Reid, D. (2003), Class. Quantum Grav. 20 — formulación práctica del
-  estimador de dimensión.
+- Reid, D. D. (2003), Phys. Rev. D 67, 024034 (arXiv:gr-qc/0207103) —
+  formulación práctica del estimador de dimensión.
 - Benincasa, D. & Dowker, F. (2010), Phys. Rev. Lett. 104 — acción
   discreta de Benincasa-Dowker.
 - Moradi, Yazdi & Zilhão (2024/2025), Class. Quantum Grav. 42,
@@ -68,10 +68,12 @@ indefinidamente).
 
 ## Estado actual
 
-Goal 1 completado (2026-09-29): paquete `causets/`, 43 tests pasando,
-figura en `figures/goal1_mm_convergence.png`; ver README. Goals 2-4 no
-lanzados todavía — el Goal 2 está completamente especificado y listo;
-los Goals 3 y 4 son esbozos que se desarrollarán en detalle antes de
+Goal 1 completado (2026-09-29): paquete `causets/`, figura en
+`figures/goal1_mm_convergence.png`; ver README.
+Goal 2 completado (2026-09-29): acción BD 2D/4D (local y suavizada),
+valores esperados exactos a densidad finita, verificación en Minkowski y
+de Sitter; 83 tests pasando; ver README.
+Goals 3-4 no lanzados: son esbozos que se desarrollarán en detalle antes de
 lanzarlos, revisando primero si hay literatura más reciente relevante
 (en particular, verificar si el grupo de Yazdi ha publicado avances sobre
 la evaluación numérica de fluctuaciones antes de lanzar el Goal 3).
