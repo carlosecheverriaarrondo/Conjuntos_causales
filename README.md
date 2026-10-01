@@ -595,7 +595,84 @@ por 1.02 de forma deliberada, fallan los 4 tests que dependen de b.
    exponente local 1.72 → 1.52 entre ρV = 10² y 10⁶). Si J¹ domina como en
    2D, el exponente asintótico en 4D sería **p = 0.75, no 0.5**: los intervalos
    casi nulos, con su rango de boosts, crecen más rápido que N. El p ≈ 1.2
-   medido con ρV ≤ 100 sería pre-asintótico.
+   medido con ρV ≤ 100 sería pre-asintótico. **Confirmado en el Paso 2.**
+
+## Paso 2: escalado en 4D
+
+Código: `scripts/step2_4d_scaling.py` (resultados en `figures/step2_4d_sim.json`,
+`figures/step2_4d_sim_extra.json` y `figures/step2_4d_results.json`), tests en
+`tests/test_4d_scaling.py`.
+
+**Predicción (derivada antes de calcular).** El argumento del Goal 3d en d
+dimensiones: los pares con tiempo propio τ pequeño tienen rapidez χ ≲ ln(L/τ),
+y la medida del hiperboloide ∫ sinh^(d−2)χ dχ ~ (L/τ)^(d−2). Con
+μ = ρ·(volumen del intervalo):
+
+  ⟨Σ_pares h(n)⟩ ∝ (ρV)^(2−2/d) · Σ_n h(n) Γ(n + 2/d)/n! + …
+
+- d = 2: Γ(n+1)/n! = 1 y aparece el logaritmo (caso marginal, Goal 3d).
+- d = 4: J¹ = Σ a_k² ⟨N_k⟩ ∝ (ρV)^1.5, es decir, **p → 1 − 1/d = 0.75**.
+- El término cruzado con N lleva Σ_k a_k Γ(k+½)/k! = −1 + 9/2 − 6 + 5/2 = 0:
+  no crece. Es la misma cancelación que hace finita la media de la acción.
+
+**J¹ exacto** (integrales de `continuum.expected_abundance`, sin Monte
+Carlo). Su exponente local baja muy despacio hacia 0.75:
+
+| ρV | 25→50 | 100→200 | 400→800 | 1600→3200 | 10⁴→10⁵ | 10⁵→10⁶ |
+|---|---|---|---|---|---|---|
+| p local de J¹ | 1.26 | 1.09 | 0.96 | 0.88 | 0.80 | 0.77 |
+
+⟨N_k⟩/(ρV)^1.5, normalizado por Γ(k+½)/k!, converge a un valor común: la
+dispersión entre k = 0…3 pasa de 27 % (ρV = 10⁴) a 13 % (10⁵) y 5.5 % (10⁶).
+
+**Simulación** (acción local, ρV = 25 … 6400; con ρV = 3200 hay dos tandas,
+2000 sprinklings en total, y con ρV = 6400 hay 500):
+
+| ρV | (ΔS)²/ρV simulación | J¹/ρV exacto | resto/J¹ | p local (total) |
+|---|---|---|---|---|
+| 25 | 73.6 ± 3.9 | 56.0 | 0.32 ± 0.07 | |
+| 50 | 204.7 ± 5.0 | 160.8 | 0.28 ± 0.03 | 1.24 ± 0.04 |
+| 100 | 539 ± 11 | 407.6 | 0.33 ± 0.03 | 1.20 ± 0.02 |
+| 200 | 1224 ± 40 | 921.4 | 0.33 ± 0.04 | 1.09 ± 0.03 |
+| 400 | 2488 ± 77 | 1892.5 | 0.32 ± 0.04 | 1.01 ± 0.03 |
+| 800 | 4787 ± 146 | 3596.9 | 0.33 ± 0.04 | 0.97 ± 0.03 |
+| 1600 | 8359 ± 346 | 6425.6 | 0.30 ± 0.05 | 0.90 ± 0.04 |
+| 3200 | 15 415 ± 508 | 10 927 | 0.41 ± 0.05 | 0.94 ± 0.04 |
+| 6400 | 20 979 ± 1272 | 17 869 | 0.17 ± 0.07 | 0.72 ± 0.05 |
+
+"Resto" = total − J¹ − NN − cruzado, es decir, la suma de los términos de
+correlación de MYZ. **Regla fijada antes de la segunda tanda:** si las
+correlaciones crecen como J¹, la pendiente de resto/J¹ frente a ln ρV es
+compatible con 0 a 4σ. Resultado: +0.0056 ± 0.0091 (0.6σ, χ²/dof = 1.39).
+**Se cumple.** La fracción media es resto/J¹ = 0.317 ± 0.014, es decir,
+(ΔS)² ≈ 1.32·J¹ en todo el rango.
+
+![Paso 2](figures/step2_4d_scaling.png)
+
+**Conclusiones:**
+1. **El p ≈ 1.2 medido con ρV ≤ 100 (Goal 3) es pre-asintótico**, y se
+   explica entero: el propio J¹ tiene exponente local 1.26–1.17 ahí. A medida
+   que crece ρV, el exponente local de la varianza total sigue al de J¹ hacia
+   abajo.
+2. **Asintóticamente, ΔS ∝ (ρV)^0.75 en 4D.** Esto se apoya en dos piezas.
+   Una es exacta: J¹ → (ρV)^1.5. La otra es empírica hasta ρV = 6400: las
+   correlaciones son una fracción constante de J¹. Que esa proporcionalidad
+   siga hasta ρV → ∞ es una extrapolación.
+3. **En general, p = 1 − 1/d.** El origen es el mismo en cualquier
+   dimensión: el número de intervalos casi nulos de volumen fijo crece con el
+   rango de boosts disponible dentro de la región, (L/τ)^(d−2), más deprisa que
+   el número de elementos. Sólo en d = 2 sale 1/2, y con logaritmo (caso
+   marginal).
+4. **Acción suavizada:** el mismo argumento da J¹ ∝ (ρV)^1.5 ·
+   Σ_n f_ε(n)² Γ(n+½)/n! con ε fijo. El suavizado cambia la amplitud, no el
+   exponente. (No se ha simulado en 4D.) Si ε escalara con ρ, manteniendo
+   fija la escala de no localidad, el análisis sería otro.
+5. **Everpresent Λ:** en 4D, que es el caso físico, Λ ∼ S/V daría
+   ΔΛ ∝ V^(−1/4), no V^(−1/2). Con los V cosmológicos (ρV ~ 10²⁴⁰), la
+   asíntota es la relevante. Esto refuerza el veredicto del Goal 3c con un
+   mecanismo explícito: las fluctuaciones de la acción BD en un diamante de
+   Minkowski 4D **no** tienen el escalado de Poisson. No lo tienen por una
+   razón estructural (los boosts), no por falta de densidad.
 
 ## Referencias
 

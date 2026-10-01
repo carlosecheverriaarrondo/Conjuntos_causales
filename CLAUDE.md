@@ -118,14 +118,21 @@ rapidez). Derivado y verificado: (ΔS)² ⊇ b(ε) ρV ln ρV con b = Σ_n f_ε(
 (24 / 0.395 / 0.0228). J⁶ conexo crece también (forma sin determinar; con
 suavizado aporta ~28 %). Asintótica 2D: ΔS ∝ √(ρV ln ρV). Predicción 4D si
 J¹ domina: p = 0.75. Ver README.
-Total: 120 tests pasando.
+Paso 2 (4D, 2026-10-01): J¹ ∝ (ρV)^(2−2/d) exacto → p → 1 − 1/d = 0.75 en
+4D (exponente local 1.26 a ρV = 25, 0.77 a 10⁶; el p ≈ 1.2 del Goal 3 era
+pre-asintótico). Simulación hasta ρV = 6400: las correlaciones son una
+fracción constante de J¹ (resto/J¹ = 0.317 ± 0.014, pendiente 0.6σ). En 4D,
+ΔΛ ∝ V^(−1/4): sin escalado de Poisson por una razón estructural (boosts).
+Total: 124 tests pasando.
 
 Goal 4 no lanzado y por REPLANTEAR según el Goal 3c: no generar Λ(t)
 suponiendo que las fluctuaciones de S_BD tienen el escalado de Poisson;
 medirlas. Pendientes que le afectan:
 - ¿En 4D el exponente efectivo baja con ρV, como en 2D? (Ahora sólo hay
   ρV ≤ 100, con p ≈ 1.2.)
-- 4D: comprobar la predicción p → 0.75 (término J¹ ∝ (ρV)^1.5).
+- 4D con suavizado: no simulado (la predicción es el mismo exponente 0.75).
+- ¿Regiones distintas del diamante (p. ej. conos de luz pasados de FLRW)?
+  El rango de boosts lo fija la región: hay que rehacer el argumento.
 - J⁶ conexo: determinar su crecimiento (dominante con suavizado fuerte).
 - Acción suavizada con ερV ≫ 1 (límite ε → 0): sólo se ha llegado a
   ερV = 100; el escalado asintótico sigue abierto.
