@@ -111,15 +111,22 @@ NO es estable (baja de 0.72-0.77 a 0.59-0.62, más de 7σ) y sigue siendo
 incompatible con 0.5 (más de 5σ). Hipótesis a posteriori: (ΔS)² ≈ ρV(a + b ln ρV)
 (Poisson con corrección logarítmica). (3) Veredicto: el Goal 4 tal como
 estaba planteado NO tiene base; ver la propuesta alternativa en el README.
-Total: 107 tests pasando.
+Goal 3d (paso 1, 2026-10-01): el logaritmo en 2D viene del término "mismo
+par" J¹ (ruido de Poisson del número de intervalos casi nulos, por el rango
+de rapidez cortado por el diamante); NO es un efecto de frontera (meseta en
+rapidez). Derivado y verificado: (ΔS)² ⊇ b(ε) ρV ln ρV con b = Σ_n f_ε(n)²
+(24 / 0.395 / 0.0228). J⁶ conexo crece también (forma sin determinar; con
+suavizado aporta ~28 %). Asintótica 2D: ΔS ∝ √(ρV ln ρV). Predicción 4D si
+J¹ domina: p = 0.75. Ver README.
+Total: 120 tests pasando.
 
 Goal 4 no lanzado y por REPLANTEAR según el Goal 3c: no generar Λ(t)
 suponiendo que las fluctuaciones de S_BD tienen el escalado de Poisson;
 medirlas. Pendientes que le afectan:
 - ¿En 4D el exponente efectivo baja con ρV, como en 2D? (Ahora sólo hay
   ρV ≤ 100, con p ≈ 1.2.)
-- Comprobar o refutar (ΔS)² ≈ ρV(a + b ln ρV) en 2D y localizar el origen
-  del logaritmo (¿frontera?).
+- 4D: comprobar la predicción p → 0.75 (término J¹ ∝ (ρV)^1.5).
+- J⁶ conexo: determinar su crecimiento (dominante con suavizado fuerte).
 - Acción suavizada con ερV ≫ 1 (límite ε → 0): sólo se ha llegado a
   ερV = 100; el escalado asintótico sigue abierto.
 - 4D: la predicción con ρV = 100 tiene un error MC del 23 %; la cuadratura

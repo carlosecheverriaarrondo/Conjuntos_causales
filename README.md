@@ -439,10 +439,9 @@ mucho mejor (χ²/dof = 11.7, 1.8 y 2.0; con ε = 1 hace falta algo más en las
 densidades bajas). Si esa forma es la correcta, ΔS ∝ √(ρV ln ρV)
 asintóticamente: escalado de Poisson **con una corrección logarítmica**, y el
 "0.72" del Goal 3 sería un exponente efectivo de densidades pequeñas.
-**Esto es una hipótesis, no un resultado verificado**: se formuló tras ver
-los datos, sólo cubre 2D y dos décadas de ρV, y no se ha derivado
-analíticamente. Una explicación natural, sin comprobar, son contribuciones
-de intervalos casi nulos a lo largo de la frontera del diamante.
+Esta forma se formuló como hipótesis tras ver los datos. **El Goal 3d
+(sección siguiente) la deriva y la verifica** para el término dominante, y
+muestra que no es un efecto de frontera.
 
 ![Goal 3c](figures/goal3c_asymptotic.png)
 
@@ -500,6 +499,103 @@ y no aportaría nada nuevo.
 - Si se va a FLRW, hacerlo como **medida** y no como supuesto: calcular ΔS
   en conos de luz pasados de FLRW y comparar con δΛ ∝ V^(−1/2), en vez de
   generar Λ(t) suponiendo que la relación se cumple.
+
+## Goal 3d: origen del logaritmo en 2D
+
+Código: `causets/fluctuations.py` (`pair_weight`, `same_pair_log_coefficient`),
+`scripts/goal3d_log_origin.py` (resultados en `figures/goal3d_terms.json`,
+`figures/goal3d_rapidity.json` y `figures/goal3d_results.json`), tests en
+`tests/test_log_origin.py`.
+
+**Hipótesis (formulada antes del cálculo).** El logaritmo viene del término
+"mismo par" (J¹ de MYZ): el ruido de Poisson del *número* de intervalos. En
+coordenadas de cono de luz (diamante de lado ℓ, V = ℓ²/2):
+
+  ⟨Σ_pares h(n)⟩ = (ρ²/4) ∫∫₀^ℓ (ℓ−a)(ℓ−b) E_{n~Poisson(ρab/2)}[h(n)] da db.
+
+A producto ab = x fijo, la integral ∫_{x/ℓ}^{ℓ} da/a = ln(ℓ²/x) cuenta el
+**rango de rapidez** de los intervalos casi nulos de volumen fijo, que el
+tamaño del diamante corta. Como ∫₀^∞ P_n(μ) dμ = 1:
+
+  ⟨Σ_pares h(n)⟩ = ρV ln(ρV) · Σ_n h(n) + O(ρV).
+
+Con h = f_ε², donde f_ε(n) es la contribución de un par a la acción, sale
+(ΔS)² ⊇ b(ε) ρV ln ρV con **b(ε) = Σ_n f_ε(n)²**: b(1) = Σa_k² = 24,
+b(0.5) = 0.395, b(0.25) = 0.0228. El término cruzado con N lleva
+Σ_n f_ε(n) = 0 y no tiene logaritmo.
+
+**Verificaciones:**
+- ⟨N_k⟩/ρV − ln ρV converge a una constante (integral exacta hasta
+  ρV = 10⁶): el coeficiente del logaritmo es 1 para todo k.
+- El aumento por década de ⟨Σ f_ε²⟩/ρV, dividido por ln 10, da 23.998,
+  0.39503 y 0.02285 frente a b = 24, 0.39506 y 0.02285 (integral exacta, sin
+  Monte Carlo).
+- **Descomposición de la predicción MYZ** por términos (ρV = 50 … 12 800;
+  la suma reproduce la varianza total exactamente). El aumento de J¹/ρV en
+  cada factor 4 de ρV converge a b(ε)·ln 4:
+
+| ε | aumentos de J¹/ρV | b(ε)·ln 4 |
+|---|---|---|
+| 1 | 30.0, 32.2, 32.9, 33.2 | 33.27 |
+| 0.5 | 0.503, 0.533, 0.541, 0.549 | 0.548 |
+| 0.25 | 0.0284, 0.0305, 0.0315, 0.0315 | 0.0316 |
+
+**No es un efecto de frontera.** Sobre 20 sprinklings con ρV = 3200, la
+contribución de los pares a Σ f_ε(n)² repartida por rapidez η = ½ ln(Δu/Δv)
+forma una **meseta**: aproximadamente constante para |η| ≲ 3 y cortada en
+|η| ≈ ½ ln ρV = 4.0. Su altura (22.9 / 0.38 / 0.0219 por unidad de η) es
+~96 % de b(ε). Cada unidad de rapidez aporta lo mismo; los pares pegados a
+los bordes nulos (|η| > 4) aportan poco. La frontera sólo fija dónde se corta
+el rango de rapidez. El logaritmo es un efecto de la invariancia de Lorentz
+(boosts) cortada por el tamaño finito de la región. Además, J¹/ρV medido sobre
+sprinklings (137.1) coincide con la predicción (137.7).
+
+**Los otros términos** (ajuste T/ρV = c + b ln ρV, ρV = 50 … 12 800):
+
+| ε | b total | b(J¹) predicho | b(J²+J³+J⁴) | b(J⁶ conexo) |
+|---|---|---|---|---|
+| 1 | 24.43 ± 0.24 | 24 | ≈ −0.3 | 2.04 ± 0.21 |
+| 0.5 | 0.540 ± 0.016 | 0.395 | ≈ +0.014 | 0.151 ± 0.015 |
+| 0.25 | 0.0350 ± 0.0014 | 0.0228 | ≈ +0.005 | 0.0063 ± 0.0012 |
+
+- J², J³ y J⁴ son O(ρV): planos a densidad alta. El pequeño b de J⁴ con
+  ε = 0.25 sale de su subida a densidad baja; desde ρV = 200 es plano.
+- **J⁶ conexo** (correlaciones entre intervalos solapados) también crece.
+  Con la acción local es secundario: el b total, 24.43 ± 0.24, es
+  compatible con 24. Con la acción suavizada explica la diferencia con la
+  fórmula de J¹ (con ε = 0.5, ~28 % de la pendiente). **No se ha determinado
+  su forma funcional**: sus errores de Monte Carlo crecen con ρV, y con
+  ε = 1 salta de 9.4 ± 1.5 a 20.1 ± 2.2 entre ρV = 3200 y 12 800 (~4σ),
+  sin que se pueda distinguir una fluctuación de cola de un crecimiento real.
+
+**Tests:** 13 en `tests/test_log_origin.py`. Incluyen el coeficiente 1 de
+⟨N_k⟩, b(1) = 24, Σf_ε = 0, b(0.5) por integral exacta, el cierre de la
+descomposición, el b total de la acción local frente a 24 y el último aumento
+de J¹ frente a b(ε)·ln 4. Los márgenes de los dos últimos son el estándar
+del proyecto (4σ), aunque los valores ya se habían visto. Con b multiplicado
+por 1.02 de forma deliberada, fallan los 4 tests que dependen de b.
+
+![Goal 3d](figures/goal3d_log_origin.png)
+
+**Consecuencias:**
+1. **El exponente asintótico en 2D es 1/2 con corrección logarítmica, al
+   menos para el término dominante:** (ΔS)² = b(ε) ρV ln ρV + …, es decir,
+   ΔS ∝ √(ρV ln ρV). Los "0.72" (Goal 3) y "0.59–0.62" (Goal 3c) son
+   exponentes efectivos de ese crecimiento logarítmico a densidades finitas.
+   La regla del Goal 3c ("incompatible con 0.5") sigue siendo correcta para
+   un ajuste de potencia pura en ese rango, pero la ley real no es una
+   potencia. Queda abierta la contribución de J⁶.
+2. **Everpresent Λ:** en 2D las fluctuaciones de la acción son "casi de
+   Poisson" (Poisson por un logaritmo). Siguen en pie las otras dos
+   objeciones de la Fase 3 del Goal 3c: el modelo no deriva Λ de la acción BD,
+   y la amplitud b(ε) depende del suavizado. Además, el logaritmo aquí es
+   ln(ρV) del diamante: no es universal y depende de la forma de la región.
+3. **Predicción para 4D (paso 2, sin comprobar):** el mismo argumento da
+   ⟨N_k⟩ ∝ (ρV)^(2−2/d) = (ρV)^1.5 (confirmado numéricamente para ⟨N_0⟩:
+   exponente local 1.72 → 1.52 entre ρV = 10² y 10⁶). Si J¹ domina como en
+   2D, el exponente asintótico en 4D sería **p = 0.75, no 0.5**: los intervalos
+   casi nulos, con su rango de boosts, crecen más rápido que N. El p ≈ 1.2
+   medido con ρV ≤ 100 sería pre-asintótico.
 
 ## Referencias
 

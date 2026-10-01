@@ -769,3 +769,29 @@ def expected_thinned_abundance(dim: int, lam: float, k: int, eps: float = 1.0) -
     from .continuum import expected_abundance
 
     return expected_abundance(dim, eps * lam, k) / eps**2
+
+
+def pair_weight(dim: int, n, eps: float = 1.0) -> np.ndarray:
+    """f_eps(n) = sum_k a_k B_k(n, eps): contribución a S_eps de un par con n
+    elementos entre sus extremos (sin el término a_N N). Con eps = 1,
+    f(n) = a_n para n < n_d y 0 si no."""
+    from scipy.stats import binom
+
+    a = action_coefficients(dim, eps)[1:]
+    n = np.asarray(n)
+    return sum(a[k] * binom.pmf(k, n, eps) for k in range(len(a)))
+
+
+def same_pair_log_coefficient(eps: float = 1.0, n_max: int = 20_000) -> float:
+    """Coeficiente b de (Delta S)^2 ≈ b rho V ln(rho V) + O(rho V) que aporta
+    el término "mismo par" (J¹ de MYZ) en un diamante de Minkowski 2D.
+
+    Derivación (Goal 3d, ver README): en coordenadas de cono de luz, con
+    diamante de lado l (V = l²/2),
+        <sum_pares h(n)> = (rho²/4) ∫∫_0^l (l-a)(l-b) E_{n~Poisson(rho a b/2)}[h(n)] da db.
+    A ab = x fijo, ∫_{x/l}^{l} da/a = ln(l²/x): el rango de rapidez de los
+    intervalos casi nulos, cortado por el diamante. Con ∫_0^∞ P_n(mu) dmu = 1,
+        <sum_pares h(n)> = rho V ln(rho V) sum_n h(n) + O(rho V).
+    Para h = f_eps² sale b = sum_n f_eps(n)². El término cruzado con N lleva
+    sum_n f_eps(n) = 0 (porque sum_k C_k = 0), y no tiene logaritmo."""
+    return float(np.sum(pair_weight(2, np.arange(n_max), eps) ** 2))
