@@ -88,7 +88,15 @@ ampliación de abajo). Minkowski 2D verificado con predicción exacta (5 densida
 Sitter 2D exploratorio. Conclusión: con la acción local en Minkowski,
 ΔS ∝ (ρV)^0.72 (2D), no de tipo Poisson: no respalda Everpresent Λ tal
 cual; ver README. La búsqueda de literatura del grupo de Yazdi se hizo
-(sept. 2026) y no encontró nada publicado.
+(sept. 2026) y no encontró nada publicado. Repetida el 2026-10-01: MYZ
+sólo tiene 2 citas en INSPIRE (Yeats 2412.14036, combinatoria; Dowker-Liu-
+Lloyd-Jones 2501.00139, media de la acción con frontera temporal); ninguna
+evalúa la varianza ni su escalado. MYZ sólo PLANTEAN si las fluctuaciones de
+la acción podrían ser el origen de Everpresent Λ, no lo responden.
+Revisado también Ashfaque, "Numerical Explorations of the Benincasa-Dowker
+Conjecture" (ResearchGate, abr. 2026, sin arXiv; PDF local en references/,
+no versionado): sólo trata la MEDIA de la acción, sin resultados numéricos,
+y su suavizado e^(-εn) no es el de Sorkin/Dowker-Glaser; no se solapa.
 Ampliación del Goal 3 (2026-10-01): acción BD SUAVIZADA (abundancias
 adelgazadas) y |A∩B| exacto en 4D (`causets/overlap.py`, cuadratura).
 2D, ε = 0.5 y 0.25, ρV = 25..400: 10/10 puntos con |z| < 4. El suavizado
