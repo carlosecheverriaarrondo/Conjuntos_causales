@@ -105,6 +105,23 @@ def local_action_coefficients(dim: int) -> np.ndarray:
     return LOCAL_ACTION_COEFFICIENTS[dim].copy()
 
 
+def smeared_action_coefficients(dim: int, eps: float) -> np.ndarray:
+    """a = (a_N, a_0, ..., a_{n_d - 1}) de la acción suavizada escrita con
+    abundancias adelgazadas (ver ``thinned_abundance_vector``):
+    S_eps = a_N N + sum_k a_k Ñ_k, con a_N = -s_d alpha beta eps^(2/d) y
+    a_k = -s_d alpha eps^(1+2/d) C_k (``action.bd_action_from_pairs``).
+    Con eps = 1 coincide con ``local_action_coefficients``."""
+    from .action import coefficients
+
+    c = coefficients(dim)
+    pref = -c.action_scale * c.alpha * eps ** (2.0 / dim)
+    return np.concatenate([[pref * c.beta], pref * eps * np.asarray(c.layers)])
+
+
+def action_coefficients(dim: int, eps: float = 1.0) -> np.ndarray:
+    return local_action_coefficients(dim) if eps == 1 else smeared_action_coefficients(dim, eps)
+
+
 # ---------------------------------------------------------------------------
 # Indicadores de MYZ sobre un conjunto causal concreto
 # ---------------------------------------------------------------------------
@@ -128,6 +145,23 @@ def abundance_vector(C: np.ndarray, n_max: int) -> np.ndarray:
     n = interval_cardinalities(C)[C]
     counts = np.bincount(n, minlength=n_max)[:n_max]
     return np.concatenate([[C.shape[0]], counts]).astype(float)
+
+
+def thinned_abundance_vector(C: np.ndarray, n_max: int, eps: float) -> np.ndarray:
+    """(N, Ñ_0, ..., Ñ_{n_max - 1}) con Ñ_k = sum_{y ≺ x} B_k(n(y,x), eps),
+    B_k(n, eps) = binom(n, k) eps^k (1-eps)^(n-k): número esperado de pares
+    con k elementos entre ellos tras adelgazar el intervalo con probabilidad
+    de retención eps. f_d(n, eps) = sum_k C_k B_k(n, eps) (``action.py``), así
+    que S_eps = a · Ñ con ``smeared_action_coefficients``. Con eps = 1, Ñ_k = N_k."""
+    from scipy.stats import binom
+
+    if eps == 1:
+        return abundance_vector(C, n_max)
+    C = np.asarray(C, dtype=bool)
+    counts = np.bincount(interval_cardinalities(C)[C])
+    ns = np.arange(len(counts))
+    thinned = [float(np.sum(counts * binom.pmf(k, ns, eps))) for k in range(n_max)]
+    return np.array([C.shape[0], *thinned], dtype=float)
 
 
 # ---------------------------------------------------------------------------
@@ -167,16 +201,16 @@ class EnsembleFluctuations:
         return prods.std(axis=0, ddof=1) / np.sqrt(len(d))
 
 
-def ensemble_fluctuations(geometry, density: float, n_samples: int, rng, coefficients=None) -> EnsembleFluctuations:
+def ensemble_fluctuations(geometry, density: float, n_samples: int, rng, coefficients=None, eps: float = 1.0) -> EnsembleFluctuations:
     """Sprinklings de Poisson independientes de ``geometry`` (sin cadena de
-    Markov: no hay termalización) y sus abundancias."""
+    Markov: no hay termalización) y sus abundancias (adelgazadas si eps < 1)."""
     from .causal import minkowski_causal_matrix
     from .sprinkling import sprinkle
 
-    a = local_action_coefficients(geometry.dim) if coefficients is None else np.asarray(coefficients)
+    a = action_coefficients(geometry.dim, eps) if coefficients is None else np.asarray(coefficients)
     n_max = len(a) - 1
     rows = [
-        abundance_vector(minkowski_causal_matrix(sprinkle(geometry.region, density, rng)), n_max)
+        thinned_abundance_vector(minkowski_causal_matrix(sprinkle(geometry.region, density, rng)), n_max, eps)
         for _ in range(n_samples)
     ]
     return EnsembleFluctuations(np.array(rows), a)
@@ -219,6 +253,37 @@ def joint_cardinality_probability(za, zb, zc, n: int) -> np.ndarray:
     return out
 
 
+def thinned_joint_probability(zA, zB, zAB, sA, sB, n: int, eps: float = 1.0) -> np.ndarray:
+    """<zeta_{i-sA}(A) zeta_{j-sB}(B)> para i, j = 0..n-1 tras adelgazar A y B
+    de forma independiente con probabilidad de retención eps, forma (m, n, n).
+    zA = rho|A|, zB = rho|B|, zAB = rho|A∩B|; sA (sB) es el número de puntos de
+    la configuración contenidos en A (B).
+
+    Con eps = 1 es MYZ (3.15, 3.31). Para eps < 1: los elementos de A∩B se
+    reparten (adelgazamiento de un proceso de Poisson) en procesos de Poisson
+    independientes retenidos por ambos (eps^2), sólo por A o sólo por B
+    (eps(1-eps) cada uno), así que la estructura de (3.15) se mantiene con
+        zA' = eps zA - eps^2 zAB,  zAB' = eps^2 zAB,  zB' = eps zB - eps^2 zAB,
+    y cada punto fijo contenido se retiene con probabilidad eps:
+    el desplazamiento sA pasa a ser Binomial(sA, eps)."""
+    zA, zB, zAB = (np.asarray(v, float) for v in (zA, zB, zAB))
+    sA, sB = np.asarray(sA, int), np.asarray(sB, int)
+    if eps == 1:
+        return _shifted(joint_cardinality_probability(zA - zAB, zAB, zB - zAB, n), sA, sB)
+    from scipy.stats import binom
+
+    e2 = eps * eps
+    P = joint_cardinality_probability(np.maximum(eps * zA - e2 * zAB, 0.0), e2 * zAB, np.maximum(eps * zB - e2 * zAB, 0.0), n)
+    out = np.zeros_like(P)
+    for u in range(int(sA.max(initial=0)) + 1):
+        wu = binom.pmf(u, sA, eps)
+        for v in range(int(sB.max(initial=0)) + 1):
+            w = wu * binom.pmf(v, sB, eps)
+            if np.any(w > 0):
+                out += w[:, None, None] * _shifted(P, np.full(len(P), u), np.full(len(P), v))
+    return out
+
+
 def _sinh_power_integral(d: int, X):
     """S_d(X) = int_0^X sinh^{d-2}(chi) d chi."""
     X = np.asarray(X, dtype=float)
@@ -240,12 +305,18 @@ class _Proposal:
     [0, ln(4 L / tau)] y n uniforme en S^{d-2}. Como la medida de volumen en
     estas variables es d^d o = dz sinh^{d-2}chi dchi dOmega / (d rho_c c_d),
     los pesos 1/q son suaves (e^{z/z0} z^{1-2/d} S_d(chi_max)): no hay colas
-    pesadas. ``density`` devuelve q(o) en medida coordenada."""
+    pesadas. ``density`` devuelve q(o) en medida coordenada.
+
+    ``z0`` puede ser una tupla de escalas: entonces z se muestrea de la mezcla
+    equiponderada de las Gammas ("defensive importance sampling", Hesterberg,
+    Technometrics 37 (1995) 185), y el peso queda acotado por el de la mejor
+    componente. Se usa con la acción suavizada, donde los intervalos
+    relevantes tienen rho V ~ 1/eps además de los pequeños."""
 
     dim: int
     extent: float
     rho_c: float  # densidad en medida coordenada (rho en Minkowski)
-    z0: float = 3.0
+    z0: float | tuple = 3.0
 
     def sample(self, m: int, rng, budget) -> tuple[np.ndarray, np.ndarray]:
         """``budget``: tiempo coordenado disponible desde cada punto base hasta
@@ -257,8 +328,9 @@ class _Proposal:
         d = self.dim
         c = diamond_volume_unit(d)
         shape = 2.0 / d
-        z = rng.gamma(shape, self.z0, size=m)
-        p_z = z ** (shape - 1) * np.exp(-z / self.z0) / (gamma_fn(shape) * self.z0**shape)
+        scales = np.atleast_1d(np.asarray(self.z0, dtype=float))
+        z = rng.gamma(shape, scales[rng.integers(len(scales), size=m)])
+        p_z = np.mean([z ** (shape - 1) * np.exp(-z / s) / (gamma_fn(shape) * s**shape) for s in scales], axis=0)
         tau = (z / (self.rho_c * c)) ** (1.0 / d)
         budget = np.broadcast_to(np.asarray(budget, dtype=float), (m,))
         valid = tau < budget
@@ -319,10 +391,15 @@ class FluctuationPrediction:
 class FluctuationKernel:
     """Evalúa el formalismo MYZ sobre una geometría (ver ``geometry.py``)."""
 
-    def __init__(self, geometry, density: float, n_max: int, rng, z0: float = 3.0,
-                 overlap: str = "auto", overlap_points: int = 1024):
-        """``overlap``: cómo obtener |A ∩ B|.
-          "exact"      forma cerrada de la geometría (sólo 2D Minkowski)
+    def __init__(self, geometry, density: float, n_max: int, rng, z0=None,
+                 overlap: str = "auto", overlap_points: int = 1024, eps: float = 1.0):
+        """``eps``: suavizado de la acción (1 = acción local). Con eps < 1 las
+        matrices son las de las abundancias adelgazadas Ñ_k
+        (``thinned_abundance_vector``).
+
+        ``overlap``: cómo obtener |A ∩ B|.
+          "exact"      determinista, de la geometría: forma cerrada en 2D
+                       Minkowski, cuadratura (``overlap.py``) en 4D Minkowski
           "plugin"     estimación MC con ``overlap_points`` puntos en A y fórmula
                        exacta de <zeta zeta> (sesgo O(1/overlap_points))
           "stochastic" estimadores insesgados (realización de Poisson local y
@@ -335,6 +412,8 @@ class FluctuationKernel:
         extent = 2 * geometry.region.half_height
         coord_volume = diamond_volume_unit(geometry.dim) * extent**geometry.dim
         rho_c = density * geometry.volume / coord_volume
+        if z0 is None:  # escala(s) de la propuesta (ver ``_Proposal``)
+            z0 = 3.0 if eps == 1 else (3.0, 3.0 / eps)
         self.prop = _Proposal(geometry.dim, extent, rho_c, z0)
         lo, hi = geometry.region.bounding_box()
         self._t_min, self._t_max = float(lo[0]), float(hi[0])
@@ -343,6 +422,11 @@ class FluctuationKernel:
             overlap = "exact" if has_exact else "plugin"
         if overlap == "exact" and not has_exact:
             raise ValueError("esta geometría no tiene |A ∩ B| en forma cerrada")
+        if overlap == "stochastic" and eps != 1:
+            raise ValueError("el modo estocástico sólo está implementado para eps = 1")
+        if not 0 < eps <= 1:
+            raise ValueError("eps debe estar en (0, 1]")
+        self.eps = float(eps)
         self.overlap_mode = overlap
         self.overlap_points = overlap_points
         self.exact_overlap = overlap == "exact"
@@ -386,8 +470,7 @@ class FluctuationKernel:
         if self.overlap_mode in ("exact", "plugin"):
             if Vb is None:
                 Vb = self._overlap(yA, xA, yB, xB, VA)
-            P = joint_cardinality_probability(rho * (VA - Vb), rho * Vb, rho * (VB - Vb), n)
-            return _shifted(P, sA, sB)
+            return thinned_joint_probability(rho * VA, rho * VB, rho * Vb, sA, sB, n, self.eps)
         rng = self.rng
         nA = rng.poisson(rho * VA)
         active = nA <= n  # si nA > n - 1 + sA no contribuye a ningún i < n
@@ -441,14 +524,26 @@ class FluctuationKernel:
     # -- términos ---------------------------------------------------------
 
     def abundance_means(self, m: int, n_levels: int) -> tuple[np.ndarray, np.ndarray]:
-        """L_k = <N_k> (MYZ 5.15), k = 0..n_levels-1, por MC. Devuelve (L, se)."""
+        """L_k = <N_k> (MYZ 5.15), k = 0..n_levels-1, por MC (con eps < 1,
+        <Ñ_k> = rho^2 ∫∫ P_k(eps rho V)). Devuelve (L, se)."""
         x = self.g.sample_M(m, self.rng)
         y, q = self._past(x)
         ok = self._points_in_M(y)
         V = self.g.interval_volume(y, x)
         w = np.where(ok, self.rho**2 * self.g.volume * self.g.weight(y) / q, 0.0)
-        vals = w[:, None] * _pmf_table(self.rho * V, n_levels)
+        vals = w[:, None] * _pmf_table(self.eps * self.rho * V, n_levels)
         return vals.mean(axis=0), vals.std(axis=0, ddof=1) / np.sqrt(m)
+
+    def term_J1(self, m: int, a: np.ndarray) -> TermEstimate:
+        """J1_ij (MYZ 5.47): x1 = x2, y1 = y2. Con eps = 1 es delta_ij L_i; con
+        eps < 1 los dos factores Ñ_i, Ñ_j del mismo par son adelgazamientos
+        independientes del mismo intervalo: <..> = thinned_joint con A = B."""
+        y, x, w = self._sample_pair(m)
+        w = np.where(self._points_in_M(y), w, 0.0)
+        V = self.g.interval_volume(y, x)
+        zeros = np.zeros(m, dtype=int)
+        G = thinned_joint_probability(self.rho * V, self.rho * V, self.rho * V, zeros, zeros, self.n, self.eps)
+        return self._contract(w[:, None, None] * G, a)
 
     def term_J4(self, m: int, a: np.ndarray) -> TermEstimate:
         """J4_ij (MYZ 5.48): cadena y1 ≺ x1 = y2 ≺ x2; intervalos disjuntos."""
@@ -457,8 +552,9 @@ class FluctuationKernel:
         x2, q2 = self._future(x1)
         ok = self._points_in_M(y1, x2)
         w = np.where(ok, self.rho**3 * self.g.volume * self.g.weight(y1) * self.g.weight(x2) / (q1 * q2), 0.0)
-        Pi = _pmf_table(self.rho * self.g.interval_volume(y1, x1), self.n)
-        Pj = _pmf_table(self.rho * self.g.interval_volume(x1, x2), self.n)
+        er = self.eps * self.rho
+        Pi = _pmf_table(er * self.g.interval_volume(y1, x1), self.n)
+        Pj = _pmf_table(er * self.g.interval_volume(x1, x2), self.n)
         return self._contract(w[:, None, None] * Pi[:, :, None] * Pj[:, None, :], a)
 
     def term_J2(self, m: int, a: np.ndarray) -> TermEstimate:
@@ -507,7 +603,8 @@ class FluctuationKernel:
         sB = self._inside(y2, x1, x2).astype(int) + self._inside(y2, y1, x2)  # x1, y1 ∈ B
         Vb = self._overlap(y1, x1, y2, x2, VA) if self.overlap_mode != "stochastic" else None
         G = self._joint(y1, x1, y2, x2, VA, VB, sA, sB, Vb)
-        PP = _pmf_table(rho * VA, n)[:, :, None] * _pmf_table(rho * VB, n)[:, None, :]
+        er = self.eps * rho
+        PP = _pmf_table(er * VA, n)[:, :, None] * _pmf_table(er * VB, n)[:, None, :]
         f = base[sel]
         if use_inverse_overlap:
             if Vb is None:
@@ -601,8 +698,13 @@ class FluctuationKernel:
 
     def predict(self, coefficients=None, m_terms: int = 200_000, m_means: int = 400_000, exact_means=None, batch: int = 50_000) -> FluctuationPrediction:
         """(Delta S)^2 = a^T M a. ``exact_means``: L_0..L_n exactos si se conocen
-        (Minkowski: ``continuum.expected_abundance``); si no, MC."""
-        a = local_action_coefficients(self.g.dim) if coefficients is None else np.asarray(coefficients, float)
+        (Minkowski: ``expected_thinned_abundance``); si no, MC.
+
+        Con eps < 1, M es la covarianza de (N, Ñ_0, ...); la fila M_{-1,k}
+        conserva la forma (k+2) L_k - (k+1) L_{k+1} con L_k = <Ñ_k>: por la
+        fórmula de Mecke, Cov(N, sum_pares h(n)) = rho^2 ∫∫ E[(2 + n - rho V) h(n)],
+        y para h(n) = B_k(n, eps) se separa n = (retenidos) + (no retenidos)."""
+        a = action_coefficients(self.g.dim, self.eps) if coefficients is None else np.asarray(coefficients, float)
         n = self.n
         assert len(a) == n + 1
         aN, ak = a[0], a[1:]
@@ -615,10 +717,14 @@ class FluctuationKernel:
             L, L_se = self._batched_means(m_means, n + 1, batch)
 
         terms = {}
-        for name, fn in (("J2", self.term_J2), ("J3", self.term_J3), ("J4", self.term_J4), ("J6c", self.term_J6_connected)):
+        fns = [("J2", self.term_J2), ("J3", self.term_J3), ("J4", self.term_J4), ("J6c", self.term_J6_connected)]
+        if self.eps != 1:
+            fns.insert(0, ("J1", self.term_J1))
+        for name, fn in fns:
             terms[name] = self._batched(fn, m_terms, ak, batch)
 
-        Mkk = np.diag(L[:n]) + terms["J2"].matrix + terms["J3"].matrix + terms["J4"].matrix + terms["J4"].matrix.T + terms["J6c"].matrix
+        J1 = np.diag(L[:n]) if self.eps == 1 else terms["J1"].matrix
+        Mkk = J1 + terms["J2"].matrix + terms["J3"].matrix + terms["J4"].matrix + terms["J4"].matrix.T + terms["J6c"].matrix
         Mkk = (Mkk + Mkk.T) / 2
         j = np.arange(n)
         MNk = (j + 2) * L[:n] - (j + 1) * L[1 : n + 1]
@@ -631,7 +737,7 @@ class FluctuationKernel:
         # error: términos MC independientes + error de L (lineal en L)
         se2 = sum(t.contraction_se**2 for name, t in terms.items() if name != "J4") + 4 * terms["J4"].contraction_se**2
         dvar_dL = np.zeros(n + 1)
-        dvar_dL[:n] += ak**2 + 2 * aN * ak * (j + 2)
+        dvar_dL[:n] += (ak**2 if self.eps == 1 else 0.0) + 2 * aN * ak * (j + 2)
         dvar_dL[1 : n + 1] += -2 * aN * ak * (j + 1)
         se2 += float(np.sum((dvar_dL * L_se) ** 2))
         return FluctuationPrediction(self.rho, a, np.concatenate([[rhoV], L]), cov, var, float(np.sqrt(se2)), terms)
@@ -655,3 +761,11 @@ class FluctuationKernel:
             sq += (se * k) ** 2
             tot += k
         return sums / tot, np.sqrt(sq) / tot
+
+
+def expected_thinned_abundance(dim: int, lam: float, k: int, eps: float = 1.0) -> float:
+    """<Ñ_k> exacto en un diamante plano con rho V = lam:
+    rho^2 ∫∫ P_k(eps rho V) = L_k(eps lam) / eps^2 (cambio rho -> eps rho)."""
+    from .continuum import expected_abundance
+
+    return expected_abundance(dim, eps * lam, k) / eps**2

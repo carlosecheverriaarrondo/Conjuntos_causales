@@ -18,7 +18,8 @@ de Minkowski (cartesianas en Minkowski, conformes en métricas a(eta)^2 eta):
 La relación causal de ``causal.py`` sirve para todas (métricas conformemente
 planas). Los volúmenes de intervalos son exactos; la intersección de dos
 intervalos sólo tiene forma cerrada en 2D (coordenadas de cono de luz, donde
-los intervalos son rectángulos).
+los intervalos son rectángulos); en Minkowski 4D se calcula con una
+cuadratura determinista (``overlap.py``).
 """
 
 from __future__ import annotations
@@ -109,9 +110,10 @@ class _ConformallyFlatGeometry:
 class MinkowskiDiamondGeometry(_ConformallyFlatGeometry):
     """Diamante causal de Minkowski (``CausalDiamond``), d = 2, 3, 4."""
 
-    def __init__(self, dim: int, half_height: float = 1.0):
+    def __init__(self, dim: int, half_height: float = 1.0, overlap_nodes: int = 32):
         self.dim = dim
         self.region = CausalDiamond(dim, half_height)
+        self.overlap_nodes = overlap_nodes  # nodos de la cuadratura 4D en t y en z
 
     def weight(self, z):
         return np.ones(len(np.atleast_2d(z)))
@@ -120,6 +122,12 @@ class MinkowskiDiamondGeometry(_ConformallyFlatGeometry):
         return diamond_volume(self.dim, proper_time(y, x) / 2)
 
     def overlap_volume(self, y1, x1, y2, x2):
+        """2D: forma cerrada. 4D: cuadratura determinista (``overlap.py``)."""
+        if self.dim == 4:
+            from .overlap import interval_intersection_volume_4d
+
+            n = self.overlap_nodes
+            return interval_intersection_volume_4d(y1, x1, y2, x2, n, n)
         if self.dim != 2:
             return None
         # coordenadas de cono de luz u = t + x, v = t - x;  dV = du dv / 2
