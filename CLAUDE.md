@@ -94,10 +94,24 @@ adelgazadas) y |A∩B| exacto en 4D (`causets/overlap.py`, cuadratura).
 2D, ε = 0.5 y 0.25, ρV = 25..400: 10/10 puntos con |z| < 4. El suavizado
 reduce la amplitud pero no el escalado (p = 0.72 / 0.77). 4D local con
 ρV = 25, 50, 100: compatible, ΔS ∝ (ρV)^1.21. Ver README.
-Total: 104 tests pasando (suite completa ~5 min).
+Goal 3c completado (2026-10-01): (1) Everpresent Λ (Das-Nasiri-Yazdi
+2023, ecs. 2.2, 3.6, 3.10-3.13) exige estrictamente δΛ ∝ V^(-1/2), pero lo
+obtiene de la fluctuación de Poisson de N con contribuciones independientes
+por elemento, NO de la acción BD; α sólo fija la amplitud. (2) Minkowski 2D
+con ρV = 800-3200 (ερV hasta 3200): 9/9 puntos con |z| < 4; el exponente
+NO es estable (baja de 0.72-0.77 a 0.59-0.62, más de 7σ) y sigue siendo
+incompatible con 0.5 (más de 5σ). Hipótesis a posteriori: (ΔS)² ≈ ρV(a + b ln ρV)
+(Poisson con corrección logarítmica). (3) Veredicto: el Goal 4 tal como
+estaba planteado NO tiene base; ver la propuesta alternativa en el README.
+Total: 107 tests pasando.
 
-Goal 4 no lanzado: es un esbozo que se desarrollará en detalle antes de
-lanzarlo. Pendientes del Goal 3 que le afectan:
+Goal 4 no lanzado y por REPLANTEAR según el Goal 3c: no generar Λ(t)
+suponiendo que las fluctuaciones de S_BD tienen el escalado de Poisson;
+medirlas. Pendientes que le afectan:
+- ¿En 4D el exponente efectivo baja con ρV, como en 2D? (Ahora sólo hay
+  ρV ≤ 100, con p ≈ 1.2.)
+- Comprobar o refutar (ΔS)² ≈ ρV(a + b ln ρV) en 2D y localizar el origen
+  del logaritmo (¿frontera?).
 - Acción suavizada con ερV ≫ 1 (límite ε → 0): sólo se ha llegado a
   ερV = 100; el escalado asintótico sigue abierto.
 - 4D: la predicción con ρV = 100 tiene un error MC del 23 %; la cuadratura

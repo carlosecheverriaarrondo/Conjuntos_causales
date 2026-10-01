@@ -309,6 +309,198 @@ crece de 74 a 539). Así que, también con la acción suavizada, la varianza
 total de S en un diamante de Minkowski no tiene el escalado de Poisson que
 supone Everpresent Λ.
 
+## Goal 3c: ¿es robusto el exponente? ¿Qué exige realmente Everpresent Λ?
+
+### Fase 1: qué exige el modelo Everpresent Λ (Model 1)
+
+Fuente: S. Das, A. Nasiri & Y. K. Yazdi, "Aspects of Everpresent Λ (I): A
+Fluctuating Cosmological Constant from Spacetime Discreteness", JCAP 10 (2023)
+047, arXiv:2304.03819 (PDF en `references/`). Se revisó también la Parte II
+(JCAP 10 (2024) 076, arXiv:2307.13743), que contrasta el modelo con supernovas
+Ia y CMB y no trata el exponente de escalado.
+
+**1. De dónde sale el exponente 1/2: de la relación número-volumen, no de la
+acción BD.** El artículo deriva δΛ ∝ V^(−1/2) en tres pasos:
+- Fluctuación de Poisson de N (sec. 2, ec. 2.2): "the standard deviation
+  δN = √(ρ_cs V), which is also the smallest possible deviation [29] from an
+  exact number-volume correspondence", es decir, δV = √N/ρ_cs.
+- Relación de incertidumbre entre Λ y V en gravedad unimodular (ecs. 3.4-3.5):
+  δΛ/(8πG) = (ℏ/2)(1/δV).
+- Combinando ambas, δΛ = 4π(ℓ_p/ℓ_cs)² (1/√V) (ec. 3.6), y por tanto
+  δΛ ∼ H² (ec. 3.7).
+
+La acción de Benincasa-Dowker-Glaser sólo aparece para definir la integral de
+camino Z(N) = Σ e^{iS_BDG} (ec. 2.3). **En ningún momento se identifica Λ con
+las fluctuaciones de S_BDG.** Esa identificación, a través del término −2ΛV
+de MYZ (ec. 4.6), es una hipótesis de este proyecto, no del modelo.
+
+**2. Model 1 impone el exponente 1/2 por construcción** (sec. 3.1).
+- "We next make the ansatz that (3.8) is true even element-wise, in the sense
+  that each causal set element contributes a random variable with standard
+  deviation 8πα/ℓ²_cs to Λ" (ec. 3.10).
+- S_Λ es la suma de esas variables independientes (ec. 3.11). Por el teorema
+  central del límite, S_Λ ∼ N(0, √N/2) y Λ(x) ∼ N(0, 8πα/√V) (ec. 3.13).
+- La recursión (3.14-3.16) añade √ΔV ξ_n con ξ_n normal estándar e
+  independiente: es un paseo aleatorio.
+- Lo único flexible es la forma de la distribución: "any other distribution
+  with mean 0 and standard deviation 8πα/ℓ²_cs would work just as well for
+  our purposes".
+- El único parámetro libre es α (ec. 3.9), que fija la **amplitud** (se
+  exploran α = 0.005-0.012, sec. 5). Ningún parámetro del modelo puede
+  absorber otro exponente.
+- Los autores admiten que "the true causal set mechanism that gives rise to
+  Everpresent Λ is not fully understood".
+- Model 2 (sec. 5.4.1) sustituye la dinámica por un proceso gaussiano en
+  Ω_Λ, con parámetros α̃ y µ que fijan amplitud y tiempo de correlación. Está
+  construido para reproducir la misma propiedad de Model 1: Ω_Λ = O(1) en
+  todas las épocas.
+
+**3. Por qué otro exponente no es tolerable** (derivación propia, no está en
+el artículo, que no discute otros exponentes). Si las fluctuaciones de la
+acción escalan como ΔS ∝ N^p y Λ ∼ S/V, entonces ΔΛ ∝ V^(p−1). Con V ∼ H^(−4):
+
+  ΔΛ / H² ∝ H^(2 − 4p).
+
+Sólo con p = 1/2 la fracción Ω_Λ fluctúa con amplitud constante en todas las
+épocas. Eso es lo que da nombre al modelo ("Everpresent") y lo que resuelve el
+problema de la constante cosmológica "without fine tuning" (resumen). Con
+p = 0.72, ΔΛ/H² ∝ H^(−0.88): la energía oscura crece sin límite respecto a la
+densidad crítica a medida que H disminuye. Con p ≈ 1.2 (4D), ΔΛ crece en
+términos absolutos con el volumen. Ajustar α sólo puede hacer Ω_Λ ∼ 1 en una
+época concreta (hoy), y eso es exactamente el ajuste fino que el modelo
+pretende evitar. Además, sin p = 1/2 desaparece el paseo aleatorio de
+incrementos independientes (3.15) en el que se basa la simulación de Model 1.
+
+**Respuesta de la Fase 1.** El modelo exige estrictamente el exponente 1/2,
+pero lo obtiene de la fluctuación de Poisson del número de elementos (δN =
+√N), con contribuciones independientes por elemento. No lo obtiene de la
+acción BD. El exponente no es un parámetro ajustable: α sólo controla la
+amplitud.
+
+### Fase 2: régimen ερV > 100 (Minkowski 2D)
+
+Código: `scripts/goal3c_asymptotic.py` (resultados en `figures/goal3c_sim.json`,
+`figures/goal3c_pred.json` y `figures/goal3c_results.json`), tests en
+`tests/test_asymptotic_scaling.py`.
+
+**Coste y alcance.** Sólo 2D. La cuadratura de |A∩B| en 4D cuesta ~10–30 min
+por densidad ya con ρV ≤ 100 (ver la ampliación del Goal 3), y la simulación
+4D con ρV ≫ 100 no es viable en este equipo. En 2D se llegó a ρV = 3200 con
+2000 sprinklings por densidad. Cada sprinkling de ρV = 3200 cuesta varios
+segundos (~1.5 h en total). Los mismos sprinklings sirven para ε = 1, 0.5 y
+0.25, así que ερV va de 200 a 3200: más de un orden de magnitud por encima de
+100.
+
+**Reglas fijadas antes de ver los resultados:**
+- acuerdo simulación-predicción: |z| < 4 (σ combinada);
+- p compatible con 0.5: |p − 0.5| < 4σ_p;
+- p estable entre regímenes: |p_alto − p_bajo| < 4σ combinada.
+
+**Resultados:**
+
+| ρV | ε | (ΔS)² predicción | (ΔS)² simulación | z |
+|---|---|---|---|---|
+| 800 | 1 | 84 994 ± 852 | 89 698 ± 2856 | 1.58 |
+| 800 | 0.5 | 1811 ± 42 | 1810 ± 58 | −0.02 |
+| 800 | 0.25 | 103.7 ± 3.3 | 108.8 ± 3.6 | 1.03 |
+| 1600 | 1 | 202 790 ± 2209 | 199 363 ± 6130 | −0.53 |
+| 1600 | 0.5 | 4113 ± 109 | 4176 ± 128 | 0.37 |
+| 1600 | 0.25 | 250.4 ± 9.1 | 268.2 ± 8.4 | 1.43 |
+| 3200 | 1 | 457 192 ± 5463 | 456 621 ± 14 357 | −0.04 |
+| 3200 | 0.5 | 9601 ± 283 | 9325 ± 292 | −0.68 |
+| 3200 | 0.25 | 609 ± 24 | 602 ± 19 | −0.24 |
+
+Los 9 puntos cumplen |z| < 4 (máximo 1.58): el formalismo MYZ extendido
+sigue siendo exacto también en este régimen.
+
+Exponentes (ajuste ponderado de la simulación, ΔS ∝ (ρV)^p):
+
+| ε | p (ρV = 25–400) | p (ρV = 800–3200) | salto entre regímenes | p alto vs 0.5 |
+|---|---|---|---|---|
+| 1 | 0.718 ± 0.006 | 0.587 ± 0.016 | −7.7σ | +5.4σ |
+| 0.5 | 0.722 ± 0.006 | 0.591 ± 0.016 | −7.6σ | +5.6σ |
+| 0.25 | 0.772 ± 0.006 | 0.617 ± 0.017 | −8.9σ | +7.0σ |
+
+Según las reglas fijadas: **el exponente NO es estable** (baja más de 7σ) y
+**sigue sin ser compatible con 0.5** (más de 5σ por encima). Las
+predicciones dan lo mismo (p alto = 0.608, 0.601, 0.638).
+
+**El exponente es efectivo, no asintótico** (análisis hecho *a posteriori*,
+tras ver los datos). El exponente local entre densidades consecutivas
+(predicciones, ρV = 25 → 3200) baja de forma sostenida, sin estabilizarse:
+
+- ε = 1: 0.81, 0.73, 0.69, 0.65, 0.65, 0.63, 0.59
+- ε = 0.5: 0.83, 0.78, 0.66, 0.66, 0.65, 0.59, 0.61
+- ε = 0.25: 0.93, 0.82, 0.73, 0.65, 0.63, 0.64, 0.64
+
+Una ley de potencias única se rechaza con fuerza al ajustar (ΔS)²/ρV en todo
+el rango (χ²/dof = 94, 36 y 43). La forma (ΔS)² = ρV(a + b ln ρV) ajusta
+mucho mejor (χ²/dof = 11.7, 1.8 y 2.0; con ε = 1 hace falta algo más en las
+densidades bajas). Si esa forma es la correcta, ΔS ∝ √(ρV ln ρV)
+asintóticamente: escalado de Poisson **con una corrección logarítmica**, y el
+"0.72" del Goal 3 sería un exponente efectivo de densidades pequeñas.
+**Esto es una hipótesis, no un resultado verificado**: se formuló tras ver
+los datos, sólo cubre 2D y dos décadas de ρV, y no se ha derivado
+analíticamente. Una explicación natural, sin comprobar, son contribuciones
+de intervalos casi nulos a lo largo de la frontera del diamante.
+
+![Goal 3c](figures/goal3c_asymptotic.png)
+
+**Tests** (`tests/test_asymptotic_scaling.py`, márgenes fijados de antemano):
+- un punto calculado en vivo con ε = 0.2 y ρV = 600 (ερV = 120), a 4σ;
+- comprobación de los 9 puntos del cálculo largo (|z| < 4) y de que los
+  exponentes p_sim y p_pred del régimen alto coinciden a 4σ.
+
+Con el error deliberado ε → ε² en la probabilidad conjunta, el test en vivo
+falla.
+
+### Fase 3: veredicto
+
+**¿Hay alguna versión del mecanismo compatible con lo que exige
+Everpresent Λ?** Con los datos de este proyecto, **no**:
+
+1. **Exponente.** Ninguna versión probada da p = 0.5: ni la local, ni la
+   suavizada con ε = 0.5 o 0.25, ni el régimen ερV de 200 a 3200 (todas más
+   de 5σ por encima con la regla fijada). En 4D, la única evidencia
+   (acción local, ρV ≤ 100) es p ≈ 1.2, mucho peor. Lo más cerca que se llega
+   es la tendencia 2D hacia un escalado de Poisson con corrección
+   logarítmica. Aun en ese caso, ΔΛ ∝ V^(−1/2)·√ln V no es exactamente lo que
+   pide el modelo, y no hay ningún dato que diga que pase lo mismo en 4D.
+2. **Mecanismo.** Aunque el exponente fuera 1/2, el modelo (Fase 1) **no**
+   deriva Λ de las fluctuaciones de la acción BD. Las deriva de la
+   fluctuación de Poisson de N y de contribuciones independientes por
+   elemento (ecs. 2.2, 3.6, 3.10-3.11). Las fluctuaciones de S_BD están
+   dominadas por correlaciones entre intervalos, que son justo lo contrario
+   de contribuciones independientes. Además, Model 1 usa el cono de luz
+   pasado, no un diamante.
+3. **Amplitud.** (ΔS)²/ρV va de ~0.2 a ~140 según ε y ρV; no es una
+   constante O(1) por elemento. α sólo absorbería una amplitud fija.
+
+**¿Tiene base viable el Goal 4 tal como está planteado?** **No.** Generar
+realizaciones estocásticas de Λ(t) con Model 1 "a partir de las
+fluctuaciones de la acción BD" supondría un mecanismo que ni el artículo
+propone ni los datos de este proyecto respaldan. Model 1 se puede simular
+tal cual, pero entonces es independiente de todo el trabajo de los Goals 2-3
+y no aportaría nada nuevo.
+
+**Propuesta para el Goal 4** (no implementada):
+- Documentar como hallazgo del proyecto que las fluctuaciones de la acción BD
+  en un diamante de Minkowski no tienen el escalado de Poisson que requiere
+  Everpresent Λ: p efectivo de 0.6–0.8 en 2D y ~1.2 en 4D a las densidades
+  accesibles. Incluir las cotas cuantitativas de este README.
+- Antes de FLRW, cerrar la pregunta abierta más importante: ¿en 4D el
+  exponente efectivo también baja con ρV, como en 2D? La predicción MYZ es
+  más barata que la simulación en densidades altas, pero en 4D la cuadratura
+  es el cuello de botella: hace falta acelerarla o reducir su precisión de
+  forma controlada.
+- Comprobar en 2D la hipótesis ρV(a + b ln ρV) con una predicción
+  independiente (análisis asintótico del formalismo MYZ, o densidades
+  mayores), y localizar de dónde sale el logaritmo, por ejemplo separando
+  las contribuciones de la frontera.
+- Si se va a FLRW, hacerlo como **medida** y no como supuesto: calcular ΔS
+  en conos de luz pasados de FLRW y comparar con δΛ ∝ V^(−1/2), en vez de
+  generar Λ(t) suponiendo que la relación se cumple.
+
 ## Referencias
 
 - Bombelli, Lee, Meyer & Sorkin (1987), Phys. Rev. Lett. 59, 521 — sprinkling de Poisson.
@@ -319,6 +511,7 @@ supone Everpresent Λ.
 - Benincasa & Dowker (2010), Phys. Rev. Lett. 104, 181301, arXiv:1001.2725 — acción BD en 4D.
 - Sorkin, R. D. (2007), arXiv:gr-qc/0703099 — d'Alembertiano 2D y suavizado ε.
 - Benincasa, Dowker & Schmitzer (2011), Class. Quantum Grav. 28, 105018, arXiv:1011.5191 — acción 2D y su media.
+- Das, Nasiri & Yazdi (2023), JCAP 10, 047, arXiv:2304.03819 — Everpresent Λ (I), Model 1.
+- Das, Nasiri & Yazdi (2024), JCAP 10, 076, arXiv:2307.13743 — Everpresent Λ (II), tests cosmológicos.
 - Dowker & Glaser (2013), Class. Quantum Grav. 30, 195016, arXiv:1305.2588 — f_d(n, ε) en dimensión d.
 - Moradi, Yazdi & Zilhão, arXiv:2407.03395 — kernels de fluctuación (Goal 3).
-- Das, Nasiri & Yazdi, JCAP 10 (2023) 047; JCAP 10 (2024) 076 — Everpresent Λ (Goal 4).
