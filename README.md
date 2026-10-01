@@ -7,11 +7,14 @@ Simulador numérico de conjuntos causales por sprinkling de Poisson. Ver
 
 ```bash
 source venv/bin/activate
-python -m pytest -q                      # tests (≈3 min)
+python -m pytest -q                      # tests (≈5 min)
 python scripts/goal1_convergence.py      # figura figures/goal1_mm_convergence.png
 python scripts/goal2_bd_action.py        # figura figures/goal2_bd_action.png
 python scripts/goal3_fluctuations.py run  # cálculo largo (~20 min) -> figures/goal3_results.json
 python scripts/goal3_fluctuations.py plot # figura figures/goal3_fluctuations.png
+python scripts/smeared_fluctuations.py run2d  # acción suavizada 2D (largo) -> figures/smeared_results_2d.json
+python scripts/smeared_fluctuations.py run4d  # 4D con |A∩B| exacto (largo) -> figures/smeared_results_4d.json
+python scripts/smeared_fluctuations.py plot   # figura figures/smeared_fluctuations.png
 ```
 
 ## Estructura
@@ -25,6 +28,9 @@ python scripts/goal3_fluctuations.py plot # figura figures/goal3_fluctuations.pn
 | `causets/intervals.py` | Cardinalidades de intervalos n(y,x) y abundancias N_k |
 | `causets/action.py` | Operador B_ε y acción S_ε de Benincasa-Dowker (2D y 4D, local y suavizados) |
 | `causets/continuum.py` | Valores esperados exactos a densidad finita (Minkowski y de Sitter) |
+| `causets/geometry.py` | Geometrías para el formalismo de fluctuaciones (Minkowski, de Sitter): pesos, volúmenes de intervalos y de su intersección |
+| `causets/overlap.py` | Volumen exacto de la intersección de dos intervalos en Minkowski 4D (cuadratura determinista) |
+| `causets/fluctuations.py` | Fluctuaciones (ΔS)² de la acción BD (formalismo de Moradi-Yazdi-Zilhão), local y suavizada |
 | `tests/` | Tests pytest (tolerancias estadísticas explícitas en cada fichero) |
 | `scripts/` | Scripts que generan figuras |
 
@@ -108,8 +114,8 @@ in Causal Set Theory", Class. Quantum Grav. 42 (2025) 045017, arXiv:2407.03395
 que MYZ descomponen: S = a_N N + Σ_{k<n_d} a_k N_k con a = (1, −2, 4, −2) en 2D
 y (4/√6)(1, −1, 9, −16, 8) en 4D (normalización del Goal 2; la de MYZ, ec. 5.4,
 difiere en una constante global, p. ej. factor −√6/2 en 4D). La acción
-suavizada (ε < 1) depende de todas las N_n y **no** se ha tratado (trabajo
-futuro): ningún resultado de esta sección se refiere a ella.
+suavizada (ε < 1) depende de todas las N_n; se trata en la sección siguiente
+("Ampliación del Goal 3").
 
 **Qué se implementó del artículo.**
 - Indicadores ζ_i (cardinalidad, MYZ 3.2/3.4) y χ (ocupación, 3.16):
@@ -193,9 +199,9 @@ y el sesgo de K = 256. No permiten afirmar un acuerdo fino: el resultado se
 toma como una prueba de que el código funciona en geometría curva, no como una
 predicción validada.
 
-**Trabajo futuro.** Una fórmula de |A∩B| en 4D (o una cuadratura
-determinista) que elimine el sesgo plugin; la acción suavizada; más
-densidades en 4D para medir el escalado; y FLRW (Goal 4).
+**Trabajo futuro.** (La cuadratura de |A∩B| en 4D, la acción suavizada y
+más densidades en 4D se hicieron después: ver "Ampliación del Goal 3".)
+Queda FLRW (Goal 4).
 
 **¿Validan estos resultados usar las fluctuaciones para modelar Everpresent Λ?**
 
@@ -216,6 +222,92 @@ FLRW; y otras formas de extraer Λ que no sean la varianza total de S en un
 diamante. Una hipótesis no comprobada aquí es que la mayor parte de la
 varianza venga de intervalos casi nulos pegados a la frontera del diamante;
 si fuera así, restar términos de frontera podría cambiar el escalado.
+
+## Ampliación del Goal 3: acción suavizada y |A∩B| exacto en 4D
+
+Código: `causets/fluctuations.py`, `causets/overlap.py`,
+`tests/test_smeared_fluctuations.py`, `tests/test_overlap.py`,
+`scripts/smeared_fluctuations.py` (resultados en
+`figures/smeared_results_2d.json` y `figures/smeared_results_4d.json`).
+
+**Acción suavizada como abundancias adelgazadas.** La función de suavizado de
+Dowker & Glaser (2013) es f_d(n, ε) = Σ_k C_k B_k(n, ε), con
+B_k(n, ε) = binom(n, k) ε^k (1−ε)^(n−k). Por tanto
+S_ε = a_N N + Σ_{k<n_d} a_k Ñ_k, con Ñ_k = Σ_{y≺x} B_k(n(y,x), ε): el número
+esperado de pares con k elementos entre ellos cuando cada elemento del
+intervalo se conserva con probabilidad ε (`thinned_abundance_vector`,
+`smeared_action_coefficients`). Así el formalismo MYZ se aplica sin cambios a
+(N, Ñ_0, …), con estas modificaciones (extensión propia, no está en MYZ):
+- ⟨Ñ_k⟩ = ρ²∫∫P_k(ερV): la densidad efectiva es ερ.
+- J¹ deja de ser diagonal: los dos factores de un mismo par son
+  adelgazamientos independientes del mismo intervalo.
+- ⟨ζζ⟩ con solapamiento: adelgazar un proceso de Poisson da procesos de
+  Poisson independientes. A∩B se reparte en "retenido por ambos" (ε²),
+  "sólo por A" y "sólo por B" (ε(1−ε) cada uno), y la ec. (3.15) de MYZ se
+  mantiene con ρ|A| → ερ|A| − ε²ρ|A∩B|, ρ|A∩B| → ε²ρ|A∩B|. Los puntos fijos
+  dentro del intervalo se conservan con probabilidad ε (desplazamiento
+  binomial) (`thinned_joint_probability`).
+- La fila M_{−1,k} = (k+2)L_k − (k+1)L_{k+1} sigue valiendo (fórmula de Mecke).
+
+**|A∩B| exacto en 4D** (`overlap.py`). A t fijo cada cono es una bola y a
+(t, z) fijos un disco. El área de la intersección de los 4 discos se calcula
+exactamente con el teorema de Green (arcos de circunferencia) y se integra con
+Gauss-Legendre en t (partido en los instantes de tangencia, que son lineales
+en t) y en z. Verificado contra casos exactos (tolerancia relativa 1e-3) y
+contra Monte Carlo con 10⁶ puntos (4σ). Sustituye al estimador plugin, que
+tenía un sesgo O(1/K).
+
+Los tests fallan con errores deliberados: con el área de los discos ×1.01
+fallan los 4 tests de área/volumen; con ε en vez de ε² en la probabilidad
+conjunta fallan el test contra sprinklings y el de la varianza.
+
+**Resultados en Minkowski 2D, acción suavizada** (4000 sprinklings por punto;
+predicción con 4·10⁶ (ε = 0.5) y 10⁷ (ε = 0.25) muestras MC por término):
+
+| ρV | ε = 0.5 predicción | ε = 0.5 simulación | z | ε = 0.25 predicción | ε = 0.25 simulación | z |
+|---|---|---|---|---|---|---|
+| 25 | 12.59 ± 0.27 | 13.36 ± 0.36 | 1.72 | 0.576 ± 0.015 | 0.595 ± 0.016 | 0.86 |
+| 50 | 39.8 ± 0.9 | 40.5 ± 1.0 | 0.55 | 2.09 ± 0.05 | 2.10 ± 0.05 | 0.21 |
+| 100 | 117.3 ± 2.7 | 113.4 ± 2.6 | −1.03 | 6.46 ± 0.17 | 6.24 ± 0.15 | −0.96 |
+| 200 | 295 ± 8 | 299 ± 7 | 0.41 | 17.7 ± 0.5 | 17.2 ± 0.4 | −0.74 |
+| 400 | 733 ± 22 | 748 ± 17 | 0.56 | 43.4 ± 1.6 | 45.3 ± 1.0 | 0.98 |
+
+Los 10 puntos cumplen |z| < 4 (máximo 1.72). Ajuste ponderado de la
+simulación, ΔS ∝ (ρV)^p:
+
+| ε | p |
+|---|---|
+| 1 (local) | 0.718 ± 0.006 |
+| 0.5 | 0.722 ± 0.006 |
+| 0.25 | 0.772 ± 0.006 |
+
+**Resultados en Minkowski 4D, acción local, |A∩B| por cuadratura** (6000
+sprinklings por punto):
+
+| ρV | (ΔS)² predicción | (ΔS)² simulación | z | (ΔS)²/ρV |
+|---|---|---|---|---|
+| 25 | 1899 ± 82 | 1840 ± 97 | −0.46 | 74 |
+| 50 | 9775 ± 332 | 10 234 ± 249 | 1.10 | 205 |
+| 100 | 51 224 ± 12 003 | 53 932 ± 1144 | 0.22 | 539 |
+
+Con ρV = 50 el error de la predicción baja al 3.4 % (plugin: 6–10 % más un
+sesgo sin acotar). Con ρV = 100 el error MC es del 23 % (colas pesadas con
+5·10⁵ muestras): el acuerdo es real pero poco exigente. Ajuste de la
+simulación: **ΔS ∝ (ρV)^1.21 ± 0.02 en 4D** (la predicción da 1.18 ± 0.04).
+Este punto no tiene test automatizado: es caro (~10–30 min por densidad).
+
+![Acción suavizada](figures/smeared_fluctuations.png)
+
+**Conclusión para Everpresent Λ.** El suavizado reduce mucho la amplitud de
+las fluctuaciones: con ρV = 400 en 2D, (ΔS)² pasa de ~35 000 (ε = 1) a ~750
+(ε = 0.5) y ~45 (ε = 0.25). Pero **no mejora el escalado**: p no baja hacia
+el 0.5 de Poisson. Se mantiene en 0.72 con ε = 0.5 y sube a 0.77 con
+ε = 0.25. Con ε = 0.25, ερV sólo va de 6 a 100, así que es probable que sea un
+régimen pre-asintótico; el escalado para ε → 0 con ερV → ∞ sigue abierto.
+En 4D, con la acción local, el escalado es aún peor (p ≈ 1.2, y (ΔS)²/ρV
+crece de 74 a 539). Así que, también con la acción suavizada, la varianza
+total de S en un diamante de Minkowski no tiene el escalado de Poisson que
+supone Everpresent Λ.
 
 ## Referencias
 

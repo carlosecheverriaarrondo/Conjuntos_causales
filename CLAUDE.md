@@ -82,22 +82,26 @@ Goal 2 completado (2026-09-29): acción BD 2D/4D (local y suavizada),
 valores esperados exactos a densidad finita, verificación en Minkowski y
 de Sitter; ver README.
 Goal 3 completado (2026-09-29): formalismo de Moradi-Yazdi-Zilhão en
-`causets/fluctuations.py` para la acción BD LOCAL (la suavizada queda
-pendiente). Minkowski 2D verificado con predicción exacta (5 densidades,
+`causets/fluctuations.py` para la acción BD LOCAL (la suavizada, en la
+ampliación de abajo). Minkowski 2D verificado con predicción exacta (5 densidades,
 |z| ≤ 1.56; tests). 4D preliminar (plugin, compatible, error 6-10 %) y de
 Sitter 2D exploratorio. Conclusión: con la acción local en Minkowski,
 ΔS ∝ (ρV)^0.72 (2D), no de tipo Poisson: no respalda Everpresent Λ tal
 cual; ver README. La búsqueda de literatura del grupo de Yazdi se hizo
 (sept. 2026) y no encontró nada publicado.
-Total: 93 tests pasando (suite completa ~4 min).
+Ampliación del Goal 3 (2026-10-01): acción BD SUAVIZADA (abundancias
+adelgazadas) y |A∩B| exacto en 4D (`causets/overlap.py`, cuadratura).
+2D, ε = 0.5 y 0.25, ρV = 25..400: 10/10 puntos con |z| < 4. El suavizado
+reduce la amplitud pero no el escalado (p = 0.72 / 0.77). 4D local con
+ρV = 25, 50, 100: compatible, ΔS ∝ (ρV)^1.21. Ver README.
+Total: 104 tests pasando (suite completa ~5 min).
 
 Goal 4 no lanzado: es un esbozo que se desarrollará en detalle antes de
 lanzarlo. Pendientes del Goal 3 que le afectan:
-- Fluctuaciones de la acción SUAVIZADA (ε < 1): no implementadas; es la
-  candidata natural a fluctuaciones más pequeñas.
-- |A∩B| en 4D sin forma cerrada: el estimador "plugin" tiene sesgo O(1/K);
-  hace falta una cuadratura determinista para resultados 4D fiables.
-- Escalado en 4D: sólo hay una densidad (ρV = 50).
+- Acción suavizada con ερV ≫ 1 (límite ε → 0): sólo se ha llegado a
+  ερV = 100; el escalado asintótico sigue abierto.
+- 4D: la predicción con ρV = 100 tiene un error MC del 23 %; la cuadratura
+  es lenta (~10–30 min por densidad).
 - FLRW puede seguir el patrón de `DeSitterGeometry` (coordenadas conformes,
   peso a(η)^d, volúmenes de intervalos), pero sin simetría máxima los
   volúmenes de intervalos no se reducen a un invariante.
