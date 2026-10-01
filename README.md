@@ -17,6 +17,19 @@ python scripts/smeared_fluctuations.py run4d  # 4D con |A∩B| exacto (largo) ->
 python scripts/smeared_fluctuations.py plot   # figura figures/smeared_fluctuations.png
 ```
 
+## Reproducibilidad
+
+- Entorno exacto en `requirements.txt` (Python 3.12.3, Linux):
+  `python3 -m venv venv && source venv/bin/activate && pip install -r requirements.txt`.
+- `./reproduce.sh fast` regenera todas las tablas y figuras de los Goals 3–3d
+  y del Paso 2 a partir de los JSON de `figures/` y ejecuta los tests. Se
+  comprobó (2026-10-01) que el resultado es idéntico byte a byte al guardado
+  en git.
+- `./reproduce.sh full` lo recalcula todo desde cero (muchas horas; tiempos
+  aproximados en el propio script). Todos los cálculos usan semillas fijas.
+- La etiqueta de git `resultados-2026-10-01` marca la versión del código y
+  los datos de los resultados de este README.
+
 ## Estructura
 
 | Módulo | Responsabilidad |

@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+# Reproduce los resultados del proyecto.
+#
+#   ./reproduce.sh fast   figuras y tablas a partir de los JSON guardados en
+#                         figures/ (~1 min) y suite de tests (~8 min)
+#   ./reproduce.sh full   recalcula todo desde cero con las semillas fijas de
+#                         cada script (muchas horas; ver tiempos abajo) y
+#                         después hace lo mismo que "fast"
+#
+# Entorno: python3 -m venv venv && source venv/bin/activate &&
+#          pip install -r requirements.txt
+set -euo pipefail
+cd "$(dirname "$0")"
+source venv/bin/activate
+export MPLBACKEND=Agg
+
+analysis() {
+    python scripts/goal3_fluctuations.py plot
+    python scripts/smeared_fluctuations.py plot
+    python scripts/goal3c_asymptotic.py fit
+    python scripts/goal3d_log_origin.py fit
+    python scripts/step2_4d_scaling.py fit
+}
+
+full() {
+    python scripts/goal1_convergence.py           # Goal 1
+    python scripts/goal2_bd_action.py             # Goal 2
+    python scripts/goal3_fluctuations.py run      # Goal 3            (~20 min)
+    python scripts/smeared_fluctuations.py run2d  # ampliación, 2D    (~1 h)
+    python scripts/smeared_fluctuations.py run4d  # ampliación, 4D    (~1 h)
+    python scripts/goal3c_asymptotic.py sim       # Goal 3c           (~1.5 h)
+    python scripts/goal3c_asymptotic.py pred      #                   (~1 h)
+    python scripts/goal3d_log_origin.py terms     # Goal 3d           (~1 h)
+    python scripts/goal3d_log_origin.py rapidity  #                   (~10 min)
+    python scripts/step2_4d_scaling.py sim        # Paso 2            (~11 min)
+    python scripts/step2_4d_scaling.py extra      #                   (~1 h)
+}
+
+case "${1:-fast}" in
+    fast) analysis ;;
+    full) full; analysis ;;
+    *) echo "uso: $0 [fast|full]"; exit 1 ;;
+esac
+python -m pytest -q

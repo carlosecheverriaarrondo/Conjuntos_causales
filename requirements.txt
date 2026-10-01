@@ -1,0 +1,5 @@
+# Entorno con el que se obtuvieron los resultados (Python 3.12.3, Linux).
+numpy==2.5.3
+scipy==1.18.1
+matplotlib==3.11.2
+pytest==9.1.1
