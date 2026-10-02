@@ -20,6 +20,7 @@ analysis() {
     python scripts/goal3c_asymptotic.py fit
     python scripts/goal3d_log_origin.py fit
     python scripts/step2_4d_scaling.py fit
+    python scripts/cone_fluctuations.py fit
 }
 
 full() {
@@ -34,6 +35,8 @@ full() {
     python scripts/goal3d_log_origin.py rapidity  #                   (~10 min)
     python scripts/step2_4d_scaling.py sim        # Paso 2            (~11 min)
     python scripts/step2_4d_scaling.py extra      #                   (~1 h)
+    python scripts/cone_fluctuations.py sim       # Punto 1a          (~1.5 h)
+    python scripts/cone_fluctuations.py pred      #                   (~30 min)
 }
 
 case "${1:-fast}" in

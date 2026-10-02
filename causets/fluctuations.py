@@ -409,13 +409,12 @@ class FluctuationKernel:
         self.rho = density
         self.n = n_max
         self.rng = rng
-        extent = 2 * geometry.region.half_height
-        coord_volume = diamond_volume_unit(geometry.dim) * extent**geometry.dim
-        rho_c = density * geometry.volume / coord_volume
+        lo, hi = geometry.region.bounding_box()
+        extent = float(hi[0] - lo[0])
+        rho_c = density * geometry.volume / geometry.coordinate_volume
         if z0 is None:  # escala(s) de la propuesta (ver ``_Proposal``)
             z0 = 3.0 if eps == 1 else (3.0, 3.0 / eps)
         self.prop = _Proposal(geometry.dim, extent, rho_c, z0)
-        lo, hi = geometry.region.bounding_box()
         self._t_min, self._t_max = float(lo[0]), float(hi[0])
         has_exact = geometry.overlap_volume(*(np.zeros((1, geometry.dim)),) * 4) is not None
         if overlap == "auto":

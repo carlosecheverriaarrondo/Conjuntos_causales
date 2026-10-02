@@ -123,7 +123,13 @@ Paso 2 (4D, 2026-10-01): J¹ ∝ (ρV)^(2−2/d) exacto → p → 1 − 1/d = 0.
 pre-asintótico). Simulación hasta ρV = 6400: las correlaciones son una
 fracción constante de J¹ (resto/J¹ = 0.317 ± 0.014, pendiente 0.6σ). En 4D,
 ΔΛ ∝ V^(−1/4): sin escalado de Poisson por una razón estructural (boosts).
-Total: 124 tests pasando.
+Punto 1a (2026-10-02): cono de luz pasado truncado J⁻(q) ∩ {t ≥ 0} en
+Minkowski 2D (región de Everpresent Λ, análogo plano). Fórmula exacta de
+⟨Σ_pares H⟩ en el cono; MYZ frente a simulación con 8/8 |z| < 4 (ε = 1, 0.5,
+ρV = 50–3200); b total = 24.09 ± 0.19 frente a 24.43 ± 0.24 del diamante. En 2D
+el escalado ρV ln ρV (mismo b(ε)) no depende de la región; sólo cambia la
+constante. Siguiente: 1b, FLRW (el big bang podría cambiar el corte de rapidez).
+Total: 137 tests pasando.
 
 Goal 4 no lanzado y por REPLANTEAR según el Goal 3c: no generar Λ(t)
 suponiendo que las fluctuaciones de S_BD tienen el escalado de Poisson;
@@ -131,8 +137,8 @@ medirlas. Pendientes que le afectan:
 - ¿En 4D el exponente efectivo baja con ρV, como en 2D? (Ahora sólo hay
   ρV ≤ 100, con p ≈ 1.2.)
 - 4D con suavizado: no simulado (la predicción es el mismo exponente 0.75).
-- ¿Regiones distintas del diamante (p. ej. conos de luz pasados de FLRW)?
-  El rango de boosts lo fija la región: hay que rehacer el argumento.
+- ¿Conos de luz pasados de FLRW? En Minkowski 2D el cono truncado ya está
+  hecho (punto 1a: mismo escalado). Falta FLRW y el cono en 4D.
 - J⁶ conexo: determinar su crecimiento (dominante con suavizado fuerte).
 - Acción suavizada con ερV ≫ 1 (límite ε → 0): sólo se ha llegado a
   ερV = 100; el escalado asintótico sigue abierto.

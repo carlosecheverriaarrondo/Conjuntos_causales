@@ -5,6 +5,8 @@ Una geometría expone, en coordenadas en las que la estructura causal es la
 de Minkowski (cartesianas en Minkowski, conformes en métricas a(eta)^2 eta):
 
   dim, volume                         volumen físico de M
+  coordinate_volume                   volumen coordenado de M (= volume en
+                                      Minkowski)
   sample_M(n, rng)                    n puntos de M distribuidos según dV físico
   contains(z)                         z en M
   weight(z)                           densidad física por unidad de volumen
@@ -29,6 +31,7 @@ import numpy as np
 from .regions import (
     CausalDiamond,
     ConformalDiamond,
+    TruncatedPastCone,
     DeSitterIntervalVolume,
     de_sitter_invariant,
     de_sitter_scale_factor,
@@ -107,13 +110,14 @@ class _ConformallyFlatGeometry:
         return pts, owner
 
 
-class MinkowskiDiamondGeometry(_ConformallyFlatGeometry):
-    """Diamante causal de Minkowski (``CausalDiamond``), d = 2, 3, 4."""
+class _MinkowskiGeometry(_ConformallyFlatGeometry):
+    """Región de Minkowski causalmente convexa (``region``), d = 2, 3, 4."""
 
-    def __init__(self, dim: int, half_height: float = 1.0, overlap_nodes: int = 32):
-        self.dim = dim
-        self.region = CausalDiamond(dim, half_height)
-        self.overlap_nodes = overlap_nodes  # nodos de la cuadratura 4D en t y en z
+    overlap_nodes: int = 32  # nodos de la cuadratura 4D en t y en z
+
+    @property
+    def coordinate_volume(self) -> float:
+        return self.volume
 
     def weight(self, z):
         return np.ones(len(np.atleast_2d(z)))
@@ -143,6 +147,27 @@ class MinkowskiDiamondGeometry(_ConformallyFlatGeometry):
         return self._sample_coordinate_uniform(y, x, k, rng)
 
 
+class MinkowskiDiamondGeometry(_MinkowskiGeometry):
+    """Diamante causal de Minkowski (``CausalDiamond``), d = 2, 3, 4."""
+
+    def __init__(self, dim: int, half_height: float = 1.0, overlap_nodes: int = 32):
+        self.dim = dim
+        self.region = CausalDiamond(dim, half_height)
+        self.overlap_nodes = overlap_nodes
+
+
+class MinkowskiConeGeometry(_MinkowskiGeometry):
+    """Cono de luz pasado truncado de Minkowski (``TruncatedPastCone``):
+    J^-(q) ∩ {t >= 0}, d = 2, 3, 4. Al ser causalmente convexo, los
+    intervalos de pares de la región están contenidos en ella y todo lo
+    demás es igual que en el diamante."""
+
+    def __init__(self, dim: int, height: float = 1.0, overlap_nodes: int = 32):
+        self.dim = dim
+        self.region = TruncatedPastCone(dim, height)
+        self.overlap_nodes = overlap_nodes
+
+
 class DeSitterGeometry(_ConformallyFlatGeometry):
     """Diamante en coordenadas conformes del parche plano de de Sitter,
     a(eta) = -1/(H eta). Volúmenes de intervalos exactos por simetría máxima
@@ -155,6 +180,10 @@ class DeSitterGeometry(_ConformallyFlatGeometry):
         self.a = de_sitter_scale_factor(hubble)
         self.region = ConformalDiamond(dim, (eta_top - eta_bottom) / 2, (eta_top + eta_bottom) / 2, self.a)
         self._vol = DeSitterIntervalVolume(hubble, dim, hubble * np.log(eta_bottom / eta_top) * 1.001 + 1e-9)
+
+    @property
+    def coordinate_volume(self) -> float:
+        return diamond_volume(self.dim, self.region.half_height)
 
     def weight(self, z):
         # fuera del parche (eta >= 0) el punto no está en M: peso 0

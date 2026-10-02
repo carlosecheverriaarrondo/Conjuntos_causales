@@ -83,6 +83,55 @@ class CausalDiamond:
 
 
 @dataclass(frozen=True)
+class TruncatedPastCone:
+    """Pasado causal de un observador cortado por una superficie inicial:
+    J^-(q) ∩ {t >= 0} en Minkowski d-dimensional, con q = (h, 0, ..., 0) y
+    h = ``height``. Un punto está dentro si t >= 0 y t + |x| <= h.
+
+    Es el análogo plano de la región que usa Everpresent Λ (el pasado causal
+    del observador hasta la superficie inicial). Es causalmente convexa: el
+    intervalo entre dos puntos de la región está contenido en ella.
+
+    Volumen: un cono de altura h y base una bola (d-1)-dimensional de radio h,
+    V = (h / d) * V_{d-1}(1) * h^(d-1)  (V = h^2 en 2D).
+    """
+
+    dim: int
+    height: float = 1.0
+
+    def __post_init__(self):
+        if self.dim < 2:
+            raise ValueError("dim debe ser >= 2")
+        if self.height <= 0:
+            raise ValueError("height debe ser > 0")
+
+    @property
+    def volume(self) -> float:
+        return self.height**self.dim * unit_ball_volume(self.dim - 1) / self.dim
+
+    @property
+    def top_vertex(self) -> np.ndarray:
+        q = np.zeros(self.dim)
+        q[0] = self.height
+        return q
+
+    def contains(self, coords: np.ndarray) -> np.ndarray:
+        coords = np.atleast_2d(coords)
+        t = coords[:, 0]
+        r = np.linalg.norm(coords[:, 1:], axis=1)
+        return (t >= 0) & (t + r <= self.height)
+
+    def bounding_box(self) -> tuple[np.ndarray, np.ndarray]:
+        h = self.height
+        lo, hi = np.full(self.dim, -h), np.full(self.dim, h)
+        lo[0] = 0.0
+        return lo, hi
+
+    def weight(self, coords: np.ndarray) -> np.ndarray:
+        return np.ones(len(np.atleast_2d(coords)))
+
+
+@dataclass(frozen=True)
 class ConformalDiamond:
     """Diamante en coordenadas conformes de una métrica g = a(eta)^2 eta_Minkowski.
 

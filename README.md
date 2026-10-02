@@ -34,14 +34,14 @@ python scripts/smeared_fluctuations.py plot   # figura figures/smeared_fluctuati
 
 | Módulo | Responsabilidad |
 |---|---|
-| `causets/regions.py` | Regiones: `CausalDiamond` (Minkowski), `ConformalDiamond` (métricas a(η)² η, p. ej. de Sitter), volúmenes de intervalos en de Sitter |
+| `causets/regions.py` | Regiones: `CausalDiamond` y `TruncatedPastCone` (Minkowski), `ConformalDiamond` (métricas a(η)² η, p. ej. de Sitter), volúmenes de intervalos en de Sitter |
 | `causets/sprinkling.py` | Sprinkling de Poisson (`sprinkle`) y muestreo uniforme de N fijo (`sample_uniform`), puntos ordenados por t |
 | `causets/causal.py` | Matriz causal de Minkowski y verificación de orden parcial (reflexividad, antisimetría, transitividad) |
 | `causets/dimension.py` | Estimador de dimensión de Myrheim-Meyer |
 | `causets/intervals.py` | Cardinalidades de intervalos n(y,x) y abundancias N_k |
 | `causets/action.py` | Operador B_ε y acción S_ε de Benincasa-Dowker (2D y 4D, local y suavizados) |
 | `causets/continuum.py` | Valores esperados exactos a densidad finita (Minkowski y de Sitter) |
-| `causets/geometry.py` | Geometrías para el formalismo de fluctuaciones (Minkowski, de Sitter): pesos, volúmenes de intervalos y de su intersección |
+| `causets/geometry.py` | Geometrías para el formalismo de fluctuaciones (diamante y cono pasado de Minkowski, de Sitter): pesos, volúmenes de intervalos y de su intersección |
 | `causets/overlap.py` | Volumen exacto de la intersección de dos intervalos en Minkowski 4D (cuadratura determinista) |
 | `causets/fluctuations.py` | Fluctuaciones (ΔS)² de la acción BD (formalismo de Moradi-Yazdi-Zilhão), local y suavizada |
 | `tests/` | Tests pytest (tolerancias estadísticas explícitas en cada fichero) |
@@ -686,6 +686,89 @@ compatible con 0 a 4σ. Resultado: +0.0056 ± 0.0091 (0.6σ, χ²/dof = 1.39).
    mecanismo explícito: las fluctuaciones de la acción BD en un diamante de
    Minkowski 4D **no** tienen el escalado de Poisson. No lo tienen por una
    razón estructural (los boosts), no por falta de densidad.
+
+## Punto 1a: el cono de luz pasado truncado (Minkowski 2D)
+
+Código: `causets/regions.py` (`TruncatedPastCone`), `causets/geometry.py`
+(`MinkowskiConeGeometry`), `causets/continuum.py` (`cone_pair_integral_2d`,
+`expected_abundance_cone`), `scripts/cone_fluctuations.py` (resultados en
+`figures/cone_sim.json`, `figures/cone_pred.json` y `figures/cone_results.json`),
+tests en `tests/test_cone.py`.
+
+**Motivación.** Everpresent Λ no usa un diamante: usa el pasado causal del
+observador hasta la superficie inicial. Todos los resultados anteriores son
+para diamantes, y su mecanismo (el rango de boosts) depende de la región. Aquí
+se usa el análogo plano: el cono pasado truncado J⁻(q) ∩ {t ≥ 0}, con
+q = (h, 0) y V = h² en 2D. Es causalmente convexo, así que el formalismo MYZ
+se aplica sin cambios. Sólo cambian el dominio y las medias exactas.
+
+**Hipótesis y criterios (fijados antes de calcular).** El coeficiente del
+logaritmo de J¹ sale del rango de rapidez ln ρ de los intervalos casi nulos.
+La forma de la región sólo debería cambiar la constante O(ρV). Si es así,
+en el cono (ΔS)² ⊇ b(ε) ρV ln ρV con el mismo b(ε) = Σf_ε² que en el diamante.
+Criterios: C1, ⟨N_k⟩ exacto frente a sprinklings con |z| < 4. C2, el
+coeficiente del logaritmo de ⟨Σf_ε²⟩ en el cono es b(ε) (integral exacta,
+tolerancia relativa 10⁻³). C3, la predicción MYZ coincide con la simulación
+con |z| < 4. C4, el b total del cono (ε = 1) es compatible a 4σ con el del
+diamante (24.43 ± 0.24).
+
+**Fórmula exacta.** En coordenadas de cono de luz el cono es
+{u, v ≤ h, u + v ≥ 0}. Un par con lados Δu = a y Δv = b cabe si su vértice
+inferior está en un triángulo de área física (2h − a − b)²/4. Con ρ = 1 y
+μ = ab/2:
+
+  ⟨Σ_pares H(n)⟩ = ¼ ∫₀^{ρV/2} E_{n~Poisson(μ)}[H(n)] · I(μ) dμ,
+  I(μ) = ∫_{a₋}^{a₊} (c − a − k/a)² da/a,  c = 2h, k = 2μ,
+
+con a± las raíces de a² − ca + k = 0 (primitiva cerrada en el código). A μ
+fijo, I(μ) = 4ρV ln(ρV/μ) + O(ρV). Se ha comprobado frente a la integral doble
+directa (error relativo < 10⁻⁸). ⟨N_0⟩/ρV − ln ρV converge a −1.7296 en el
+cono y a −1.4228 en el diamante: **el coeficiente del logaritmo es el mismo
+(1) y sólo cambia la constante.**
+
+**Resultados** (simulación: 4000/4000/3000/2000 sprinklings; MYZ: 2·10⁶
+muestras con ε = 1 y 4·10⁶ con ε = 0.5):
+
+| ρV | ε = 1: simulación | ε = 1: MYZ | z | ε = 0.5: simulación | ε = 0.5: MYZ | z |
+|---|---|---|---|---|---|---|
+| 50 | 1708 ± 45 | 1647 ± 13 | +1.28 | 34.80 ± 0.92 | 34.71 ± 0.63 | +0.08 |
+| 200 | 12 843 ± 289 | 12 823 ± 102 | +0.06 | 273.9 ± 6.2 | 272.5 ± 5.8 | +0.16 |
+| 800 | 81 381 ± 2094 | 79 300 ± 696 | +0.94 | 1664 ± 46 | 1684 ± 46 | −0.31 |
+| 3200 | 445 300 ± 14 000 | 431 500 ± 4400 | +0.93 | 9465 ± 310 | 9228 ± 320 | +0.53 |
+
+- **C1:** máximo |z| = 1.73 sobre las 32 medias ⟨Ñ_k⟩. **Se cumple.**
+- **C2:** pasan los tests con ε = 1 y 0.5. **Se cumple.**
+- **C3:** 8/8 puntos con |z| < 4 (máximo 1.28). **Se cumple.**
+- **C4:** con ε = 1 y ρV = 50 … 12 800, b = 24.09 ± 0.19 frente a
+  24.43 ± 0.24 en el diamante (z = −1.09). **Se cumple.** El χ²/dof del
+  ajuste es 7.9: la ley c + b ln ρV sólo vale asintóticamente. Los aumentos
+  de J¹/ρV por factor 4 de ρV, divididos por ln 4, son 21.3, 23.1, 23.7 y
+  23.9 (→ 24).
+- **ε = 0.5:** b = 0.500 ± 0.013 frente a Σf² = 0.395. La diferencia es
+  J⁶ conexo, como en el diamante (0.540 ± 0.016).
+- **Exponente local** de ΔS con ε = 1: 0.74, 0.66, 0.61 y 0.59. Es la misma
+  bajada lenta que en el diamante (Goal 3c).
+
+**Tests:** 13 en `tests/test_cone.py`. Con un error deliberado del 2 % en la
+normalización de la fórmula del cono fallan 7 de los 10 tests deterministas,
+y C1 da |z| = 41. Restaurado el código, pasan todos.
+
+![Punto 1a](figures/cone_fluctuations.png)
+
+**Conclusiones:**
+1. **En 2D, el escalado no depende de la región:** también en el cono pasado,
+   (ΔS)² = b(ε) ρV ln ρV + O(ρV) y ΔS ∝ √(ρV ln ρV), con el mismo b(ε). La
+   forma de la región sólo cambia el término O(ρV). El logaritmo es ln ρ, la
+   resolución de los boosts, no una propiedad del diamante.
+2. **Everpresent Λ:** el veredicto del Goal 3c se extiende a la región
+   cosmológicamente relevante en 2D: el escalado no es de Poisson puro, por
+   el factor logarítmico.
+3. **4D (sin comprobar):** el mismo argumento da J¹ ∝ (ρV)^(2−2/d) en
+   cualquier región compacta, con prefactor dependiente de la forma. La
+   predicción para el cono pasado en 4D es p → 0.75, como en el diamante.
+4. **Siguiente paso (1b):** FLRW. El cono pasado de FLRW llega al big bang,
+   donde a(η) → 0, y eso podría cambiar el corte de rapidez. En Minkowski
+   la superficie inicial no lo cambia.
 
 ## Referencias
 

@@ -110,6 +110,55 @@ def expected_abundance(dim: int, lam: float, k: int) -> float:
     return _diamond_pair_integral(lambda z: poisson_pmf(k, z), dim, lam)
 
 
+def _cone_position_integral(mu, lam: float):
+    """I(mu) = ∫ (c - a - k/a)^2 da / a sobre a- <= a <= a+ (raíces de
+    a^2 - c a + k = 0), con c = 2 sqrt(lam), k = 2 mu: rango de rapidez
+    de los pares de volumen mu en un cono truncado 2D de volumen lam (rho = 1).
+    Primitiva: (c^2 + 2k) ln a + a^2/2 - k^2/(2a^2) - 2ca + 2ck/a."""
+    mu = np.asarray(mu, dtype=float)
+    c = 2.0 * np.sqrt(lam)
+    k = 2.0 * mu
+    disc = np.sqrt(np.maximum(c * c - 4 * k, 0.0))
+    ap = (c + disc) / 2
+    am = np.where(k > 0, 2 * k / np.where(c + disc > 0, c + disc, 1.0), 1.0)  # = (c - disc)/2 sin cancelación
+
+    def F(a):
+        return a * a / 2 - k * k / (2 * a * a) - 2 * c * a + 2 * c * k / a
+
+    return np.where(k > 0, (c * c + 2 * k) * np.log(ap / am) + F(ap) - F(am), np.inf)
+
+
+def cone_pair_integral_2d(H, lam: float, decay: float = 1.0) -> float:
+    """E[ sum_{pares y ≺ x} H(rho V(y, x)) ] en el cono de luz pasado truncado
+    J^-(q) ∩ {t >= 0} de Minkowski 2D con rho V = lam (``TruncatedPastCone``).
+
+    Derivación (punto 1a, ver README): en coordenadas de cono de luz
+    u = t + x, v = t - x la región es {u, v <= h, u + v >= 0} (V = h^2) y un
+    par con lados Δu = a, Δv = b tiene sus extremos dentro si y sólo si
+    el vértice inferior está en un triángulo de área física (2h - a - b)^2 / 4.
+    Con medida de pares da db / 2 y rho = 1:
+        E[sum h] = (1/8) ∫∫_{a + b <= 2h} (2h - a - b)^2 H(ab/2) da db
+                 = (1/4) ∫_0^{lam/2} H(mu) I(mu) dmu      (b = 2 mu / a),
+    con I(mu) de ``_cone_position_integral``. A mu fijo y lam -> ∞,
+    I(mu) = 4 lam ln(lam / mu) + O(lam): el mismo rango de rapidez
+    logarítmico que en el diamante, y por tanto el mismo coeficiente
+    E[sum h] = lam ln(lam) ∫ H + O(lam)."""
+    upper = min(lam / 2, _Z_CUT / decay)
+    edges = np.unique(np.concatenate([[0.0], np.geomspace(1e-8, upper, 60)]))
+    tot = 0.0
+    for lo, hi in zip(edges[:-1], edges[1:]):
+        val, _ = quad(lambda mu: H(mu) * float(_cone_position_integral(mu, lam)), lo, hi,
+                      limit=200, epsabs=0, epsrel=1e-11)
+        tot += val
+    return tot / 4
+
+
+def expected_abundance_cone(lam: float, k: int, eps: float = 1.0) -> float:
+    """E[Ñ_k] en el cono truncado 2D con rho V = lam (Ñ_k = N_k con eps = 1):
+    H(mu) = P_k(eps mu) (adelgazamiento de Poisson)."""
+    return cone_pair_integral_2d(lambda mu: float(poisson_pmf(k, eps * mu)), lam, decay=eps)
+
+
 def expected_bd_action_diamond(dim: int, lam: float, eps: float = 1.0) -> float:
     """E[S_eps] para un sprinkling de Poisson de un diamante plano con rho V = lam."""
     c = coefficients(dim)
