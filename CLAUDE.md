@@ -135,7 +135,13 @@ con 8/8 |z| < 4; b = 24.26 ± 0.19 (α = 1) y 24.78 ± 0.24 (α = 2) frente a
 24.43 ± 0.24 del diamante. El big bang no cambia el escalado: en 2D,
 ΔS ∝ √(ρV ln ρV) con b = Σf² en toda región compacta conformemente plana.
 Abierto: 4D (predicción p → 0.75; prefactor dependiente de la geometría).
-Total: 150 tests pasando.
+Punto 1c (2026-10-02): cono pasado truncado en Minkowski 4D. Medias exactas
+(integral doble) y prefactor asintótico ⟨N_k⟩ ≈ (ρV)^1.5 G/(8√c₄) Γ(k+½)/k!,
+G = ∫dV∫dΩ ℓ² (rango de boosts). Cono/diamante → 0.566, verificado con J¹
+exacto hasta 10⁸ (0.562). Simulación ρV = 25–6400: resto/J¹ constante
+(0.342 ± 0.017, pendiente 0.05σ). En 4D, el escalado tampoco depende de la
+región: ΔS ∝ (ρV)^0.75; la geometría sólo fija la amplitud.
+Total: 156 tests pasando.
 
 Goal 4 no lanzado y por REPLANTEAR según el Goal 3c: no generar Λ(t)
 suponiendo que las fluctuaciones de S_BD tienen el escalado de Poisson;
@@ -143,8 +149,8 @@ medirlas. Pendientes que le afectan:
 - ¿En 4D el exponente efectivo baja con ρV, como en 2D? (Ahora sólo hay
   ρV ≤ 100, con p ≈ 1.2.)
 - 4D con suavizado: no simulado (la predicción es el mismo exponente 0.75).
-- Conos pasados: hechos en 2D (Minkowski, punto 1a; FLRW, punto 1b; mismo
-  escalado). Falta 4D (cono de Minkowski y de FLRW).
+- Conos pasados: hechos en 2D (Minkowski, 1a; FLRW, 1b) y en Minkowski 4D
+  (1c); mismo escalado. Falta FLRW 4D (G con el factor de escala).
 - J⁶ conexo: determinar su crecimiento (dominante con suavizado fuerte).
 - Acción suavizada con ερV ≫ 1 (límite ε → 0): sólo se ha llegado a
   ερV = 100; el escalado asintótico sigue abierto.

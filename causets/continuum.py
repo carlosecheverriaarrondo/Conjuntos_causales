@@ -159,6 +159,49 @@ def expected_abundance_cone(lam: float, k: int, eps: float = 1.0) -> float:
     return cone_pair_integral_2d(lambda mu: float(poisson_pmf(k, eps * mu)), lam, decay=eps)
 
 
+def cone_pair_integral(H, dim: int, lam: float, decay: float = 1.0) -> float:
+    """E[ sum_{pares y ≺ x} H(rho V(y, x)) ] en el cono pasado truncado
+    J^-(q) ∩ {t >= 0} de Minkowski (``TruncatedPastCone``), d = 2 o 4, con
+    rho V = lam (rho = 1).
+
+    Derivación (punto 1c, ver README): el pasado de x ya está en J^-(q), así que
+    y = x - tau (cosh chi, sinh chi n) está en el cono si y sólo si
+    tau cosh chi <= t_x. Con d^d y = tau^(d-1) dtau sinh^(d-2)chi dchi dOmega,
+        E[sum H] = Omega_{d-2} ∫_cono dV_x ∫_0^{t_x} tau^(d-1) S_d(arccosh(t_x/tau)) H(c_d tau^d) dtau,
+    S_d(X) = ∫_0^X sinh^(d-2), y dV_x = V_{d-1}(1) (h - t)^(d-1) dt. Sólo
+    depende de t_x: integral doble. En 2D coincide con ``cone_pair_integral_2d``."""
+    from .regions import TruncatedPastCone, unit_ball_volume, unit_sphere_area
+
+    h = (lam / TruncatedPastCone(dim, 1.0).volume) ** (1.0 / dim)
+    c = 2 * 0.5**dim * unit_ball_volume(dim - 1) / dim  # c_d: volumen del intervalo de tiempo propio 1
+    omega = unit_sphere_area(dim - 2) if dim > 2 else 2.0
+    tau_cut = (_Z_CUT / decay / c) ** (1.0 / dim)
+
+    def S(X):
+        return X if dim == 2 else np.sinh(2 * X) / 4 - X / 2
+
+    def inner(t):
+        def f(tau):
+            X = np.arccosh(max(t / tau, 1.0))
+            return tau ** (dim - 1) * S(X) * H(c * tau**dim)
+
+        val, _ = quad(f, 0.0, min(t, tau_cut), limit=200, epsabs=0, epsrel=1e-10)
+        return val
+
+    def outer(t):
+        return unit_ball_volume(dim - 1) * (h - t) ** (dim - 1) * inner(t)
+
+    # inner(t) crece como t^(d-2) para t >> tau_cut: la integral es suave salvo cerca de t = 0
+    edges = np.unique(np.concatenate([[0.0], np.geomspace(min(1e-3, h / 10), h, 30)]))
+    tot = sum(quad(outer, a, b, limit=200, epsabs=0, epsrel=1e-10)[0] for a, b in zip(edges[:-1], edges[1:]))
+    return float(omega * tot)
+
+
+def expected_abundance_cone_d(dim: int, lam: float, k: int, eps: float = 1.0) -> float:
+    """E[Ñ_k] en el cono truncado d-dimensional con rho V = lam."""
+    return cone_pair_integral(lambda mu: float(poisson_pmf(k, eps * mu)), dim, lam, decay=eps)
+
+
 def expected_bd_action_diamond(dim: int, lam: float, eps: float = 1.0) -> float:
     """E[S_eps] para un sprinkling de Poisson de un diamante plano con rho V = lam."""
     c = coefficients(dim)

@@ -858,6 +858,90 @@ pasan todos.
    prefactor de (ρV)^1.5 depende de la geometría. En FLRW 4D, el big bang y
    la expansión podrían cambiarlo; el exponente no debería cambiar.
 
+## Punto 1c: el cono pasado truncado en Minkowski 4D
+
+Código: `causets/continuum.py` (`cone_pair_integral`, `expected_abundance_cone_d`),
+`scripts/cone4d_scaling.py` (resultados en `figures/cone4d_sim.json` y
+`figures/cone4d_results.json`), tests en `tests/test_cone4d.py`. Mismo método
+que el Paso 2: J¹, NN y el término cruzado son exactos; la varianza total se
+mide sobre sprinklings, y la diferencia ("resto") es la suma de las
+correlaciones de MYZ.
+
+**Medias exactas.** El pasado de x ya está en J⁻(q), así que
+y = x − τ(cosh χ, sinh χ n) está en el cono si y sólo si τ cosh χ ≤ t_x:
+
+  ⟨Σ_pares H⟩ = Ω_{d−2} ∫_cono dV_x ∫₀^{t_x} τ^(d−1) S_d(arccosh(t_x/τ)) H(c_d τ^d) dτ,
+
+con S_d(X) = ∫₀^X sinh^(d−2). Es una integral doble. En 2D reproduce la
+fórmula del punto 1a hasta 10⁻¹².
+
+**Prefactor asintótico (predicción).** Un par casi nulo desde x en la
+dirección n puede tener rapidez hasta τe^χ/2 = ℓ(x, n), la longitud (en t)
+del rayo nulo pasado dentro de la región. Con sinh²χ ≈ e^(2χ)/4:
+
+  ⟨N_k⟩ ≈ (ρV)^1.5 · (G/V^1.5)/(8√c₄) · Γ(k+½)/k!,  G = ∫dV_x ∫_{S²} ℓ(x,n)² dΩ,  c₄ = π/24.
+
+El exponente es universal, y la geometría sólo entra a través de G. En el cono,
+ℓ = t_x y G = 4π∫t² dV: G/V^1.5 = 0.8187. En el diamante, ℓ = ((t+1)² − r²)/(2(t+1−x·n)),
+y por Monte Carlo G/V^1.5 = 1.4472 ± 0.0005. Predicción: **J¹_cono/J¹_diamante →
+0.566** a igual ρV.
+
+**Calibración en el diamante (antes de calcular en el cono).** El cociente
+⟨N_k⟩ exacto / asintótico, para k = 0…3, vale 0.967–0.914 con ρV = 10⁶,
+0.987–0.965 con 10⁷ y 0.995–0.987 con 10⁸.
+
+**Criterios (fijados antes de calcular en el cono):**
+- H1: ⟨N_k⟩ exacto frente a sprinklings, con |z| < 4.
+- H2: el cociente exacto / asintótico converge de forma monótona entre
+  ρV = 10⁶, 10⁷ y 10⁸, y a 10⁸ está a menos del 3 % de 1.
+- H3: la pendiente de resto/J¹ frente a ln ρV es compatible con 0 a 4σ
+  (regla del Paso 2).
+
+**Resultados** (ρV = 25 … 6400; 4000 sprinklings hasta ρV = 100, 2000 hasta 800,
+1000 con 1600 y 3200, y 500 con 6400):
+
+| ρV | (ΔS)²/ρV simulación | J¹/ρV exacto | resto/J¹ | J¹ cono/diamante | total cono/diamante |
+|---|---|---|---|---|---|
+| 25 | 6.6 ± 0.3 | 5.0 | 0.20 ± 0.06 | 0.090 | 0.090 ± 0.006 |
+| 100 | 83.0 ± 2.4 | 59.8 | 0.40 ± 0.04 | 0.147 | 0.154 ± 0.005 |
+| 400 | 621 ± 20 | 466.7 | 0.34 ± 0.04 | 0.247 | 0.250 ± 0.011 |
+| 1600 | 2776 ± 126 | 2217 | 0.25 ± 0.06 | 0.345 | 0.332 ± 0.020 |
+| 6400 | 10 101 ± 566 | 7522 | 0.34 ± 0.08 | 0.421 | 0.481 ± 0.040 |
+
+(9 densidades en total en `figures/cone4d_results.json`.)
+
+- **H1:** máximo |z| = 2.69. **Se cumple.**
+- **H2:** con ρV = 10⁸, el cociente vale 0.992, 0.985, 0.981 y 0.978 para
+  k = 0…3. La convergencia es monótona y la desviación máxima es 2.2 %.
+  **Se cumple.** El cociente J¹_cono/J¹_diamante exacto sube de 0.516
+  (ρV = 1.5·10⁵) a 0.562 (10⁸), hacia el 0.566 predicho.
+- **H3:** pendiente −0.0006 ± 0.0114 (z = −0.05, χ²/dof = 1.81). **Se
+  cumple.** Las correlaciones son una fracción constante de J¹:
+  resto/J¹ = 0.342 ± 0.017, compatible con el 0.317 ± 0.014 del diamante.
+- **Exponente local** de ΔS: 1.46 (ρV = 25→50), 1.20 (200→400) y 0.91 ± 0.05
+  (3200→6400). Converge más despacio que en el diamante, porque en el cono
+  los pares de gran rapidez sólo existen lejos de t = 0, y la asíntota
+  (0.75) llega más tarde.
+
+**Tests:** 6 en `tests/test_cone4d.py`. Con un error deliberado del 2 % en la
+normalización de la integral del cono fallan los 2 tests de consistencia con
+2D, y H1 da |z| de hasta 9.2 (con ρV = 800). Restaurado el código, pasan
+todos.
+
+![Punto 1c](figures/cone4d_scaling.png)
+
+**Conclusiones:**
+1. **En 4D, el escalado tampoco depende de la región:** también en el cono
+   pasado, J¹ ∝ (ρV)^1.5 y las correlaciones son una fracción constante de
+   J¹ (≈ 0.33 en ambas regiones). Asintóticamente, ΔS ∝ (ρV)^0.75.
+2. **La geometría sólo fija la amplitud,** a través de G = ∫dV∫dΩ ℓ²: el
+   rango de boosts disponible. El cono tiene un 43 % menos que el diamante,
+   y esta predicción se ha verificado con J¹ exacto hasta ρV = 10⁸.
+3. **Everpresent Λ (4D):** en la región del modelo (el análogo plano),
+   ΔS ∝ (ρV)^0.75 y ΔΛ ∝ V^(−1/4), no V^(−1/2). Queda FLRW 4D. Allí el
+   argumento predice el mismo exponente, con un G que incluye el factor de
+   escala.
+
 ## Referencias
 
 - Bombelli, Lee, Meyer & Sorkin (1987), Phys. Rev. Lett. 59, 521 — sprinkling de Poisson.
