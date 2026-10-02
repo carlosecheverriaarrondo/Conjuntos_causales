@@ -318,11 +318,15 @@ class _Proposal:
     rho_c: float  # densidad en medida coordenada (rho en Minkowski)
     z0: float | tuple = 3.0
 
-    def sample(self, m: int, rng, budget) -> tuple[np.ndarray, np.ndarray]:
+    def sample(self, m: int, rng, budget, local=1.0) -> tuple[np.ndarray, np.ndarray]:
         """``budget``: tiempo coordenado disponible desde cada punto base hasta
         el borde temporal de M; se impone tau cosh(chi) <= budget, i.e.
         chi <= arccosh(budget / tau) (condición necesaria para seguir en M).
-        Si tau >= budget la muestra es inválida (q = inf, peso 0)."""
+        Si tau >= budget la muestra es inválida (q = inf, peso 0).
+        ``local``: factor (por punto base) que multiplica rho_c, para adaptar
+        la escala de los intervalos a la densidad física local (FLRW). Si es
+        una tupla de factores, cada muestra usa uno al azar y q es la densidad
+        de la mezcla equiponderada (como con ``z0``)."""
         from scipy.special import gamma as gamma_fn
 
         d = self.dim
@@ -330,8 +334,23 @@ class _Proposal:
         shape = 2.0 / d
         scales = np.atleast_1d(np.asarray(self.z0, dtype=float))
         z = rng.gamma(shape, scales[rng.integers(len(scales), size=m)])
-        p_z = np.mean([z ** (shape - 1) * np.exp(-z / s) / (gamma_fn(shape) * s**shape) for s in scales], axis=0)
-        tau = (z / (self.rho_c * c)) ** (1.0 / d)
+        if isinstance(local, tuple):
+            comps = [self.rho_c * np.broadcast_to(np.asarray(f, dtype=float), (m,)) for f in local]
+            rho_c = np.choose(rng.integers(len(comps), size=m), comps)
+            tau = (z / (rho_c * c)) ** (1.0 / d)
+
+            def q_z(rc):
+                """Densidad de la mezcla de Gammas en z' = rc c tau^d, por rc."""
+                zz = rc * c * tau**d
+                return rc * np.mean([zz ** (shape - 1) * np.exp(-zz / s) / (gamma_fn(shape) * s**shape) for s in scales], axis=0)
+
+            p_z = np.mean([q_z(rc) for rc in comps], axis=0)  # incluye el factor rho_c
+            rho_q = 1.0
+        else:
+            rho_c = self.rho_c * np.broadcast_to(np.asarray(local, dtype=float), (m,))
+            tau = (z / (rho_c * c)) ** (1.0 / d)
+            p_z = np.mean([z ** (shape - 1) * np.exp(-z / s) / (gamma_fn(shape) * s**shape) for s in scales], axis=0)
+            rho_q = rho_c
         budget = np.broadcast_to(np.asarray(budget, dtype=float), (m,))
         valid = tau < budget
         X = np.where(valid, np.arccosh(np.maximum(budget / tau, 1.0)), 1e-12)
@@ -354,7 +373,7 @@ class _Proposal:
         n = rng.normal(size=(m, d - 1))
         n /= np.linalg.norm(n, axis=1, keepdims=True)
         o = np.column_stack([tau * np.cosh(chi), (tau * np.sinh(chi))[:, None] * n])
-        q = p_z * d * self.rho_c * c / (_sinh_power_integral(d, X) * unit_sphere_area(d - 2))
+        q = p_z * d * rho_q * c / (_sinh_power_integral(d, X) * unit_sphere_area(d - 2))
         return o, np.where(valid, q, np.inf)
 
 
@@ -432,13 +451,24 @@ class FluctuationKernel:
 
     # -- utilidades -----------------------------------------------------
 
+    def _local(self, base, mixture=False):
+        """Factor de densidad local de la propuesta: 1, salvo en geometrías con
+        ``local_proposal`` (FLRW): la densidad física relativa en el punto base,
+        acotada por debajo. Hacia el futuro (``mixture``) el punto base es el
+        vértice inferior, que infravalora la densidad del intervalo: se mezcla
+        con la global. El soporte de la propuesta no cambia."""
+        if not getattr(self.g, "local_proposal", False):
+            return 1.0
+        rel = np.maximum(self.g.weight(base) * self.g.coordinate_volume / self.g.volume, 0.02)
+        return (rel, 1.0) if mixture else rel
+
     def _past(self, base):
         """y = base - o con o del futuro; devuelve (y, q)."""
-        o, q = self.prop.sample(len(base), self.rng, base[:, 0] - self._t_min)
+        o, q = self.prop.sample(len(base), self.rng, base[:, 0] - self._t_min, self._local(base))
         return base - o, q
 
     def _future(self, base):
-        o, q = self.prop.sample(len(base), self.rng, self._t_max - base[:, 0])
+        o, q = self.prop.sample(len(base), self.rng, self._t_max - base[:, 0], self._local(base, mixture=True))
         return base + o, q
 
     def _inside(self, y, z, x):
@@ -624,8 +654,19 @@ class FluctuationKernel:
         return y, x, self.rho**2 * self.g.volume * self.g.weight(y) / q
 
     def _anchor_in(self, y, x, m):
-        """Un punto uniforme (dV físico) en cada I(y[k], x[k]); peso rho |I|."""
-        pts, _ = self.g.sample_in_intervals(y, x, np.ones(m, dtype=int), self.rng)
+        """Un punto uniforme (dV físico) en cada I(y[k], x[k]); peso rho |I|.
+        Si y está fuera de M, la configuración tiene peso 0 (todos los usos
+        exigen y en M) y se devuelve x sin muestrear: en FLRW un intervalo que
+        cruza eta = 0 haría el rechazo arbitrariamente lento. (Sólo con
+        ``local_proposal``, para no cambiar la secuencia aleatoria de los
+        cálculos ya guardados en Minkowski y de Sitter.)"""
+        if not getattr(self.g, "local_proposal", False):
+            pts, _ = self.g.sample_in_intervals(y, x, np.ones(m, dtype=int), self.rng)
+            return pts, self.rho * self.g.interval_volume(y, x)
+        ok = self.g.contains(y)
+        pts = x.copy()
+        if ok.any():
+            pts[ok], _ = self.g.sample_in_intervals(y[ok], x[ok], np.ones(int(ok.sum()), dtype=int), self.rng)
         return pts, self.rho * self.g.interval_volume(y, x)
 
     def term_J6_connected(self, m: int, a: np.ndarray) -> TermEstimate:

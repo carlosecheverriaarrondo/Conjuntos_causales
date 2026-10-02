@@ -129,7 +129,13 @@ Minkowski 2D (región de Everpresent Λ, análogo plano). Fórmula exacta de
 ρV = 50–3200); b total = 24.09 ± 0.19 frente a 24.43 ± 0.24 del diamante. En 2D
 el escalado ρV ln ρV (mismo b(ε)) no depende de la región; sólo cambia la
 constante. Siguiente: 1b, FLRW (el big bang podría cambiar el corte de rapidez).
-Total: 137 tests pasando.
+Punto 1b (2026-10-02): cono pasado hasta el big bang en FLRW 2D, a = η^α
+(α = 1, 2), volúmenes exactos (`FLRWConeGeometry`). MYZ frente a simulación
+con 8/8 |z| < 4; b = 24.26 ± 0.19 (α = 1) y 24.78 ± 0.24 (α = 2) frente a
+24.43 ± 0.24 del diamante. El big bang no cambia el escalado: en 2D,
+ΔS ∝ √(ρV ln ρV) con b = Σf² en toda región compacta conformemente plana.
+Abierto: 4D (predicción p → 0.75; prefactor dependiente de la geometría).
+Total: 150 tests pasando.
 
 Goal 4 no lanzado y por REPLANTEAR según el Goal 3c: no generar Λ(t)
 suponiendo que las fluctuaciones de S_BD tienen el escalado de Poisson;
@@ -137,8 +143,8 @@ medirlas. Pendientes que le afectan:
 - ¿En 4D el exponente efectivo baja con ρV, como en 2D? (Ahora sólo hay
   ρV ≤ 100, con p ≈ 1.2.)
 - 4D con suavizado: no simulado (la predicción es el mismo exponente 0.75).
-- ¿Conos de luz pasados de FLRW? En Minkowski 2D el cono truncado ya está
-  hecho (punto 1a: mismo escalado). Falta FLRW y el cono en 4D.
+- Conos pasados: hechos en 2D (Minkowski, punto 1a; FLRW, punto 1b; mismo
+  escalado). Falta 4D (cono de Minkowski y de FLRW).
 - J⁶ conexo: determinar su crecimiento (dominante con suavizado fuerte).
 - Acción suavizada con ερV ≫ 1 (límite ε → 0): sólo se ha llegado a
   ερV = 100; el escalado asintótico sigue abierto.

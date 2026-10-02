@@ -132,6 +132,54 @@ class TruncatedPastCone:
 
 
 @dataclass(frozen=True)
+class ConformalPastCone:
+    """Cono de luz pasado de un observador hasta la superficie eta = 0, en
+    coordenadas conformes de una métrica g = a(eta)^2 eta_Minkowski:
+    {eta >= 0, eta + |x| <= h}. Con a(0) = 0 es el pasado causal del
+    observador hasta el big bang de un FLRW plano (la región de
+    Everpresent Λ). La estructura causal es la de Minkowski; la medida es
+    dV = a(eta)^d d eta d^(d-1)x. ``scale_factor`` debe ser creciente."""
+
+    dim: int
+    height: float
+    scale_factor: Callable[[np.ndarray], np.ndarray]
+
+    @property
+    def volume(self) -> float:
+        d, h = self.dim, self.height
+        vb = unit_ball_volume(d - 1)
+        val, _ = quad(lambda eta: self.scale_factor(np.array(eta)) ** d * vb * (h - eta) ** (d - 1),
+                      0.0, h, epsabs=0, epsrel=1e-12, limit=200)
+        return float(val)
+
+    @property
+    def top_vertex(self) -> np.ndarray:
+        q = np.zeros(self.dim)
+        q[0] = self.height
+        return q
+
+    def contains(self, coords: np.ndarray) -> np.ndarray:
+        return TruncatedPastCone(self.dim, self.height).contains(coords)
+
+    def bounding_box(self) -> tuple[np.ndarray, np.ndarray]:
+        return TruncatedPastCone(self.dim, self.height).bounding_box()
+
+    def weight(self, coords: np.ndarray) -> np.ndarray:
+        eta = np.maximum(np.atleast_2d(coords)[:, 0], 0.0)
+        return (self.scale_factor(eta) / self.scale_factor(np.array(self.height))) ** self.dim
+
+
+def power_law_scale_factor(alpha: float) -> Callable[[np.ndarray], np.ndarray]:
+    """a(eta) = eta^alpha (eta >= 0): FLRW plano con big bang en eta = 0.
+    En 4D, alpha = 1 es radiación y alpha = 2 materia (a ∝ t^(1/2), t^(2/3))."""
+
+    def a(eta):
+        return np.maximum(np.asarray(eta, dtype=float), 0.0) ** alpha
+
+    return a
+
+
+@dataclass(frozen=True)
 class ConformalDiamond:
     """Diamante en coordenadas conformes de una métrica g = a(eta)^2 eta_Minkowski.
 

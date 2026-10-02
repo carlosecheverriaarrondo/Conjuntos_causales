@@ -34,14 +34,14 @@ python scripts/smeared_fluctuations.py plot   # figura figures/smeared_fluctuati
 
 | Módulo | Responsabilidad |
 |---|---|
-| `causets/regions.py` | Regiones: `CausalDiamond` y `TruncatedPastCone` (Minkowski), `ConformalDiamond` (métricas a(η)² η, p. ej. de Sitter), volúmenes de intervalos en de Sitter |
+| `causets/regions.py` | Regiones: `CausalDiamond` y `TruncatedPastCone` (Minkowski), `ConformalPastCone` (cono pasado hasta el big bang en FLRW), `ConformalDiamond` (métricas a(η)² η, p. ej. de Sitter), volúmenes de intervalos en de Sitter |
 | `causets/sprinkling.py` | Sprinkling de Poisson (`sprinkle`) y muestreo uniforme de N fijo (`sample_uniform`), puntos ordenados por t |
 | `causets/causal.py` | Matriz causal de Minkowski y verificación de orden parcial (reflexividad, antisimetría, transitividad) |
 | `causets/dimension.py` | Estimador de dimensión de Myrheim-Meyer |
 | `causets/intervals.py` | Cardinalidades de intervalos n(y,x) y abundancias N_k |
 | `causets/action.py` | Operador B_ε y acción S_ε de Benincasa-Dowker (2D y 4D, local y suavizados) |
 | `causets/continuum.py` | Valores esperados exactos a densidad finita (Minkowski y de Sitter) |
-| `causets/geometry.py` | Geometrías para el formalismo de fluctuaciones (diamante y cono pasado de Minkowski, de Sitter): pesos, volúmenes de intervalos y de su intersección |
+| `causets/geometry.py` | Geometrías para el formalismo de fluctuaciones (diamante y cono pasado de Minkowski, cono pasado de FLRW 2D, de Sitter): pesos, volúmenes de intervalos y de su intersección |
 | `causets/overlap.py` | Volumen exacto de la intersección de dos intervalos en Minkowski 4D (cuadratura determinista) |
 | `causets/fluctuations.py` | Fluctuaciones (ΔS)² de la acción BD (formalismo de Moradi-Yazdi-Zilhão), local y suavizada |
 | `tests/` | Tests pytest (tolerancias estadísticas explícitas en cada fichero) |
@@ -769,6 +769,94 @@ y C1 da |z| = 41. Restaurado el código, pasan todos.
 4. **Siguiente paso (1b):** FLRW. El cono pasado de FLRW llega al big bang,
    donde a(η) → 0, y eso podría cambiar el corte de rapidez. En Minkowski
    la superficie inicial no lo cambia.
+
+## Punto 1b: el cono pasado hasta el big bang en FLRW 2D
+
+Código: `causets/regions.py` (`ConformalPastCone`, `power_law_scale_factor`),
+`causets/geometry.py` (`FLRWConeGeometry`, `power_law_rectangle_volume`),
+`scripts/flrw_fluctuations.py` (resultados en `figures/flrw_sim.json`,
+`figures/flrw_pred.json` y `figures/flrw_results.json`), tests en
+`tests/test_flrw.py`.
+
+**Región.** FLRW plano 2D, ds² = a(η)²(−dη² + dx²), con a = η^α. En la región
+(η ≥ 0, η + |x| ≤ h) hay un big bang en η = 0. En coordenadas conformes, el
+pasado causal del observador hasta el big bang es el triángulo del punto 1a.
+Sólo cambia la medida, dV = a² du dv/2. Casos: α = 1 y α = 2 (en 4D
+corresponderían a radiación y materia).
+
+**Volúmenes exactos.** Los intervalos y sus intersecciones son rectángulos
+en (u, v). Con 2α = p entero, el binomio de Newton da
+
+  ∫∫ ((u+v)/2)^p du dv/2 = 2^(−p−1) Σ_k C(p,k) s₀^(p−k) Σ_{j=1}^{k+1} C(k+2,j) Δu^j Δv^(k+2−j) / ((k+1)(k+2)),
+
+con s₀ = u₀ + v₀ ≥ 0. Todos los términos son positivos, así que no hay
+cancelaciones, ni siquiera en intervalos casi nulos. Las medias ⟨N_k⟩ no
+tienen forma cerrada y se obtienen por Monte Carlo.
+
+**Muestreo.** Cerca del big bang la densidad física (∝ a²) es mucho menor que
+la media, y la propuesta de intervalos, escalada con la densidad media, los
+generaba demasiado pequeños. En FLRW (`local_proposal`), la escala se adapta a
+a(η)² en el punto base. Hacia el futuro se mezcla con la global (mezcla
+defensiva), porque el vértice inferior infravalora la densidad del intervalo.
+El soporte no cambia, así que el estimador sigue siendo insesgado. Además, no
+se muestrean puntos dentro de intervalos que cruzan η = 0, porque tienen peso
+0 y el rechazo se volvía arbitrariamente lento. En Minkowski y de Sitter el
+cálculo queda idéntico bit a bit.
+
+**Hipótesis y criterios (fijados antes de calcular, ε = 1).** Un par casi
+nulo en η tiene volumen físico ≈ a(η)² Δu Δv/2. El coeficiente de ln ρ sigue
+siendo ρ∫dV Σh, y a(η) sólo añade ρ∫ln a² dV (finito) a la constante.
+Predicción: el mismo b que en Minkowski. El riesgo era el big bang (a → 0).
+Criterios:
+- F1: volúmenes en forma cerrada frente a integración numérica (relativo 10⁻⁹).
+- F2: ⟨N_k⟩ de Monte Carlo frente a sprinklings, con |z| < 4.
+- F3: predicción MYZ frente a simulación, α = 1 y 2, ρV = 50 … 3200, con |z| < 4.
+- F4: el b del ajuste c + b ln ρV (ρV = 50 … 12 800) es compatible a 4σ
+  con el del diamante (24.43 ± 0.24).
+
+**Resultados** (simulación: 4000/4000/3000/2000 sprinklings; MYZ: 4·10⁶
+muestras por término):
+
+| ρV | α = 1: simulación | α = 1: MYZ | z | α = 2: simulación | α = 2: MYZ | z |
+|---|---|---|---|---|---|---|
+| 50 | 1854 ± 45 | 1900 ± 14 | −0.97 | 1796 ± 44 | 1906 ± 20 | −2.29 |
+| 200 | 14 041 ± 320 | 13 790 ± 100 | +0.74 | 13 514 ± 310 | 14 169 ± 130 | −1.97 |
+| 800 | 84 824 ± 2200 | 83 273 ± 690 | +0.68 | 83 980 ± 2200 | 83 584 ± 850 | +0.17 |
+| 3200 | 443 140 ± 14 000 | 451 740 ± 4300 | −0.59 | 467 770 ± 14 000 | 451 860 ± 5000 | +1.05 |
+
+- **F1:** pasan los tests; con α = 0 se recupera el cono de Minkowski. **Se cumple.**
+- **F2:** máximo |z| = 2.16. **Se cumple.**
+- **F3:** 8/8 puntos con |z| < 4. **Se cumple.** Con α = 2, los dos puntos de
+  ρV más bajo tienen el mismo signo (−2.3 y −2.0). Está dentro del margen,
+  pero conviene tenerlo presente.
+- **F4:** α = 1 da b = 24.26 ± 0.19 (z = −0.56); α = 2 da b = 24.78 ± 0.24
+  (z = +1.04). **Se cumple.** El χ²/dof es 10.5 y 5.7: igual que en el cono de
+  Minkowski, la ley c + b ln ρV sólo vale asintóticamente. Los aumentos de
+  J¹/ρV por unidad de ln ρV son 21.9, 23.5, 23.9 y 24.0 (α = 1) y 21.9, 23.4,
+  23.9 y 23.9 (α = 2), todos → 24.
+- **Exponente local** de ΔS: 0.72 → 0.58 (α = 1) y 0.72 → 0.59 (α = 2), la
+  misma bajada que en Minkowski.
+
+**Tests:** 13 en `tests/test_flrw.py`. Con un error deliberado del 2 % en el
+volumen de los intervalos fallan 5 de los 9 tests deterministas, y F2 da
+|z| = 10–13 al recalcular las medias con ρV = 800. Restaurado el código,
+pasan todos.
+
+![Punto 1b](figures/flrw_fluctuations.png)
+
+**Conclusiones:**
+1. **El big bang no cambia el escalado:** en el cono pasado de FLRW 2D,
+   (ΔS)² = b ρV ln ρV + O(ρV) con el mismo b que en Minkowski, para α = 1 y 2.
+   El factor de escala sólo cambia el término O(ρV).
+2. **En 2D, el resultado es universal** para regiones compactas
+   conformemente planas (diamante, cono, cono de FLRW): ΔS ∝ √(ρV ln ρV), con
+   un coeficiente que sólo depende de la acción (Σf²), no de la geometría.
+3. **Everpresent Λ (2D):** en la región del modelo, las fluctuaciones de la
+   acción BD no tienen escalado de Poisson puro. Les falta el factor √(ln ρV),
+   que con ρV ~ 10²⁴⁰ vale ~23.5 y no es una constante.
+4. **Lo que queda abierto es 4D:** el argumento predice p → 0.75, pero el
+   prefactor de (ρV)^1.5 depende de la geometría. En FLRW 4D, el big bang y
+   la expansión podrían cambiarlo; el exponente no debería cambiar.
 
 ## Referencias
 

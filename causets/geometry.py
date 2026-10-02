@@ -31,11 +31,13 @@ import numpy as np
 from .regions import (
     CausalDiamond,
     ConformalDiamond,
+    ConformalPastCone,
     TruncatedPastCone,
     DeSitterIntervalVolume,
     de_sitter_invariant,
     de_sitter_scale_factor,
     diamond_volume,
+    power_law_scale_factor,
 )
 from .sprinkling import sample_uniform
 
@@ -108,6 +110,29 @@ class _ConformallyFlatGeometry:
         tau = proper_time(y[owner], x[owner])
         pts = _boost_from_rest(unit * tau[:, None], delta, tau) + y[owner]
         return pts, owner
+
+    def _sample_conformal_weighted(self, y, x, k, rng):
+        """Puntos según dV físico en métricas a(eta)^2 eta con a creciente:
+        rechazo con peso (a / a_max)^d dentro de cada intervalo (a_max está en
+        el vértice superior). Requiere ``self.a``."""
+        k = np.asarray(k, dtype=int)
+        out_pts, out_owner = [], []
+        need = k.copy()
+        while need.sum() > 0:
+            pts, owner = self._sample_coordinate_uniform(y, x, 2 * need + 2 * (need > 0), rng)
+            accept = rng.random(len(pts)) < (self.a(pts[:, 0]) / self.a(x[owner, 0])) ** self.dim
+            pts, owner = pts[accept], owner[accept]
+            # quedarse con como mucho need[m] puntos por intervalo
+            order = np.argsort(owner, kind="stable")
+            pts, owner = pts[order], owner[order]
+            rank = np.arange(len(owner)) - np.searchsorted(owner, owner)
+            keep = rank < need[owner]
+            out_pts.append(pts[keep])
+            out_owner.append(owner[keep])
+            need -= np.bincount(owner[keep], minlength=len(k))
+        pts, owner = np.concatenate(out_pts), np.concatenate(out_owner)
+        order = np.argsort(owner, kind="stable")
+        return pts[order], owner[order]
 
 
 class _MinkowskiGeometry(_ConformallyFlatGeometry):
@@ -202,23 +227,73 @@ class DeSitterGeometry(_ConformallyFlatGeometry):
         return np.where(related, self._vol.from_h_tau(np.where(related, h_tau, 0.0)), 0.0)
 
     def sample_in_intervals(self, y, x, k, rng):
-        """Rechazo con peso (a / a_max)^d dentro de cada intervalo; a crece con
-        eta, así que a_max está en el vértice superior."""
-        k = np.asarray(k, dtype=int)
-        out_pts, out_owner = [], []
-        need = k.copy()
-        while need.sum() > 0:
-            pts, owner = self._sample_coordinate_uniform(y, x, 2 * need + 2 * (need > 0), rng)
-            accept = rng.random(len(pts)) < (self.a(pts[:, 0]) / self.a(x[owner, 0])) ** self.dim
-            pts, owner = pts[accept], owner[accept]
-            # quedarse con como mucho need[m] puntos por intervalo
-            order = np.argsort(owner, kind="stable")
-            pts, owner = pts[order], owner[order]
-            rank = np.arange(len(owner)) - np.searchsorted(owner, owner)
-            keep = rank < need[owner]
-            out_pts.append(pts[keep])
-            out_owner.append(owner[keep])
-            need -= np.bincount(owner[keep], minlength=len(k))
-        pts, owner = np.concatenate(out_pts), np.concatenate(out_owner)
-        order = np.argsort(owner, kind="stable")
-        return pts[order], owner[order]
+        return self._sample_conformal_weighted(y, x, k, rng)
+
+
+def power_law_rectangle_volume(s0, du, dv, p: int) -> np.ndarray:
+    """∫∫ ((u + v)/2)^p du dv / 2 sobre el rectángulo [u0, u0 + du] x
+    [v0, v0 + dv], con s0 = u0 + v0 >= 0 y p entero >= 0: volumen físico de
+    un intervalo (o de la intersección de dos) en el FLRW 2D a(eta) = eta^(p/2).
+
+    Con t = u - u0, r = v - v0 y el binomio de Newton,
+        ∫∫ (s0 + t + r)^p = sum_k C(p, k) s0^(p-k) ∫_0^du ∫_0^dv (t + r)^k,
+        ∫∫ (t + r)^k = sum_{j=1}^{k+1} C(k+2, j) du^j dv^(k+2-j) / ((k+1)(k+2)):
+    todos los términos son >= 0, así que no hay cancelaciones (exacto también
+    para intervalos casi nulos)."""
+    from math import comb
+
+    s0, du, dv = (np.asarray(v, dtype=float) for v in (s0, du, dv))
+    total = np.zeros(np.broadcast(s0, du, dv).shape)
+    for k in range(p + 1):
+        inner = sum(comb(k + 2, j) * du**j * dv ** (k + 2 - j) for j in range(1, k + 2)) / ((k + 1) * (k + 2))
+        total = total + comb(p, k) * s0 ** (p - k) * inner
+    return total / 2.0 ** (p + 1)
+
+
+class FLRWConeGeometry(_ConformallyFlatGeometry):
+    """Cono de luz pasado hasta el big bang en un FLRW plano 2D con
+    a(eta) = eta^alpha (``ConformalPastCone``), 2 alpha entero.
+
+    En coordenadas de cono de luz u = eta + x, v = eta - x los intervalos y
+    sus intersecciones son rectángulos y sus volúmenes físicos tienen forma
+    cerrada (``power_law_rectangle_volume``): todo es exacto como en
+    Minkowski 2D. Con alpha = 0 se recupera ``MinkowskiConeGeometry``."""
+
+    local_proposal = True  # escala de la propuesta según a(eta)^2 local (``fluctuations._local``)
+
+    def __init__(self, alpha: float, height: float = 1.0):
+        if abs(2 * alpha - round(2 * alpha)) > 1e-12 or alpha < 0:
+            raise ValueError("se requiere 2 alpha entero >= 0")
+        self.dim, self.alpha, self._p = 2, alpha, int(round(2 * alpha))
+        self.a = power_law_scale_factor(alpha)
+        self.region = ConformalPastCone(2, height, self.a)
+
+    @property
+    def coordinate_volume(self) -> float:
+        return self.region.height**2
+
+    def weight(self, z):
+        return self.a(np.atleast_2d(z)[:, 0]) ** 2
+
+    @staticmethod
+    def _uv(p):
+        return p[..., 0] + p[..., 1], p[..., 0] - p[..., 1]
+
+    def interval_volume(self, y, x):
+        (yu, yv), (xu, xv) = self._uv(np.atleast_2d(y)), self._uv(np.atleast_2d(x))
+        du, dv = xu - yu, xv - yv
+        ok = (du > 0) & (dv > 0) & (yu + yv >= 0)
+        z = np.zeros_like(du)
+        return np.where(ok, power_law_rectangle_volume(np.where(ok, yu + yv, 0.0), np.where(ok, du, z), np.where(ok, dv, z), self._p), 0.0)
+
+    def overlap_volume(self, y1, x1, y2, x2):
+        (yu1, yv1), (xu1, xv1), (yu2, yv2), (xu2, xv2) = (self._uv(np.atleast_2d(p)) for p in (y1, x1, y2, x2))
+        u0, v0 = np.maximum(yu1, yu2), np.maximum(yv1, yv2)
+        du = np.minimum(xu1, xu2) - u0
+        dv = np.minimum(xv1, xv2) - v0
+        ok = (du > 0) & (dv > 0) & (u0 + v0 >= 0)
+        z = np.zeros_like(du)
+        return np.where(ok, power_law_rectangle_volume(np.where(ok, u0 + v0, 0.0), np.where(ok, du, z), np.where(ok, dv, z), self._p), 0.0)
+
+    def sample_in_intervals(self, y, x, k, rng):
+        return self._sample_conformal_weighted(y, x, k, rng)
