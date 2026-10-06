@@ -250,36 +250,98 @@ def power_law_rectangle_volume(s0, du, dv, p: int) -> np.ndarray:
     return total / 2.0 ** (p + 1)
 
 
+def _lens_volume(r1, r2, d):
+    """Volumen de la intersección de dos bolas de R^3 de radios r1, r2 cuyos
+    centros distan d (con d <= r1 + r2)."""
+    with np.errstate(divide="ignore", invalid="ignore"):
+        lens = np.pi * (r1 + r2 - d) ** 2 * (d * d + 2 * d * (r1 + r2) - 3 * (r1 - r2) ** 2) / (12 * d)
+    small = 4 * np.pi / 3 * np.minimum(r1, r2) ** 3
+    return np.where(d <= np.abs(r1 - r2), small, np.where(d > 0, lens, small))
+
+
+def conformal_interval_volume_4d(y, x, a, nodes: int = 8) -> np.ndarray:
+    """Volumen físico ∫ a(eta)^4 d^4x de I(y, x) en una métrica a(eta)^2 eta
+    (Minkowski 4D en coordenadas conformes), fila a fila; 0 si y no ≺ x.
+
+    A eta fijo, la sección de I(y, x) es la intersección de las bolas de
+    radios r1 = eta - eta_y y r2 = eta_x - eta centradas en x_y y x_x
+    (``_lens_volume``). Se integra en eta con Gauss-Legendre en los tres
+    tramos separados por los puntos donde una bola contiene a la otra,
+    eta = (eta_y + eta_x ∓ d)/2. En cada tramo la sección es un polinomio en
+    eta (grado <= 4), así que con a^4 polinómico de grado <= 2 nodes - 5 el
+    resultado es exacto."""
+    y, x = np.atleast_2d(y), np.atleast_2d(x)
+    ey, ex = y[:, 0], x[:, 0]
+    d = np.linalg.norm(x[:, 1:] - y[:, 1:], axis=1)
+    related = ex - ey > d
+    gx, gw = np.polynomial.legendre.leggauss(nodes)
+    mid_lo, mid_hi = (ey + ex - d) / 2, (ey + ex + d) / 2
+    total = np.zeros(len(y))
+    for lo, hi in ((ey, mid_lo), (mid_lo, mid_hi), (mid_hi, ex)):
+        half = (hi - lo) / 2
+        eta = (lo + hi)[:, None] / 2 + half[:, None] * gx[None, :]
+        sec = _lens_volume(eta - ey[:, None], ex[:, None] - eta, d[:, None])
+        total += half * np.sum(gw * a(eta) ** 4 * sec, axis=1)
+    return np.where(related, total, 0.0)
+
+
 class FLRWConeGeometry(_ConformallyFlatGeometry):
-    """Cono de luz pasado hasta el big bang en un FLRW plano 2D con
-    a(eta) = eta^alpha (``ConformalPastCone``), 2 alpha entero.
+    """Cono de luz pasado hasta el big bang en un FLRW plano con
+    a(eta) = eta^alpha (``ConformalPastCone``), d = 2 o 4.
 
-    En coordenadas de cono de luz u = eta + x, v = eta - x los intervalos y
-    sus intersecciones son rectángulos y sus volúmenes físicos tienen forma
-    cerrada (``power_law_rectangle_volume``): todo es exacto como en
-    Minkowski 2D. Con alpha = 0 se recupera ``MinkowskiConeGeometry``."""
+    2D (2 alpha entero): en coordenadas de cono de luz u = eta + x,
+    v = eta - x los intervalos y sus intersecciones son rectángulos y sus
+    volúmenes físicos tienen forma cerrada (``power_law_rectangle_volume``).
+    4D: volúmenes de intervalos por ``conformal_interval_volume_4d`` (exacto
+    para alpha entero <= 2); intersecciones sin forma cerrada (sólo se usan
+    las medias de abundancias). Con alpha = 0 se recupera Minkowski."""
 
-    local_proposal = True  # escala de la propuesta según a(eta)^2 local (``fluctuations._local``)
+    local_proposal = True  # escala de la propuesta según a(eta)^d local (``fluctuations._local``)
 
-    def __init__(self, alpha: float, height: float = 1.0):
-        if abs(2 * alpha - round(2 * alpha)) > 1e-12 or alpha < 0:
-            raise ValueError("se requiere 2 alpha entero >= 0")
-        self.dim, self.alpha, self._p = 2, alpha, int(round(2 * alpha))
+    def __init__(self, alpha: float, height: float = 1.0, dim: int = 2):
+        if dim == 2 and (abs(2 * alpha - round(2 * alpha)) > 1e-12 or alpha < 0):
+            raise ValueError("en 2D se requiere 2 alpha entero >= 0")
+        if dim == 4 and (alpha not in (0, 1, 2)):
+            raise ValueError("en 4D se requiere alpha = 0, 1 o 2 (volúmenes exactos)")
+        if dim not in (2, 4):
+            raise ValueError("dim debe ser 2 o 4")
+        self.dim, self.alpha, self._p = dim, alpha, int(round(2 * alpha))
         self.a = power_law_scale_factor(alpha)
-        self.region = ConformalPastCone(2, height, self.a)
+        self.region = ConformalPastCone(dim, height, self.a)
 
     @property
     def coordinate_volume(self) -> float:
-        return self.region.height**2
+        return TruncatedPastCone(self.dim, self.region.height).volume
+
+    def sample_M(self, n: int, rng) -> np.ndarray:
+        """n puntos según dV físico, sin rechazo: la densidad marginal de eta es
+        ∝ eta^(d alpha) (h - eta)^(d-1), es decir eta = h · Beta(d alpha + 1, d),
+        y a eta fijo el punto es uniforme en la bola de radio h - eta. (El
+        rechazo genérico de ``sample_uniform`` acepta ~V/(caja·a_max^d), del
+        orden de 1e-4 con alpha = 2 en 4D: inviable para millones de puntos.)
+        En 2D se mantiene el rechazo genérico, con el que se calcularon los
+        resultados del punto 1b (reproducibilidad bit a bit)."""
+        if self.dim == 2:
+            return super().sample_M(n, rng)
+        h, d = self.region.height, self.dim
+        eta = h * rng.beta(d * self.alpha + 1, d, size=n)
+        u = rng.normal(size=(n, d - 1))
+        u /= np.linalg.norm(u, axis=1, keepdims=True)
+        r = (h - eta) * rng.random(n) ** (1.0 / (d - 1))
+        pts = np.column_stack([eta, r[:, None] * u])
+        return pts[np.argsort(eta, kind="stable")]
 
     def weight(self, z):
-        return self.a(np.atleast_2d(z)[:, 0]) ** 2
+        return self.a(np.atleast_2d(z)[:, 0]) ** self.dim
 
     @staticmethod
     def _uv(p):
         return p[..., 0] + p[..., 1], p[..., 0] - p[..., 1]
 
     def interval_volume(self, y, x):
+        if self.dim == 4:
+            y = np.atleast_2d(y)
+            return np.where(y[:, 0] >= 0, conformal_interval_volume_4d(y, x, self.a), 0.0)
         (yu, yv), (xu, xv) = self._uv(np.atleast_2d(y)), self._uv(np.atleast_2d(x))
         du, dv = xu - yu, xv - yv
         ok = (du > 0) & (dv > 0) & (yu + yv >= 0)
@@ -287,6 +349,8 @@ class FLRWConeGeometry(_ConformallyFlatGeometry):
         return np.where(ok, power_law_rectangle_volume(np.where(ok, yu + yv, 0.0), np.where(ok, du, z), np.where(ok, dv, z), self._p), 0.0)
 
     def overlap_volume(self, y1, x1, y2, x2):
+        if self.dim != 2:
+            return None
         (yu1, yv1), (xu1, xv1), (yu2, yv2), (xu2, xv2) = (self._uv(np.atleast_2d(p)) for p in (y1, x1, y2, x2))
         u0, v0 = np.maximum(yu1, yu2), np.maximum(yv1, yv2)
         du = np.minimum(xu1, xu2) - u0

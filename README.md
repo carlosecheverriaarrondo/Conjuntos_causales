@@ -41,7 +41,7 @@ python scripts/smeared_fluctuations.py plot   # figura figures/smeared_fluctuati
 | `causets/intervals.py` | Cardinalidades de intervalos n(y,x) y abundancias N_k |
 | `causets/action.py` | Operador B_ε y acción S_ε de Benincasa-Dowker (2D y 4D, local y suavizados) |
 | `causets/continuum.py` | Valores esperados exactos a densidad finita (Minkowski y de Sitter) |
-| `causets/geometry.py` | Geometrías para el formalismo de fluctuaciones (diamante y cono pasado de Minkowski, cono pasado de FLRW 2D, de Sitter): pesos, volúmenes de intervalos y de su intersección |
+| `causets/geometry.py` | Geometrías para el formalismo de fluctuaciones (diamante y cono pasado de Minkowski, cono pasado de FLRW 2D y 4D, de Sitter): pesos, volúmenes de intervalos y de su intersección |
 | `causets/overlap.py` | Volumen exacto de la intersección de dos intervalos en Minkowski 4D (cuadratura determinista) |
 | `causets/fluctuations.py` | Fluctuaciones (ΔS)² de la acción BD (formalismo de Moradi-Yazdi-Zilhão), local y suavizada |
 | `tests/` | Tests pytest (tolerancias estadísticas explícitas en cada fichero) |
@@ -941,6 +941,90 @@ todos.
    ΔS ∝ (ρV)^0.75 y ΔΛ ∝ V^(−1/4), no V^(−1/2). Queda FLRW 4D. Allí el
    argumento predice el mismo exponente, con un G que incluye el factor de
    escala.
+
+## Punto 1d: el cono pasado hasta el big bang en FLRW 4D
+
+Código: `causets/geometry.py` (`conformal_interval_volume_4d`,
+`FLRWConeGeometry` con `dim = 4` y su `sample_M` exacto),
+`scripts/cone4d_scaling.py` (`g_flrw`), `scripts/flrw4d_scaling.py`
+(resultados en `figures/flrw4d_sim_a{1,2}.json`, `figures/flrw4d_means_a{1,2}.json`
+y `figures/flrw4d_results.json`), tests en `tests/test_flrw4d.py`.
+
+**Región.** FLRW plano 4D, a = η^α, con α = 1 (radiación, a ∝ t^½) y α = 2
+(materia, a ∝ t^⅔). Es el pasado causal del observador en η = h hasta el big
+bang: en coordenadas conformes, el cono del punto 1c con dV = a⁴ d⁴x. Es la
+región física de Everpresent Λ (sin Λ de fondo).
+
+**Volúmenes de intervalos.** A η fijo, la sección de I(y, x) es la
+intersección de dos bolas (una lente), con volumen en forma cerrada. La
+integral en η, partida en los tres tramos donde la sección es polinómica, se
+hace con Gauss-Legendre de 8 nodos. Es exacta para α ≤ 2. Las intersecciones
+de dos intervalos no se necesitan, porque el método es el del Paso 2 y el
+punto 1c (J¹ y el término cruzado con medias, total por simulación).
+
+**Prefactor asintótico (predicción).** Un par casi nulo con tiempo propio
+conforme τ y extensión λ (en η) a lo largo del rayo nulo tiene volumen físico
+c₄τ⁴·w. Aquí w es la media de a⁴ sobre el intervalo, con el perfil s(λ − s)
+que tiene en 4D la sección de un diamante fino a lo largo de su dirección
+larga. Repitiendo el argumento del punto 1c:
+
+  G = ∫dV_x ∫dΩ ∫₀^ℓ 2λ a(η_x − λ)⁴ / √w dλ,  w = (6/λ³)∫₀^λ a(η_y + s)⁴ s(λ − s) ds,
+
+con ℓ = η_x (el rayo pasado llega al big bang). Con a = 1 se reduce al G del
+1c. Resultado: G/V^1.5 = 1.3145 (α = 1) y 1.4194 (α = 2), frente a 0.8187
+en el cono de Minkowski.
+
+**Medias.** No tienen forma cerrada y se calculan con el Monte Carlo del
+formalismo (1.6·10⁷ muestras por densidad), con la propuesta local. Con
+α = 0 reproduce la integral exacta del cono (0.1–0.3 %). Los puntos de la
+región se muestrean sin rechazo: η = h·Beta(4α+1, 4) y el punto espacial,
+uniforme en la bola de radio h − η. El rechazo genérico aceptaba ~1 de cada
+4000 puntos con α = 2 y llegó a ocupar 6 GB.
+
+**Criterios (fijados antes de ver los resultados).** En una prueba de
+precisión del Monte Carlo se vio de pasada ⟨N_0⟩/(ρV)^1.5 = 0.799 frente a
+0.805 (α = 1, ρV = 10⁸). Por eso K3 usa el margen del punto 1c, sin cambiarlo.
+- K1: volúmenes frente a Monte Carlo, y α = 0 frente a Minkowski.
+- K2: medias frente a sprinklings, con |z| < 4.
+- K3: |1 − ⟨N_k⟩/asintótico| < 3 % con ρV = 10⁸, y menor que con 10⁶.
+- K4: la pendiente de resto/J¹ frente a ln ρV es compatible con 0 a 4σ.
+
+**Resultados** (simulación: ρV = 25 … 3200, con 4000/2000/1000 sprinklings):
+
+| | α = 1 | α = 2 |
+|---|---|---|
+| K2: máximo \|z\| (ambos α) | 2.48 | |
+| K3: cociente con ρV = 10⁶ (k = 0…3) | 0.964 … 0.906 | 0.964 … 0.915 |
+| K3: cociente con ρV = 10⁸ (k = 0…3) | 0.995 … 0.986 (±0.002) | 0.997 … 0.981 (±0.004) |
+| K4: pendiente de resto/J¹ | +0.006 ± 0.011 (0.5σ) | −0.007 ± 0.011 (0.7σ) |
+| resto/J¹ medio | 0.348 ± 0.016 | 0.317 ± 0.016 |
+| p local, ρV = 25→50 | 1.27 ± 0.04 | 1.28 ± 0.03 |
+| p local, ρV = 1600→3200 | 0.91 ± 0.04 | 0.83 ± 0.05 |
+
+Se cumplen los cuatro criterios. Con ρV = 3200, (ΔS)²/ρV = 12 510 ± 530 (α = 1)
+y 13 085 ± 589 (α = 2), frente a J¹/ρV = 9208 y 10 544.
+
+**Tests:** 13 en `tests/test_flrw4d.py`. Hay un error deliberado que sólo
+afecta a FLRW: √w → w^0.55 en G, invisible con α = 0. Con él, K3 da
+desviaciones del 12–15 % (> 3 %) y falla. Restaurado el código, pasan todos.
+
+![Punto 1d](figures/flrw4d_scaling.png)
+
+**Conclusiones:**
+1. **En la región física de Everpresent Λ** (pasado causal hasta el big bang,
+   FLRW 4D, radiación y materia), las fluctuaciones de la acción BD local
+   siguen J¹ ∝ (ρV)^1.5 con el prefactor predicho, y las correlaciones son
+   una fracción constante de J¹ (≈ 0.32–0.35, como en Minkowski).
+   Asintóticamente, ΔS ∝ (ρV)^0.75 y ΔΛ ∼ ΔS/V ∝ V^(−1/4), no V^(−1/2).
+2. **El factor de escala sólo cambia la amplitud,** a través de G. FLRW
+   tiene más rango de boosts relativo que el cono de Minkowski (1.31–1.42
+   frente a 0.82), porque el volumen se concentra cerca del observador y los
+   rayos nulos pasados son largos.
+3. **Con los puntos 1a–1d, el replanteo del Goal 4 queda respondido:** el
+   escalado de las fluctuaciones de la acción BD es el de los boosts en todas
+   las regiones probadas, incluida la del modelo. Un Λ(t) estocástico
+   construido con S_BD tendría δΛ ∝ V^(−1/4) en 4D, no el escalado de Poisson
+   que supone Everpresent Λ.
 
 ## Referencias
 

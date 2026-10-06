@@ -23,6 +23,7 @@ analysis() {
     python scripts/cone_fluctuations.py fit
     python scripts/flrw_fluctuations.py fit
     python scripts/cone4d_scaling.py fit
+    python scripts/flrw4d_scaling.py fit
 }
 
 full() {
@@ -42,6 +43,10 @@ full() {
     python scripts/flrw_fluctuations.py sim       # Punto 1b          (~1 h)
     python scripts/flrw_fluctuations.py pred      #                   (~1 h)
     python scripts/cone4d_scaling.py sim          # Punto 1c          (~1.5 h)
+    python scripts/flrw4d_scaling.py means 1      # Punto 1d          (~15 min)
+    python scripts/flrw4d_scaling.py means 2      #                   (~15 min)
+    python scripts/flrw4d_scaling.py sim 1        #                   (~1 h)
+    python scripts/flrw4d_scaling.py sim 2        #                   (~1 h)
 }
 
 case "${1:-fast}" in

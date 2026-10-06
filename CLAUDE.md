@@ -141,7 +141,14 @@ G = ∫dV∫dΩ ℓ² (rango de boosts). Cono/diamante → 0.566, verificado con
 exacto hasta 10⁸ (0.562). Simulación ρV = 25–6400: resto/J¹ constante
 (0.342 ± 0.017, pendiente 0.05σ). En 4D, el escalado tampoco depende de la
 región: ΔS ∝ (ρV)^0.75; la geometría sólo fija la amplitud.
-Total: 156 tests pasando.
+Punto 1d (2026-10-06): cono pasado hasta el big bang en FLRW 4D (a = η^α,
+α = 1 radiación, 2 materia), la región física de Everpresent Λ. Volúmenes
+exactos (lentes + Gauss-Legendre), prefactor G con el factor de escala
+(G/V^1.5 = 1.31 / 1.42) verificado con medias MC hasta ρV = 10⁸ (desviación
+≤ 1.9 %), resto/J¹ constante (0.35 / 0.32). ΔS ∝ (ρV)^0.75, ΔΛ ∝ V^(−1/4)
+también en FLRW. Las medias MC de FLRW 4D usan muestreo exacto (Beta en η):
+el rechazo genérico agotaba la memoria.
+Total: 169 tests pasando.
 
 Goal 4 no lanzado y por REPLANTEAR según el Goal 3c: no generar Λ(t)
 suponiendo que las fluctuaciones de S_BD tienen el escalado de Poisson;
@@ -149,8 +156,8 @@ medirlas. Pendientes que le afectan:
 - ¿En 4D el exponente efectivo baja con ρV, como en 2D? (Ahora sólo hay
   ρV ≤ 100, con p ≈ 1.2.)
 - 4D con suavizado: no simulado (la predicción es el mismo exponente 0.75).
-- Conos pasados: hechos en 2D (Minkowski, 1a; FLRW, 1b) y en Minkowski 4D
-  (1c); mismo escalado. Falta FLRW 4D (G con el factor de escala).
+- Conos pasados: hechos en 2D (Minkowski, 1a; FLRW, 1b) y 4D (Minkowski,
+  1c; FLRW, 1d); mismo escalado en todos. Abierto: FLRW con Λ de fondo.
 - J⁶ conexo: determinar su crecimiento (dominante con suavizado fuerte).
 - Acción suavizada con ερV ≫ 1 (límite ε → 0): sólo se ha llegado a
   ερV = 100; el escalado asintótico sigue abierto.

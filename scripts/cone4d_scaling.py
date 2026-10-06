@@ -92,6 +92,37 @@ def g_diamond(n_batches: int = 20, m: int = 500_000, seed: int = 0) -> tuple[flo
     return float(k * np.mean(means)), float(k * np.std(means, ddof=1) / np.sqrt(n_batches))
 
 
+def g_flrw(alpha: float, nodes: int = 64) -> float:
+    """G / V^1.5 del cono pasado hasta el big bang de FLRW 4D, a = eta^alpha
+    (punto 1d). Generaliza G = ∫dV ∫dOmega l² a un factor de escala:
+
+        G = ∫ dV_x ∫ dOmega ∫_0^{eta_x} 2 lambda a(eta_x - lambda)^4 / sqrt(w) d lambda,
+        w(eta_y, lambda) = (6 / lambda³) ∫_0^lambda a(eta_y + s)^4 s (lambda - s) ds,
+
+    donde w es la media de a^4 sobre un intervalo casi nulo de extensión lambda
+    (perfil s(lambda - s) de la sección de un diamante fino en 4D): su volumen
+    físico es c_4 tau^4 w con tau el tiempo propio conforme. En el cono el rayo
+    nulo pasado llega a eta = 0, así que l = eta_x y ∫dOmega = 4π. Con a = 1
+    se reduce a ``g_cone``. Cuadratura de Gauss-Legendre (integrandos suaves)."""
+    from causets.geometry import FLRWConeGeometry
+
+    gx, gw = np.polynomial.legendre.leggauss(nodes)
+    u, wu = (gx + 1) / 2, gw / 2  # nodos en [0, 1]
+
+    def a4(eta):
+        return np.asarray(eta, float) ** (4 * alpha)
+
+    def inner(ex):  # ∫_0^{ex} 2 lam a(ex - lam)^4 / sqrt(w) dlam
+        lam = ex * u
+        ey = ex - lam
+        s = lam[:, None] * u[None, :]
+        w = 6 / lam**3 * np.sum(wu * lam[:, None] * a4(ey[:, None] + s) * s * (lam[:, None] - s), axis=1)
+        return ex * np.sum(wu * 2 * lam * a4(ey) / np.sqrt(w))
+
+    G = 4 * np.pi * sum(wk * a4(e) * (4 * np.pi / 3) * (1 - e) ** 3 * inner(e) for e, wk in zip(u, wu))
+    return float(G / FLRWConeGeometry(alpha, 1.0, 4).volume ** 1.5)
+
+
 def asymptotic_abundance(g: float, lam: float, k: int) -> float:
     return lam**1.5 * g / (8 * np.sqrt(C4)) * gamma(k + 0.5) / gamma(k + 1)
 
