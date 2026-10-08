@@ -24,6 +24,7 @@ analysis() {
     python scripts/flrw_fluctuations.py fit
     python scripts/cone4d_scaling.py fit
     python scripts/flrw4d_scaling.py fit
+    python scripts/goal4_compatibility.py
 }
 
 full() {

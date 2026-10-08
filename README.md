@@ -43,6 +43,7 @@ python scripts/smeared_fluctuations.py plot   # figura figures/smeared_fluctuati
 | `causets/continuum.py` | Valores esperados exactos a densidad finita (Minkowski y de Sitter) |
 | `causets/geometry.py` | Geometrías para el formalismo de fluctuaciones (diamante y cono pasado de Minkowski, cono pasado de FLRW 2D y 4D, de Sitter): pesos, volúmenes de intervalos y de su intersección |
 | `causets/overlap.py` | Volumen exacto de la intersección de dos intervalos en Minkowski 4D (cuadratura determinista) |
+| `causets/everpresent.py` | Compatibilidad con el Λ observado: volumen del pasado causal en ΛCDM, conversión ΔS → δΛ, amplitud de la acción local y suavizada (Goal 4a) |
 | `causets/fluctuations.py` | Fluctuaciones (ΔS)² de la acción BD (formalismo de Moradi-Yazdi-Zilhão), local y suavizada |
 | `tests/` | Tests pytest (tolerancias estadísticas explícitas en cada fichero) |
 | `scripts/` | Scripts que generan figuras |
@@ -1026,6 +1027,92 @@ desviaciones del 12–15 % (> 3 %) y falla. Restaurado el código, pasan todos.
    construido con S_BD tendría δΛ ∝ V^(−1/4) en 4D, no el escalado de Poisson
    que supone Everpresent Λ.
 
+## Goal 4a: ¿es compatible con el Λ observado?
+
+Código: `causets/everpresent.py`, `scripts/goal4_compatibility.py` (resultados en
+`figures/goal4a_results.json`), tests en `tests/test_goal4a.py`. Es un cálculo
+casi analítico: usa los prefactores medidos en los puntos 1c-1d y no hace
+simulaciones nuevas.
+
+**Suposición central (de este proyecto, no del modelo).** La fluctuación de
+la acción BD en el pasado causal del observador se interpreta como una
+fluctuación del término cosmológico. La acción BD reproduce la de
+Einstein-Hilbert: con nuestra normalización, ⟨S⟩ → (1/2ℓ²)∫R dV, y
+S_EH/ℏ = (1/16πℓ_p²)∫(R − 2Λ)dV, así que S_EH/ℏ = κS con κ = ℓ²/(8πℓ_p²). El
+término cosmológico es ΛV/(8πℓ_p²) (Das-Nasiri-Yazdi 2023, ec. 3.12). Queda
+
+  **δΛ·ℓ² = ΔS/(ρV)**,
+
+sin dependencia de ℓ_p. Aplicada a la acción de Poisson de Model 1
+(ΔS_EH = √N/2, ecs. 3.11-3.13), esta conversión reproduce exactamente su
+δΛ = 8πα/√V (test E2). Con la amplitud de los puntos 1c-1d,
+δΛ·ℓ² = A·(ρV)^(−1/4), donde A² = (1 + r)(G/V^1.5)/(8√c₄)·Σ_n f(n)² Γ(n+½)/n!.
+
+**Acción suavizada.** Con ε = (ℓ/ℓ_k)⁴, Σ_n f_ε² Γ(n+½)/n! → 4.112·ε^(5/2):
+la amplitud cae como A ∝ ε^(5/4) = (ℓ/ℓ_k)⁵. El término cruzado con N sigue
+anulándose. Las dos cosas se comprueban numéricamente (E3, E4).
+
+**Fondo.** ΛCDM de Planck 2018 (H₀ = 67.4 km/s/Mpc, Ω_m = 0.315,
+Ω_r = 9.1·10⁻⁵). Volumen del pasado causal hoy: V = 6.4·10²⁴² ℓ_p⁴.
+Λ_obs = 3Ω_Λ H₀² = 2.85·10⁻¹²² ℓ_p⁻². G/V^1.5 entre 1.31 y 1.42 (radiación
+y materia); r entre 0.32 y 0.35 (local) o entre 0 y 1 (suavizada, no medida).
+
+**Reglas de decisión (fijadas antes de calcular):**
+- D1: la acción local queda excluida si la ℓ necesaria para δΛ = Λ_obs deja
+  hoy ρV < 10³.
+- D2: la acción suavizada sigue abierta si la ℓ_k necesaria es menor que la
+  cota del LHC, ℓ_k ≲ 10⁻¹⁹ m. La cita es de Belenchia, Benincasa, Liberati,
+  Marin, Marino & Ortolan, Phys. Rev. Lett. 116, 161303 (2016),
+  arXiv:1512.02083.
+- D3: calcular la envolvente δΛ/(3H²) frente a z.
+
+**Resultados:**
+
+| | Resultado |
+|---|---|
+| D1: δΛ/Λ_obs, acción local con ℓ = ℓ_p | 1.2–1.6 · 10⁶² |
+| D1: δΛ/Λ_obs, acción local con ℓ = ℓ_cs (α = 0.01, ℓ_cs = 7.1 ℓ_p) | 1.6–2.2 · 10⁶¹ |
+| D1: ℓ necesaria | 1.9–2.5 · 10²⁷ m (≈ 15 radios de Hubble; ρV hoy < 1) → **excluida** |
+| D2: ℓ_k necesaria (ℓ = ℓ_p) | 2.5–2.7 · 10⁻²³ m (ℓ_k/ℓ ≈ 1.6 · 10¹², ε ≈ 10⁻⁴⁹) |
+| D2: ℓ_k necesaria (ℓ = ℓ_cs) | 1.2–1.3 · 10⁻²² m |
+| D2: frente a la cota del LHC (10⁻¹⁹ m) | por debajo → **vía abierta** |
+| D3: w efectivo de la envolvente (z = 10–100) | BD: −0.50; Model 1: +0.006 |
+| D3: δΛ/(3H²) en z = 1100 | BD suavizada: 4·10⁻⁵; Model 1: 0.52 |
+
+**Tests:** 14 en `tests/test_goal4a.py`. Con errores deliberados (κ con 8π en
+lugar de 16π, y la constante asintótica × 1.05) fallan E2 y E4. Al hacer esa
+comprobación apareció que E2 era un test vacío: `pytest.approx` aplica
+siempre una tolerancia absoluta de 10⁻¹², y los valores de δΛ en unidades de
+Planck son ~10⁻¹²¹. Ahora compara el cociente. Se revisaron todas las demás
+comparaciones con `approx` del proyecto: todas usan cantidades ≳ 10⁻³ y no
+están afectadas. La tolerancia del test de D3 (0.05) se fijó después de ver
+los valores. La expectativa analítica (w = −½ porque δΛ ∝ V^(−1/4) ∝ H en
+la era de materia) sí era previa.
+
+![Goal 4a](figures/goal4a_envelope.png)
+
+**Conclusiones:**
+1. **La acción BD local queda excluida** como origen de un Λ fluctuante: da
+   unos 61–62 órdenes de magnitud de más, y no hay ninguna escala de
+   discreción que lo arregle sin destruir el régimen continuo.
+2. **La acción suavizada puede dar la amplitud observada**, con una escala
+   de no-localidad ℓ_k ≈ 10⁻²² m. Ese valor es compatible con la cota actual
+   del LHC y cae justo en el rango que los experimentos optomecánicos
+   propuestos podrían explorar (10⁻²² – 10⁻²⁹ m, Belenchia et al. 2016). Es
+   una predicción contrastable, pero con un precio: ℓ_k es un parámetro
+   ajustado (ℓ_k/ℓ_p ~ 10¹²), así que reaparece el problema de la
+   coincidencia que Model 1 resuelve de forma natural (α ~ 0.01, ℓ_cs ~ ℓ_p).
+3. **La evolución es distinta de la de Model 1:** la envolvente se comporta
+   como un fluido con w ≈ −½ en la era de materia. Es despreciable en el CMB
+   y crece hasta dominar hoy, a medio camino entre ΛCDM (w = −1) y Model 1
+   (w ≈ 0). Que sea compatible con supernovas y BAO no se puede decidir sólo
+   con la envolvente. Hace falta la correlación temporal de ΔS a lo largo de
+   la línea de universo del observador, porque Λ(t) es un proceso
+   estocástico de media cero y la envolvente sólo da su desviación típica.
+4. **Siguiente paso, si se quiere seguir:** calcular esa correlación (la
+   covarianza de ΔS entre los conos pasados de dos instantes) y, con ella,
+   un Λ(t) estocástico que se pueda comparar con los datos.
+
 ## Referencias
 
 - Bombelli, Lee, Meyer & Sorkin (1987), Phys. Rev. Lett. 59, 521 — sprinkling de Poisson.
@@ -1037,6 +1124,8 @@ desviaciones del 12–15 % (> 3 %) y falla. Restaurado el código, pasan todos.
 - Sorkin, R. D. (2007), arXiv:gr-qc/0703099 — d'Alembertiano 2D y suavizado ε.
 - Benincasa, Dowker & Schmitzer (2011), Class. Quantum Grav. 28, 105018, arXiv:1011.5191 — acción 2D y su media.
 - Das, Nasiri & Yazdi (2023), JCAP 10, 047, arXiv:2304.03819 — Everpresent Λ (I), Model 1.
+- Belenchia, Benincasa, Liberati, Marin, Marino & Ortolan (2016), Phys. Rev. Lett. 116, 161303, arXiv:1512.02083 — cotas a la escala de no-localidad ℓ_k.
+- Planck Collaboration (2020), Astron. Astrophys. 641, A6, arXiv:1807.06209 — parámetros cosmológicos de fondo.
 - Das, Nasiri & Yazdi (2024), JCAP 10, 076, arXiv:2307.13743 — Everpresent Λ (II), tests cosmológicos.
 - Dowker & Glaser (2013), Class. Quantum Grav. 30, 195016, arXiv:1305.2588 — f_d(n, ε) en dimensión d.
 - Moradi, Yazdi & Zilhão, arXiv:2407.03395 — kernels de fluctuación (Goal 3).

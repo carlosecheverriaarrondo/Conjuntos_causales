@@ -58,6 +58,9 @@ confirmación aunque haya progreso, en vez de seguir sin decir nada.
 - Los márgenes estadísticos de los tests se fijan antes de ver los
   resultados (hasta ahora: 4σ combinada). Comprueba que los tests pueden
   fallar introduciendo un error deliberado (y restaurando el código).
+- `pytest.approx` aplica siempre una tolerancia absoluta de 1e-12 (aunque se
+  pase sólo `rel=`): para cantidades pequeñas (p. ej. Λ en unidades de
+  Planck), compara cocientes o pasa `abs=0`.
 - Los cálculos largos van en scripts que guardan resultados intermedios
   (p. ej. JSON en `figures/`), lanzados en segundo plano.
 
@@ -148,7 +151,14 @@ exactos (lentes + Gauss-Legendre), prefactor G con el factor de escala
 ≤ 1.9 %), resto/J¹ constante (0.35 / 0.32). ΔS ∝ (ρV)^0.75, ΔΛ ∝ V^(−1/4)
 también en FLRW. Las medias MC de FLRW 4D usan muestreo exacto (Beta en η):
 el rechazo genérico agotaba la memoria.
-Total: 169 tests pasando.
+Goal 4a (2026-10-08): compatibilidad con el Λ observado (cálculo casi
+analítico, `causets/everpresent.py`). Suposición: δΛ·ℓ² = ΔS/(ρV) (reproduce
+Model 1 con su acción de Poisson). Acción local EXCLUIDA (δΛ/Λ_obs ~ 10⁶²).
+Acción suavizada: amplitud ∝ (ℓ/ℓ_k)⁵; encaja con ℓ_k ≈ 10⁻²² m (por debajo
+de la cota LHC 10⁻¹⁹ m, en el rango de los experimentos optomecánicos), pero
+es un ajuste y la envolvente tiene w ≈ −½ (Model 1: w ≈ 0). Para comparar con
+datos falta la correlación temporal de ΔS entre conos pasados.
+Total: 183 tests pasando.
 
 Goal 4 no lanzado y por REPLANTEAR según el Goal 3c: no generar Λ(t)
 suponiendo que las fluctuaciones de S_BD tienen el escalado de Poisson;
