@@ -44,6 +44,7 @@ python scripts/smeared_fluctuations.py plot   # figura figures/smeared_fluctuati
 | `causets/geometry.py` | Geometrías para el formalismo de fluctuaciones (diamante y cono pasado de Minkowski, cono pasado de FLRW 2D y 4D, de Sitter): pesos, volúmenes de intervalos y de su intersección |
 | `causets/overlap.py` | Volumen exacto de la intersección de dos intervalos en Minkowski 4D (cuadratura determinista) |
 | `causets/everpresent.py` | Compatibilidad con el Λ observado: volumen del pasado causal en ΛCDM, conversión ΔS → δΛ, amplitud de la acción local y suavizada (Goal 4a) |
+| `causets/stochastic_lambda.py` | Λ(t) estocástico con retroacción sobre la expansión: Model 1 y acción BD, criterio «tipo ΛCDM» (Goal 4b) |
 | `causets/fluctuations.py` | Fluctuaciones (ΔS)² de la acción BD (formalismo de Moradi-Yazdi-Zilhão), local y suavizada |
 | `tests/` | Tests pytest (tolerancias estadísticas explícitas en cada fichero) |
 | `scripts/` | Scripts que generan figuras |
@@ -1113,6 +1114,130 @@ la era de materia) sí era previa.
    covarianza de ΔS entre los conos pasados de dos instantes) y, con ella,
    un Λ(t) estocástico que se pueda comparar con los datos.
 
+## Goal 4b: correlación temporal y Λ(t) estocástico
+
+### 4b-1: correlación de la acción entre conos pasados anidados
+
+Código: `scripts/goal4b_correlations.py` (sprinklings en
+`figures/goal4b_sim_{mink4,flrw4}.json`, análisis en `figures/goal4b_results.json`).
+Los conos pasados de los instantes t₁ < t₂ < … de una misma línea de universo
+están anidados. Como la región es causalmente convexa, cada par de un subcono
+es también par del cono mayor y tiene la misma cardinalidad, así que
+S(t_j) = S(t_i) + incremento. Con un solo sprinkling del cono mayor
+(ρV = 3200) se obtiene S en los subconos de ρV = 200, 500, 1250 y 3200. Acción
+local 4D, Minkowski y FLRW con a = η² (materia), 4000 sprinklings por
+geometría. Al principio se hicieron 1000; se ampliaron porque B2 no era
+concluyente.
+
+**Criterios (fijados antes de calcular):**
+- B1: κ_ij = Cov(S_i, S_j − S_i)/Var(S_i) compatible con 0 a 4σ en todos los
+  pares (incrementos independientes, es decir, paseo aleatorio).
+- B2: |κ_ij| < 0.2 en todos los pares (independencia práctica).
+- B3: Var(S_j) de los subconos igual a la del cono completo de los puntos
+  1c/1d a la misma ρV, con |z| < 4.
+
+| | Minkowski 4D | FLRW 4D (materia) |
+|---|---|---|
+| κ, pares adyacentes 200→500, 500→1250, 1250→3200 | +0.07 ± 0.04, +0.10 ± 0.04, +0.03 ± 0.04 | +0.12 ± 0.04, +0.05 ± 0.03, +0.06 ± 0.03 |
+| B1 (máx. \|κ\|/σ) | sí (2.8σ) | sí (3.3σ) |
+| B2 | **no**: κ(200→1250) = 0.29 ± 0.12 | **no**: κ(200→1250) = 0.23 ± 0.09 |
+| B3 (\|z\|) | sí (1.18, 0.06) | sí (0.99, 1.16) |
+
+**B2 falla tal como se formuló, también con 4000 sprinklings.** Los pares
+que lo incumplen son los no adyacentes que salen de ρV = 200, con errores de
+0.1–0.3: el criterio compara el valor central sin su error, y estaba mal
+planteado. No se cambia a posteriori. Los pares adyacentes, que son los mejor
+medidos, cumplen todos |κ| < 0.2. Su media ponderada (las 6) es
+**κ = 0.069 ± 0.015**: una correlación positiva pequeña pero significativa
+(≈ 4.6σ en conjunto, aunque ningún par individual llega a 4σ). La acción no es
+exactamente un paseo aleatorio. Las correlaciones medidas quedan algo por
+encima de la del paseo aleatorio, √(Var S_i/Var S_j). Escribiendo
+corr = corr_PA^β, se obtiene **β = 0.88–0.97** en los 12 pares (β = 1 es el
+paseo aleatorio). Con la acción suavizada no se ha medido.
+
+![Goal 4b-1](figures/goal4b_correlations.png)
+
+### 4b-2: Λ(t) estocástico con retroacción
+
+Código: `causets/stochastic_lambda.py`, `scripts/goal4b_lambda.py` (resultados
+en `figures/goal4b_lambda.json`), tests en `tests/test_goal4b.py`.
+
+**Modelo.** A lo largo de la línea de universo, Λ(t) = λ V(t)^(−q) s(t). Aquí
+V es el volumen del pasado causal y s es un proceso de Ornstein-Uhlenbeck en
+ln V, con varianza 1 y corr(s₁, s₂) = (V₁/V₂)^c.
+- Model 1 (Das-Nasiri-Yazdi 2023, ecs. 3.13 y 3.15): ΛV es un paseo
+  aleatorio con Var ∝ V, así que q = c = ½ y λ = 8πα.
+- Acción BD (Goal 4a y 4b-1): ΛV ∝ ΔS con Var ∝ V^(3/2), así que q = ¼ y
+  c = ¾β.
+
+La expansión se integra con retroacción, (H/H₁₀₀)² = ω_r/a⁴ + ω_m/a³ + Λ/3,
+con ω_m y ω_r de Planck 2018. V se acumula a partir de los momentos
+∫a⁴η^k dη. Se sigue la convención de DNY (sec. 5.2): Λ = 0 antes de
+z = 10⁴, con S₀ = 0. Si H² < 0, la realización cuenta como colapsada. h y
+Ω_Λ0 salen de cada realización. λ se traduce en ℓ_k con la amplitud del
+Goal 4a (FLRW materia, r = 0.33, ℓ = ℓ_p).
+
+**Criterios (fijados antes de calcular):**
+- C1: con Λ constante se reproduce ΛCDM (h, Ω_Λ, d_L, E(z)) con error relativo < 10⁻³.
+- C2: el proceso OU da corr = (V₁/V₂)^c a 4σ.
+- C3: V(a = 1) coincide con `everpresent.past_cone_volume` con error relativo < 10⁻³.
+- Comparación: misma regla para los dos modelos. Fracción de realizaciones
+  «tipo ΛCDM»: Ω_Λ0 y h en [0.6, 0.8]; forma de μ(z) (restada su media, que
+  absorbe H₀ y la magnitud de las SN) a menos de 0.1 mag de ΛCDM en
+  0.01 < z < 2.3; |E/E_ΛCDM − 1| < 5 % en z = 0.5, 1 y 2. No es un ajuste a
+  datos reales.
+
+**Validación externa (añadida DESPUÉS de ver resultados).** Al principio Λ
+se activaba desde z = 10⁶, y Model 1 colapsaba en el 98.6 % de los casos.
+Con la convención de DNY, las tasas de finalización de Model 1 son
+10 000 / 3258 / 575 de 10 000 (α = 0.005 / 0.01 / 0.012), frente a las
+publicadas 9990 / 3228 / 535 (DNY 2023, sec. 5.1). Esto se convirtió en test
+(a 4σ binomial).
+
+**Resultados** (2000 realizaciones por punto; medianas sobre las no colapsadas):
+
+| Modelo | Amplitud | Tipo ΛCDM | Colapsan | Ω_Λ0 mediana | h mediana |
+|---|---|---|---|---|---|
+| Model 1 | α = 0.003–0.008 | 0 % | 0–20 % | 0.01–0.06 | 0.38–0.39 |
+| Model 1 | α = 0.012 | 0 % | 94 % | 0.12 | 0.40 |
+| Model 1 | α ≥ 0.02 | 0 % | 100 % | — | — |
+| BD, β = 0.7–1 | λ = 0.3 (ℓ_k = 3.2·10⁻²³ m) | 0.05–0.10 % | 5–8 % | 0.12–0.14 | 0.40–0.41 |
+| BD, β = 0.7–1 | λ = 0.6 (ℓ_k = 2.8·10⁻²³ m) | 0 % | 39–48 % | 0.49–0.50 | 0.53–0.54 |
+| BD, β = 0.7–1 | λ = 1 (ℓ_k = 2.5·10⁻²³ m) | 0 % | 63–73 % | 0.72–0.73 | 0.72–0.73 |
+| BD, β = 0.7–1 | λ = 1.5–6 (ℓ_k = 1.8–2.3·10⁻²³ m) | 0 % | 74–97 % | 0.84–0.98 | 0.93–3.1 |
+
+Las medianas sobre las realizaciones que no colapsan están sesgadas hacia
+Λ > 0, porque las de Λ negativo grande son justo las que colapsan.
+
+**Diagnóstico (λ = 1, β = 0.85).** Con la amplitud que da los valores
+típicos de hoy, lo que falla es la forma de la historia de expansión: la
+mediana de max|Δμ| es 0.33 mag, y la de |E/E_ΛCDM − 1| está entre el 13 y
+el 18 %. El «reloj» del proceso es ln V, y V crece mucho a z bajo, así que Λ
+se descorrelaciona entre z = 2 y hoy. Que β esté entre 0.7 y 1 apenas cambia
+nada, así que la imprecisión en κ no afecta a la conclusión.
+
+**Tests:** 9 en `tests/test_goal4b.py` (C1, C3, C2 ×3, Model 1 frente a DNY
+×3, y la conversión λ → ℓ_k frente al Goal 4a). Con errores deliberados
+(momento del volumen 3 → 2.9; tasa del OU × 0.9) fallan C3 y los tres C2. C1
+no detecta el primero, como es de esperar: con Λ constante, V no interviene.
+
+![Goal 4b-2](figures/goal4b_lambda.png)
+
+**Conclusiones:**
+1. **La acción BD local en conos pasados anidados es casi un paseo
+   aleatorio**, con una pequeña memoria positiva (κ ≈ 0.07, β ≈ 0.9). Es la
+   misma estructura que Model 1, pero con un reloj Var ∝ V^(3/2) en vez de V.
+2. **Ninguno de los dos modelos da historias de tipo ΛCDM con una
+   probabilidad apreciable** según este criterio. Model 1 con S₀ = 0 da
+   Ω_Λ0 ≈ 0.1 o colapsa, y DNY necesitan un S₀ > 0. La acción BD suavizada,
+   con ℓ_k ≈ 2.5·10⁻²³ m, da valores típicos de hoy correctos
+   (Ω_Λ0 ≈ h ≈ 0.72), pero colapsa en dos de cada tres casos y su Λ(t) cambia
+   demasiado a z ≲ 2 como para reproducir la forma de μ(z) y H(z).
+3. **Límites:** κ y β se han medido sólo con la acción local y hasta
+   ρV = 3200. Que valgan igual para la suavizada en el régimen físico
+   (ρV ~ 10²⁴²) es una extrapolación. El criterio «tipo ΛCDM» es un sustituto
+   de un ajuste a datos (SN, BAO, CMB), que no se ha hecho.
+
 ## Referencias
 
 - Bombelli, Lee, Meyer & Sorkin (1987), Phys. Rev. Lett. 59, 521 — sprinkling de Poisson.
@@ -1125,6 +1250,7 @@ la era de materia) sí era previa.
 - Benincasa, Dowker & Schmitzer (2011), Class. Quantum Grav. 28, 105018, arXiv:1011.5191 — acción 2D y su media.
 - Das, Nasiri & Yazdi (2023), JCAP 10, 047, arXiv:2304.03819 — Everpresent Λ (I), Model 1.
 - Belenchia, Benincasa, Liberati, Marin, Marino & Ortolan (2016), Phys. Rev. Lett. 116, 161303, arXiv:1512.02083 — cotas a la escala de no-localidad ℓ_k.
+- Uhlenbeck & Ornstein (1930), Phys. Rev. 36, 823 — proceso de Ornstein-Uhlenbeck (Goal 4b-2).
 - Planck Collaboration (2020), Astron. Astrophys. 641, A6, arXiv:1807.06209 — parámetros cosmológicos de fondo.
 - Das, Nasiri & Yazdi (2024), JCAP 10, 076, arXiv:2307.13743 — Everpresent Λ (II), tests cosmológicos.
 - Dowker & Glaser (2013), Class. Quantum Grav. 30, 195016, arXiv:1305.2588 — f_d(n, ε) en dimensión d.

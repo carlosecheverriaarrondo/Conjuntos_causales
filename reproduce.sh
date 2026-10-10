@@ -25,6 +25,8 @@ analysis() {
     python scripts/cone4d_scaling.py fit
     python scripts/flrw4d_scaling.py fit
     python scripts/goal4_compatibility.py
+    python scripts/goal4b_correlations.py fit
+    python scripts/goal4b_lambda.py plot
 }
 
 full() {
@@ -48,6 +50,9 @@ full() {
     python scripts/flrw4d_scaling.py means 2      #                   (~15 min)
     python scripts/flrw4d_scaling.py sim 1        #                   (~1 h)
     python scripts/flrw4d_scaling.py sim 2        #                   (~1 h)
+    python scripts/goal4b_correlations.py sim mink4  # Goal 4b-1     (~1.1 h)
+    python scripts/goal4b_correlations.py sim flrw4  #               (~2.5 h)
+    python scripts/goal4b_lambda.py run           # Goal 4b-2         (~2 min)
 }
 
 case "${1:-fast}" in

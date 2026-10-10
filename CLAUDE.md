@@ -158,7 +158,16 @@ Acción suavizada: amplitud ∝ (ℓ/ℓ_k)⁵; encaja con ℓ_k ≈ 10⁻²² m
 de la cota LHC 10⁻¹⁹ m, en el rango de los experimentos optomecánicos), pero
 es un ajuste y la envolvente tiene w ≈ −½ (Model 1: w ≈ 0). Para comparar con
 datos falta la correlación temporal de ΔS entre conos pasados.
-Total: 183 tests pasando.
+Goal 4b (2026-10-10): (1) conos pasados anidados, acción local 4D, 4000
+sprinklings (Minkowski y FLRW materia): S(t) es casi un paseo aleatorio, con
+memoria positiva pequeña (κ = 0.069 ± 0.015, β = 0.88–0.97); B1 y B3 sí, B2
+NO (criterio mal planteado: valor central sin error; documentado, no
+cambiado). (2) Λ(t) estocástico con retroacción (`causets/stochastic_lambda.py`),
+Model 1 validado frente a las tasas de DNY (añadido a posteriori). Ningún
+modelo da historias tipo ΛCDM (≤ 0.1 %); BD con ℓ_k ≈ 2.5·10⁻²³ m da
+Ω_Λ0 ≈ h ≈ 0.72 típicos, pero colapsa en el 63–73 % y μ(z), H(z) fallan en
+forma. Ver README.
+Total: 192 tests pasando.
 
 Goal 4 no lanzado y por REPLANTEAR según el Goal 3c: no generar Λ(t)
 suponiendo que las fluctuaciones de S_BD tienen el escalado de Poisson;
