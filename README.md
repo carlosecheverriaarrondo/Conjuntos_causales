@@ -45,6 +45,7 @@ python scripts/smeared_fluctuations.py plot   # figura figures/smeared_fluctuati
 | `causets/overlap.py` | Volumen exacto de la intersección de dos intervalos en Minkowski 4D (cuadratura determinista) |
 | `causets/everpresent.py` | Compatibilidad con el Λ observado: volumen del pasado causal en ΛCDM, conversión ΔS → δΛ, amplitud de la acción local y suavizada (Goal 4a) |
 | `causets/stochastic_lambda.py` | Λ(t) estocástico con retroacción sobre la expansión: Model 1 y acción BD, criterio «tipo ΛCDM» (Goal 4b) |
+| `causets/supernovae.py` | Likelihood de Pantheon+SH0ES con χ² comprimido (spline en nodos, forma cuadrática exacta) (Goal 4c) |
 | `causets/fluctuations.py` | Fluctuaciones (ΔS)² de la acción BD (formalismo de Moradi-Yazdi-Zilhão), local y suavizada |
 | `tests/` | Tests pytest (tolerancias estadísticas explícitas en cada fichero) |
 | `scripts/` | Scripts que generan figuras |
@@ -1238,6 +1239,116 @@ no detecta el primero, como es de esperar: con Λ constante, V no interviene.
    (ρV ~ 10²⁴²) es una extrapolación. El criterio «tipo ΛCDM» es un sustituto
    de un ajuste a datos (SN, BAO, CMB), que no se ha hecho.
 
+## Goal 4c: comparación con supernovas reales (Pantheon+SH0ES)
+
+Código: `causets/supernovae.py` (likelihood), `scripts/goal4c_sn_fit.py`
+(resultados en `figures/goal4c_lcdm.json`, `figures/goal4c_seeds_{model1,bd}.json`
+y `figures/goal4c_results.json`), tests en `tests/test_goal4c.py`. Los datos
+públicos no se versionan: se descargan con `scripts/get_pantheon.sh`, que
+comprueba las sumas SHA-256.
+
+**Por qué este goal.** En el Goal 4b, el criterio «tipo ΛCDM» daba 0 % también
+para Model 1. Sin embargo, DNY (2024, sec. 4) encuentran semillas de Model 1
+que ajustan las supernovas tan bien como ΛCDM. El criterio no discriminaba, y
+hacía falta comparar los dos modelos con datos reales y con el método de DNY.
+
+**Método** (el de DNY 2024, sec. 4.1):
+- Cada «semilla» fija la secuencia de números aleatorios del proceso. Se
+  implementa con `evolve(..., noise=...)`, de modo que la historia de una
+  semilla no depende del lote ni de los parámetros de las otras
+  realizaciones; hay un test que lo comprueba.
+- Para cada semilla se busca el mínimo de χ² en (ω_m, amplitud, M_B):
+  - M_B se minimiza analíticamente.
+  - (ω_m, amplitud) se recorren con una rejilla 10 × 10 y dos refinamientos
+    locales 5 × 5. DNY usan MCMC por semilla.
+- Rangos de búsqueda: ω_m ∈ [0.02, 0.8]; para Model 1, α ∈ [0.001, 0.025]
+  (el prior de DNY); para la acción BD, λ ∈ [0.1, 10].
+- Acción BD con β = 0.9 (Goal 4b-1). 10 000 semillas por modelo, las mismas
+  para los dos.
+- Datos: Pantheon+SH0ES con el corte estándar (zHD > 0.01 o calibrador; 1657
+  curvas de luz, 77 de calibradores) y covarianza STAT+SYS.
+- El χ² se comprime de forma exacta: μ(z) se interpola con un spline en
+  ln z sobre 64 nodos, y χ² queda como una forma cuadrática de dimensión 65.
+  Se desarrolla alrededor de un ΛCDM de referencia; desarrollada en cero
+  había errores de redondeo de ~0.1 en χ², que aparecieron en el test V2.
+
+**Criterios (fijados antes de calcular, en el docstring del script) y resultados:**
+
+| Criterio | Resultado |
+|---|---|
+| V1: χ² mínimo de ΛCDM igual al de DNY (1485.3), con \|Δ\| < 2 | **no**: 1452.0 |
+| V2: χ² comprimido igual al directo, \|Δ\| < 0.01 | sí (tests) |
+| V3: Model 1, fracción de semillas «buenas» (χ² < χ²_ΛCDM + 14.7) en [0.001, 0.009] | sí: 0.0025 ± 0.0005 (DNY ≈ 0.003) |
+| V3: Model 1, fracción de semillas «mejores» (χ² < χ²_ΛCDM) igual a la de DNY (16/90 000) a 4σ | sí: 2/10 000, z = +0.16 |
+| Comparación: diferencia en la fracción de buenas, a 4σ | **indistinguibles**: z = +2.7 |
+
+**V1.** Nuestro mejor ajuste de ΛCDM (Ω_m = 0.332, H₀ = 73.5) coincide con el
+publicado para Pantheon+SH0ES (Brout et al. 2022: Ω_m = 0.334 ± 0.018,
+H₀ = 73.6 ± 1.1). La integración de `evolve` reproduce ese χ² con un error de
+0.008. Ninguna variante sencilla (ω_m u Ω_m fijos) da el 1485.3 de DNY, así
+que su configuración exacta no se ha podido reconstruir. Como estaba previsto,
+los umbrales se toman relativos a nuestro χ²_ΛCDM = 1452.0: «mejores» es
+χ² < 1452.0 y «buenas» es χ² < 1466.7.
+
+**Resultados** (10 000 semillas por modelo; parámetros de las semillas buenas,
+mediana y percentiles 16-84 %):
+
+| | Model 1 | Acción BD (β = 0.9) |
+|---|---|---|
+| Semillas buenas | 25 (0.25 %) | 48 (0.48 %) |
+| Semillas mejores que ΛCDM | 2 | 2 |
+| χ² mínimo (ΛCDM: 1452.0) | 1446.8 | 1450.4 |
+| H₀ (km/s/Mpc) | 72.0 (70.1–72.6) | 72.3 (69.8–74.4) |
+| Ω_m0 | 0.58 (0.43–0.71) | 0.49 (0.37–0.59) |
+| Amplitud | α = 0.0071 (0.0057–0.0094) | λ = 0.35 (0.24–0.46) |
+| Escala de no localidad | — | ℓ_k ≈ 3.1·10⁻²³ m (2.9–3.4·10⁻²³ m) |
+
+Las medianas de Ω_m y α de Model 1 coinciden con el promedio bayesiano de DNY
+(Ω_m = 0.58 ± 0.19, α = 0.0085 ± 0.0017). Esta comparación no formaba parte del
+criterio. En torno al 45 % de las semillas de los dos modelos tienen su mejor
+ajuste en el borde inferior de la amplitud (Λ ≈ 0, materia sola). Son siempre
+ajustes malos, con χ² ≳ 2000, así que no afectan a las fracciones de semillas
+buenas.
+
+![Goal 4c](figures/goal4c_sn.png)
+
+**Tests:** 5 en `tests/test_goal4c.py`: tamaño de la muestra, V2 (forma
+cuadrática exacta, M_B en el mínimo, spline frente a ΛCDM exacta) y
+determinismo por semilla. Se saltan si faltan los datos. Comprobación con
+errores deliberados:
+- Un término cruzado ×0.95 hace fallar V2a.
+- z × 1.002 en el spline hace fallar V2b.
+- Un ruido que depende del lote hace fallar el test de determinismo.
+
+Un primer error deliberado (ruido dependiente de ω_m) no lo detectaba, porque
+la realización comparada tenía la misma ω_m en los dos lotes. El test de
+determinismo también estaba mal escrito al principio: usaba una realización
+que colapsaba y comparaba NaN.
+
+**Conclusiones:**
+1. **Con supernovas, las fluctuaciones de la acción BD son tan viables como
+   Model 1.** Producen historias que, de vez en cuando (≈ 0.5 % de las
+   semillas), ajustan Pantheon+SH0ES tan bien como ΛCDM. En la fracción de
+   semillas buenas, la acción BD queda por delante a 2.7σ, sin llegar al
+   umbral de 4σ.
+2. **La escala ℓ_k ≈ 3·10⁻²³ m queda fijada por los datos** y coincide con la
+   del Goal 4a, que salía sólo de la amplitud de Λ hoy. Model 1 tiene α como
+   parámetro libre; la acción BD tiene una escala física de no localidad que
+   los experimentos optomecánicos propuestos podrían medir (Belenchia et al.
+   2016).
+3. **Esto matiza el Goal 4b-2.** Allí no se permitía a cada historia ajustar
+   ω_m y la amplitud, y el criterio exigía parecerse a una cosmología fija.
+   Con el método de DNY, los dos modelos tienen la misma rareza: la mayoría
+   de las historias falla, y unas pocas ajustan muy bien.
+4. **Límites:**
+   - Sólo se han usado supernovas; DNY también usan el CMB con el likelihood
+     completo de Planck, y faltan BAO y CMB.
+   - La búsqueda por rejilla puede infraestimar las fracciones frente a un
+     MCMC, aunque igual para los dos modelos.
+   - β está fijado a 0.9 y se midió con la acción local.
+   - Las semillas buenas tienen Ω_m ≈ 0.5, por encima del valor de lentes
+     débiles y cúmulos (~0.3). DNY encuentran lo mismo con Model 1.
+
 ## Referencias
 
 - Bombelli, Lee, Meyer & Sorkin (1987), Phys. Rev. Lett. 59, 521 — sprinkling de Poisson.
@@ -1250,6 +1361,9 @@ no detecta el primero, como es de esperar: con Λ constante, V no interviene.
 - Benincasa, Dowker & Schmitzer (2011), Class. Quantum Grav. 28, 105018, arXiv:1011.5191 — acción 2D y su media.
 - Das, Nasiri & Yazdi (2023), JCAP 10, 047, arXiv:2304.03819 — Everpresent Λ (I), Model 1.
 - Belenchia, Benincasa, Liberati, Marin, Marino & Ortolan (2016), Phys. Rev. Lett. 116, 161303, arXiv:1512.02083 — cotas a la escala de no-localidad ℓ_k.
+- Scolnic et al. (2022), ApJ 938, 113, arXiv:2112.03863 — muestra Pantheon+ (Goal 4c).
+- Brout et al. (2022), ApJ 938, 110, arXiv:2202.04077 — likelihood y cosmología de Pantheon+ (Goal 4c).
+- Riess et al. (2022), ApJL 934, L7, arXiv:2112.04510 — calibradores Cefeidas de SH0ES (Goal 4c).
 - Uhlenbeck & Ornstein (1930), Phys. Rev. 36, 823 — proceso de Ornstein-Uhlenbeck (Goal 4b-2).
 - Planck Collaboration (2020), Astron. Astrophys. 641, A6, arXiv:1807.06209 — parámetros cosmológicos de fondo.
 - Das, Nasiri & Yazdi (2024), JCAP 10, 076, arXiv:2307.13743 — Everpresent Λ (II), tests cosmológicos.

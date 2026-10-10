@@ -77,10 +77,13 @@ def bd_lambda_to_lk(lam: float, l_over_lp: float = 1.0, r: float = 0.33, g_over_
     return float(l_over_lp * L_PLANCK_M * eps**-0.25)
 
 
-def ou_step(s: np.ndarray, du: float, c: float, rng) -> np.ndarray:
-    """Un paso del proceso OU en u = ln V: corr(s(u), s(u + du)) = e^(-c du)."""
+def ou_step(s: np.ndarray, du: float, c: float, rng, xi: np.ndarray | None = None) -> np.ndarray:
+    """Un paso del proceso OU en u = ln V: corr(s(u), s(u + du)) = e^(-c du).
+    ``xi``: normales estándar ya generadas (si no, se sacan de ``rng``)."""
     rho = np.exp(-c * du)
-    return rho * s + np.sqrt(1 - rho * rho) * rng.standard_normal(s.shape)
+    if xi is None:
+        xi = rng.standard_normal(s.shape)
+    return rho * s + np.sqrt(1 - rho * rho) * xi
 
 
 @dataclass
@@ -97,7 +100,8 @@ class Realizations:
 
 
 def evolve(spec: ProcessSpec, n_real: int, rng, a_start: float = 1e-6, n_steps: int = 4000,
-           z_grid: np.ndarray | None = None, s_fixed: float | None = None, z_on: float = 1e4) -> Realizations:
+           z_grid: np.ndarray | None = None, s_fixed: float | None = None, z_on: float = 1e4,
+           omega_m: float | np.ndarray | None = None, noise: np.ndarray | None = None) -> Realizations:
     """Integra n_real realizaciones a la vez desde a_start hasta a = 1 (pasos
     uniformes en ln a; Λ constante dentro de cada paso, trapecio en eta).
 
@@ -107,11 +111,16 @@ def evolve(spec: ProcessSpec, n_real: int, rng, a_start: float = 1e-6, n_steps: 
     S0 = 0: Var(Λ V) = lam² (V - V0). (Arrancar antes dispara los colapsos
     H² < 0, como documentan DNY.)
     ``s_fixed``: si se da, s(t) = s_fixed desde el principio (determinista; con
-    q = c = 0 es un Λ constante, para validar frente a ΛCDM)."""
+    q = c = 0 es un Λ constante, para validar frente a ΛCDM).
+    ``omega_m``: escalar o (n_real,) (por defecto OMEGA_M); ``spec.lam`` puede
+    ser también (n_real,). ``noise``: (n_steps, n_real) normales estándar; fija
+    la "semilla" de cada realización con independencia de los parámetros
+    (Goal 4c, ajuste por semilla como en DNY 2024)."""
     if z_grid is None:
         z_grid = np.concatenate([np.geomspace(0.01, 2.3, 40)])
     a_grid = np.exp(np.linspace(np.log(a_start), 0.0, n_steps + 1))
     R = n_real
+    om = np.broadcast_to(np.asarray(OMEGA_M if omega_m is None else omega_m, float), (R,))
     eta = np.full(R, a_start / np.sqrt(OMEGA_R))
     M = np.array([np.full(R, OMEGA_R**2 * eta[0] ** (5 + k) / (5 + k)) for k in range(4)])
 
@@ -129,7 +138,7 @@ def evolve(spec: ProcessSpec, n_real: int, rng, a_start: float = 1e-6, n_steps: 
     lam_now = spec.lam * V ** (-spec.q) * s
 
     def H2(a, lam):
-        return OMEGA_R / a**4 + OMEGA_M / a**3 + lam / 3
+        return OMEGA_R / a**4 + om / a**3 + lam / 3
 
     for i in range(n_steps):
         a0, a1 = a_grid[i], a_grid[i + 1]
@@ -150,7 +159,7 @@ def evolve(spec: ProcessSpec, n_real: int, rng, a_start: float = 1e-6, n_steps: 
         eta = eta_new
         V_new = volume(eta, M)
         if s_fixed is None and a1 > a_on:
-            s = ou_step(s, np.log(V_new / V), spec.c, rng)
+            s = ou_step(s, np.log(V_new / V), spec.c, rng, None if noise is None else noise[i])
         V = V_new
         # registrar los a de la rejilla que caen en (a0, a1]
         for jz in np.nonzero((a_z > a0) & (a_z <= a1))[0]:

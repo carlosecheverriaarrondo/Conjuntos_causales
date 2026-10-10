@@ -27,6 +27,7 @@ analysis() {
     python scripts/goal4_compatibility.py
     python scripts/goal4b_correlations.py fit
     python scripts/goal4b_lambda.py plot
+    python scripts/goal4c_sn_fit.py fit
 }
 
 full() {
@@ -53,6 +54,10 @@ full() {
     python scripts/goal4b_correlations.py sim mink4  # Goal 4b-1     (~1.1 h)
     python scripts/goal4b_correlations.py sim flrw4  #               (~2.5 h)
     python scripts/goal4b_lambda.py run           # Goal 4b-2         (~2 min)
+    ./scripts/get_pantheon.sh                     # Goal 4c: datos (~35 MB)
+    python scripts/goal4c_sn_fit.py lcdm          #                   (~5 s)
+    python scripts/goal4c_sn_fit.py seeds model1  #                   (~13 min)
+    python scripts/goal4c_sn_fit.py seeds bd      #                   (~13 min)
 }
 
 case "${1:-fast}" in

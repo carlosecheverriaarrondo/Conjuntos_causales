@@ -167,7 +167,14 @@ Model 1 validado frente a las tasas de DNY (añadido a posteriori). Ningún
 modelo da historias tipo ΛCDM (≤ 0.1 %); BD con ℓ_k ≈ 2.5·10⁻²³ m da
 Ω_Λ0 ≈ h ≈ 0.72 típicos, pero colapsa en el 63–73 % y μ(z), H(z) fallan en
 forma. Ver README.
-Total: 192 tests pasando.
+Goal 4c (2026-10-10): Pantheon+SH0ES (`causets/supernovae.py`), ajuste por
+semilla como DNY 2024 sec. 4 (10 000 semillas por modelo). V1 NO (χ²_ΛCDM =
+1452.0 frente a 1485.3 de DNY; el nuestro coincide con Brout et al. 2022;
+umbrales relativos al nuestro). V3 sí (Model 1: 0.25 % buenas, DNY ≈ 0.3 %).
+BD (β = 0.9) frente a Model 1: 0.48 % frente a 0.25 % de semillas buenas,
+z = 2.7 → indistinguibles; ℓ_k ≈ 3·10⁻²³ m fijado por los datos. Matiza el
+4b-2. Falta: BAO y CMB. Datos en data/ (no versionado; scripts/get_pantheon.sh).
+Total: 197 tests pasando.
 
 Goal 4 no lanzado y por REPLANTEAR según el Goal 3c: no generar Λ(t)
 suponiendo que las fluctuaciones de S_BD tienen el escalado de Poisson;
