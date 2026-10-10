@@ -101,7 +101,8 @@ class Realizations:
 
 def evolve(spec: ProcessSpec, n_real: int, rng, a_start: float = 1e-6, n_steps: int = 4000,
            z_grid: np.ndarray | None = None, s_fixed: float | None = None, z_on: float = 1e4,
-           omega_m: float | np.ndarray | None = None, noise: np.ndarray | None = None) -> Realizations:
+           omega_m: float | np.ndarray | None = None, noise: np.ndarray | None = None,
+           record_path: bool = False, exact_start: bool = False) -> Realizations:
     """Integra n_real realizaciones a la vez desde a_start hasta a = 1 (pasos
     uniformes en ln a; Λ constante dentro de cada paso, trapecio en eta).
 
@@ -115,7 +116,12 @@ def evolve(spec: ProcessSpec, n_real: int, rng, a_start: float = 1e-6, n_steps: 
     ``omega_m``: escalar o (n_real,) (por defecto OMEGA_M); ``spec.lam`` puede
     ser también (n_real,). ``noise``: (n_steps, n_real) normales estándar; fija
     la "semilla" de cada realización con independencia de los parámetros
-    (Goal 4c, ajuste por semilla como en DNY 2024)."""
+    (Goal 4c, ajuste por semilla como en DNY 2024). ``record_path``: guarda
+    eta en todos los a de la rejilla, ``extra["a_grid"]`` y ``extra["eta_path"]``
+    (n_steps + 1, n_real) (horizonte sonoro, Goal 4d). ``exact_start``: eta(a_start)
+    exacto con radiación + materia, eta = (2/omega_m)(sqrt(omega_r + omega_m a) - sqrt(omega_r)),
+    en vez de sólo radiación (sesgo relativo ~1e-4 en r_s con a_start = 1e-5;
+    Goal 4d. Por defecto False: Goals 4b y 4c reproducibles bit a bit)."""
     if z_grid is None:
         z_grid = np.concatenate([np.geomspace(0.01, 2.3, 40)])
     a_grid = np.exp(np.linspace(np.log(a_start), 0.0, n_steps + 1))
@@ -123,6 +129,8 @@ def evolve(spec: ProcessSpec, n_real: int, rng, a_start: float = 1e-6, n_steps: 
     om = np.broadcast_to(np.asarray(OMEGA_M if omega_m is None else omega_m, float), (R,))
     eta = np.full(R, a_start / np.sqrt(OMEGA_R))
     M = np.array([np.full(R, OMEGA_R**2 * eta[0] ** (5 + k) / (5 + k)) for k in range(4)])
+    if exact_start:
+        eta = 2 / om * (np.sqrt(OMEGA_R + om * a_start) - np.sqrt(OMEGA_R))
 
     def volume(eta, M):
         return 4 * np.pi / 3 * (eta**3 * M[0] - 3 * eta**2 * M[1] + 3 * eta * M[2] - M[3])
@@ -131,6 +139,7 @@ def evolve(spec: ProcessSpec, n_real: int, rng, a_start: float = 1e-6, n_steps: 
     a_on = 0.0 if s_fixed is not None else 1 / (1 + z_on)
     V = volume(eta, M)
     collapsed = np.zeros(R, dtype=bool)
+    path = [eta.copy()] if record_path else None
     # eta en los a de la rejilla de z (para distancias) y H en esos puntos
     a_z = 1 / (1 + z_grid)
     eta_at = np.full((R, len(z_grid)), np.nan)
@@ -157,6 +166,8 @@ def evolve(spec: ProcessSpec, n_real: int, rng, a_start: float = 1e-6, n_steps: 
         for k in range(4):
             M[k] = M[k] + 0.5 * deta * (a0**4 * eta**k + a1**4 * eta_new**k)
         eta = eta_new
+        if record_path:
+            path.append(eta.copy())
         V_new = volume(eta, M)
         if s_fixed is None and a1 > a_on:
             s = ou_step(s, np.log(V_new / V), spec.c, rng, None if noise is None else noise[i])
@@ -172,7 +183,7 @@ def evolve(spec: ProcessSpec, n_real: int, rng, a_start: float = 1e-6, n_steps: 
     chi = eta[:, None] - eta_at  # distancia comóvil
     dL = chi * (1 + z_grid[None, :])
     return Realizations(spec, h, lam_today / (3 * h**2), collapsed, z_grid, dL, H_at / h[:, None], lam_today,
-                        dict(V_today=V))
+                        dict(V_today=V, **(dict(a_grid=a_grid, eta_path=np.array(path)) if record_path else {})))
 
 
 def lcdm_reference(z_grid: np.ndarray, omega_lambda: float = 0.685, h: float = 0.674):

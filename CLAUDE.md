@@ -173,8 +173,16 @@ semilla como DNY 2024 sec. 4 (10 000 semillas por modelo). V1 NO (χ²_ΛCDM =
 umbrales relativos al nuestro). V3 sí (Model 1: 0.25 % buenas, DNY ≈ 0.3 %).
 BD (β = 0.9) frente a Model 1: 0.48 % frente a 0.25 % de semillas buenas,
 z = 2.7 → indistinguibles; ℓ_k ≈ 3·10⁻²³ m fijado por los datos. Matiza el
-4b-2. Falta: BAO y CMB. Datos en data/ (no versionado; scripts/get_pantheon.sh).
-Total: 197 tests pasando.
+4b-2. Datos en data/ (no versionado; scripts/get_pantheon.sh).
+Goal 4d (2026-10-10): SN + BAO DESI DR2 + priors de distancia del CMB
+(`causets/cmb_bao.py`). W1 (validación con Planck) falló primero (l_A a
+−1.45σ, sesgo de r_s por el arranque de radiación pura) y pasó tras corregirlo
+(exact_start); W2 sí. 0 de 10 000 semillas buenas en los dos modelos
+(f < 3·10⁻⁴); Δχ² mínimo +364 (Model 1) y +124 (BD). Ninguna buena del 4c
+sobrevive: corrige la conclusión 1 del 4c. El χ²_SN del ΛCDM combinado
+(1486.3) explica probablemente el 1485.3 de DNY. Variante calibrada (a
+posteriori): sin cambios.
+Total: 202 tests pasando.
 
 Goal 4 no lanzado y por REPLANTEAR según el Goal 3c: no generar Λ(t)
 suponiendo que las fluctuaciones de S_BD tienen el escalado de Poisson;

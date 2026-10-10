@@ -123,7 +123,10 @@ def _eval(sn, model, seeds_noise, om, amp):
     return chi2, MB, real.h, real.omega_lambda0
 
 
-def fit_batch(sn, model, seeds):
+def fit_batch(sn, model, seeds, evaluator=None):
+    """``evaluator(model, noise, om, amp) -> (chi2, M_B, h, Omega_L0)``; por defecto, sólo SN (Goal 4c)."""
+    if evaluator is None:
+        evaluator = lambda m, nz, om, amp: _eval(sn, m, nz, om, amp)  # noqa: E731
     B = len(seeds)
     noise = np.stack([np.random.default_rng(SEED0 + s).standard_normal(N_STEPS) for s in seeds], axis=1)
     lom, lamp = np.log(OMEGA_M_GRID), np.log(AMP_GRID[model])
@@ -141,7 +144,7 @@ def fit_batch(sn, model, seeds):
             cand_om, cand_amp = np.broadcast_arrays(cand_om, cand_amp)
         G = cand_om.shape[1] * cand_om.shape[2]
         idx = np.repeat(np.arange(B), G)
-        chi2, MB, h, ol = _eval(sn, model, noise[:, idx], np.exp(cand_om.reshape(-1)), np.exp(cand_amp.reshape(-1)))
+        chi2, MB, h, ol = evaluator(model, noise[:, idx], np.exp(cand_om.reshape(-1)), np.exp(cand_amp.reshape(-1)))
         chi2 = chi2.reshape(B, G)
         j = np.argmin(chi2, axis=1)
         sel = np.arange(B) * G + j

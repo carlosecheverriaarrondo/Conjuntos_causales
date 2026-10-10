@@ -46,6 +46,7 @@ python scripts/smeared_fluctuations.py plot   # figura figures/smeared_fluctuati
 | `causets/everpresent.py` | Compatibilidad con el Λ observado: volumen del pasado causal en ΛCDM, conversión ΔS → δΛ, amplitud de la acción local y suavizada (Goal 4a) |
 | `causets/stochastic_lambda.py` | Λ(t) estocástico con retroacción sobre la expansión: Model 1 y acción BD, criterio «tipo ΛCDM» (Goal 4b) |
 | `causets/supernovae.py` | Likelihood de Pantheon+SH0ES con χ² comprimido (spline en nodos, forma cuadrática exacta) (Goal 4c) |
+| `causets/cmb_bao.py` | Horizonte de sonido sobre cada historia, z* y z_drag, priors de distancia del CMB y BAO de DESI DR2 (Goal 4d) |
 | `causets/fluctuations.py` | Fluctuaciones (ΔS)² de la acción BD (formalismo de Moradi-Yazdi-Zilhão), local y suavizada |
 | `tests/` | Tests pytest (tolerancias estadísticas explícitas en cada fichero) |
 | `scripts/` | Scripts que generan figuras |
@@ -1349,6 +1350,105 @@ que colapsaba y comparaba NaN.
    - Las semillas buenas tienen Ω_m ≈ 0.5, por encima del valor de lentes
      débiles y cúmulos (~0.3). DNY encuentran lo mismo con Model 1.
 
+## Goal 4d: supernovas + BAO + CMB
+
+Código: `causets/cmb_bao.py`, `scripts/goal4d_combined.py` (resultados en
+`figures/goal4d_validation.json`, `figures/goal4d_lcdm{,_cal}.json`,
+`figures/goal4d_seeds_{model1,bd}{,_cal}.json` y `figures/goal4d_results.json`),
+tests en `tests/test_goal4d.py`. Los datos de DESI se descargan con
+`scripts/get_pantheon.sh`, que también comprueba sus sumas SHA-256.
+
+**Por qué este goal.** El Goal 4c sólo usaba supernovas, que miden la *forma*
+de la historia de expansión a z < 2.3 pero no su escala absoluta ni su
+relación con el universo temprano. DNY (2024) añaden el CMB. Aquí se añaden
+el BAO de DESI DR2 y el CMB, este último en forma de priors de distancia.
+
+**Método.** El mismo ajuste por semilla del Goal 4c (las mismas 10 000
+semillas, rejilla y refinamientos), con χ² = SN + BAO + CMB:
+- **BAO:** DESI DR2 (arXiv:2503.14738), D_V/r_d, D_M/r_d y D_H/r_d: 13 medidas
+  en 7 redshifts con su covarianza (versión gaussiana del likelihood de Cobaya).
+- **CMB:** priors de distancia de Planck 2018 (Chen, Huang & Wang 2019, tabla I):
+  R = √ω_m D_M(z*) y l_A = π D_M(z*)/r_s(z*). ω_b se fija a 0.02236 y se
+  usa la gaussiana condicionada de (R, l_A).
+- **Horizonte de sonido:** r_s = ∫ c_s dη, integrado sobre la historia de cada
+  realización, con Λ estocástico desde z = 10⁴. z* y z_drag vienen de los
+  ajustes de Hu & Sugiyama (1996) y Eisenstein & Hu (1998), desplazados por
+  una constante para que den los de Planck 2018 en su mejor ajuste ΛCDM.
+- **Limitación conocida, fijada antes de calcular:** los priors de distancia
+  suponen física temprana de tipo ΛCDM. Valen para la acción BD (Λ/3H² ~
+  4·10⁻⁵ en z = 1100, Goal 4a), pero no para Model 1 (~0.5). Para Model 1 el
+  χ²_CMB es sólo orientativo; la referencia es el análisis completo de DNY
+  con el likelihood de Planck (Δχ² > 150 frente a ΛCDM).
+
+**Criterios (fijados antes de calcular ningún χ² de BAO o CMB, en el
+docstring del script) y resultados:**
+
+| Criterio | Resultado |
+|---|---|
+| W1: mejor ajuste ΛCDM de Planck 2018 → r_* y r_drag a menos del 0.3 %, R y l_A a menos de 1σ | sí, tras corregir un error (abajo): r_* = 144.51 Mpc (+0.08 %), r_drag = 147.17 Mpc (+0.08 %), R a +0.03σ, l_A a −0.92σ |
+| W2: ΛCDM con BAO sola → Ω_m = 0.2975 ± 0.0086 (DESI), a menos de 1σ | sí: 0.2972 (−0.04σ) |
+| Principal: diferencia en la fracción de semillas buenas (χ² < χ²_ΛCDM + 14.7) a 4σ | **0 de 10 000 en los dos modelos**: f < 3·10⁻⁴ (95 %); indistinguibles |
+| Secundario: semillas con Δχ²_CMB < 9 | Model 1: 0.35 %; acción BD: 1.5 % |
+
+**W1 falló al principio** (l_A a −1.45σ). Un test escrito antes de ver W1
+(r_s frente a una integral directa con `quad`) mostró un sesgo de 1.3·10⁻⁴ en
+r_s: `evolve` arrancaba en a = 10⁻⁵ con η de radiación pura, sin la materia.
+Se corrigió con un arranque exacto (`exact_start=True`, sólo en el Goal 4d,
+para que los resultados de 4b y 4c no cambien), y W1 pasó a −0.92σ. Probar
+con el ω_r de Planck (N_eff = 3.046) lo empeoraba (+5.7σ) y no se usó.
+
+**Comprobación de robustez (decidida después de que W1 fallara):** una
+variante «calibrada» multiplica l_A y r_d por los factores que hacen que el
+mejor ajuste de Planck dé exactamente sus valores (1.00027 y 0.99920). Las
+conclusiones no cambian (tabla de abajo).
+
+**ΛCDM combinado:** h = 0.6835, Ω_m = 0.300, χ² = 1504.0 (SN 1486.3, BAO 10.8,
+CMB 6.9); calibrado: χ² = 1503.8. El χ²_SN de este ajuste (1486.3) está a 1.0
+del 1485.3 de DNY, que no se pudo reproducir en el Goal 4c (V1). Hipótesis a
+posteriori: el χ² de referencia de DNY es el de supernovas de un ΛCDM
+ajustado también al CMB, no el de un ajuste sólo a supernovas.
+
+**Resultados** (10 000 semillas por modelo):
+
+| | Model 1 | Acción BD (β = 0.9) |
+|---|---|---|
+| Semillas buenas / mejores que ΛCDM | 0 / 0 | 0 / 0 |
+| Calibrado: buenas / mejores | 0 / 0 | 0 / 0 |
+| Δχ² mínimo frente a ΛCDM (calibrado) | +364 (+366) | +124 (+119) |
+| Mejor semilla: Δχ² SN / BAO / CMB | +318 / +29 / +18 | +37 / +82 / +4.5 |
+| Buenas del Goal 4c (sólo SN) que siguen siendo buenas | 0 de 25 | 0 de 48 |
+
+![Goal 4d](figures/goal4d_combined.png)
+
+**Tests:** 5 en `tests/test_goal4d.py`: r_s sin bariones = η/√3; r_s frente a
+una integral directa (< 10⁻⁴, con `exact_start`); anclaje de z* y z_drag; la
+gaussiana condicionada del CMB; χ²_BAO = 0 en los datos. Se saltan si faltan
+los datos. Error deliberado: c_s con √2.9 en vez de √3 hace fallar los dos
+tests de r_s.
+
+**Conclusiones:**
+1. **Con supernovas + BAO + CMB, ni Model 1 ni la acción BD producen historias
+   que ajusten como ΛCDM** (0 de 10 000; f < 3·10⁻⁴ al 95 %). Un motivo
+   probable: las semillas buenas del Goal 4c tenían Ω_m ≈ 0.5, y BAO y CMB
+   piden Ω_m ≈ 0.30 (no se ha comprobado semilla a semilla).
+2. **Para Model 1 coincide con DNY** (Δχ² > 150 con el likelihood completo de
+   Planck), por un camino independiente: aquí el CMB entra sólo como priors de
+   distancia, y aun así el mínimo es Δχ² = +364.
+3. **La acción BD queda mucho más cerca (+124), pero sigue excluida** en esta
+   forma (proceso de Ornstein-Uhlenbeck con β = 0.9 y la retroacción del Goal
+   4b-2). Su mejor semilla encaja con el CMB, pero no consigue a la vez la forma
+   de D(z) que piden las supernovas y la escala que piden las BAO. Que cumpla
+   el CMB es esperable: en la acción BD, Λ es despreciable en z ~ 1100.
+4. **Esto corrige la conclusión 1 del Goal 4c:** con supernovas solas los dos
+   modelos parecían viables, pero era porque las supernovas no fijan Ω_m.
+5. **Límites:**
+   - La búsqueda por rejilla puede infraestimar las fracciones frente a un
+     MCMC. Con un mínimo de +124, no cambiaría el veredicto.
+   - β = 0.9 y la forma del proceso vienen de la acción local (Goal 4b-1).
+     Otra dinámica (otro β u otro acoplamiento entre ΔS y Λ) no está
+     explorada.
+   - Para Model 1, el χ²_CMB con priors de distancia es sólo orientativo.
+
 ## Referencias
 
 - Bombelli, Lee, Meyer & Sorkin (1987), Phys. Rev. Lett. 59, 521 — sprinkling de Poisson.
@@ -1364,6 +1464,10 @@ que colapsaba y comparaba NaN.
 - Scolnic et al. (2022), ApJ 938, 113, arXiv:2112.03863 — muestra Pantheon+ (Goal 4c).
 - Brout et al. (2022), ApJ 938, 110, arXiv:2202.04077 — likelihood y cosmología de Pantheon+ (Goal 4c).
 - Riess et al. (2022), ApJL 934, L7, arXiv:2112.04510 — calibradores Cefeidas de SH0ES (Goal 4c).
+- DESI Collaboration (2025), arXiv:2503.14738 — BAO de DESI DR2 (Goal 4d).
+- Chen, Huang & Wang (2019), JCAP 02, 028, arXiv:1808.05724 — priors de distancia del CMB de Planck 2018 (Goal 4d).
+- Hu & Sugiyama (1996), ApJ 471, 542 — ajuste de z* (Goal 4d).
+- Eisenstein & Hu (1998), ApJ 496, 605 — ajuste de z_drag (Goal 4d).
 - Uhlenbeck & Ornstein (1930), Phys. Rev. 36, 823 — proceso de Ornstein-Uhlenbeck (Goal 4b-2).
 - Planck Collaboration (2020), Astron. Astrophys. 641, A6, arXiv:1807.06209 — parámetros cosmológicos de fondo.
 - Das, Nasiri & Yazdi (2024), JCAP 10, 076, arXiv:2307.13743 — Everpresent Λ (II), tests cosmológicos.
