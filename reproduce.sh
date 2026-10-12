@@ -31,6 +31,7 @@ analysis() {
     python scripts/goal4d_combined.py fit
     python scripts/goal4e_robustness.py fit
     python scripts/goal5_smeared4d.py plot
+    python scripts/goal5b_decomposition.py plot
 }
 
 full() {
@@ -76,6 +77,9 @@ full() {
     python scripts/goal5_smeared4d.py sim 6400    #                   (~1.2 h)
     python scripts/goal5_smeared4d.py pred        #                   (~20 min)
     python scripts/goal5_smeared4d.py fit
+    python scripts/goal5b_decomposition.py sim 400 800 1600 3200  # Goal 5b (~1.5 h)
+    python scripts/goal5b_decomposition.py sim 6400   #               (~4 h)
+    python scripts/goal5b_decomposition.py fit
 }
 
 case "${1:-fast}" in

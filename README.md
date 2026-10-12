@@ -1582,12 +1582,86 @@ primero y el tercero (este último por ~15σ).
    - No se sabe si es preasintótico (aquí ερV ≤ 640) o real.
    - Es coherente con el Goal 3d en 2D: el J⁶ conexo crece y domina con
      suavizado fuerte.
+   - **Corregido por el Goal 5b:** el crecimiento es un efecto de la
+     proyección. El resto sin proyectar no crece; ver abajo.
 4. **Consecuencias para el Goal 4a:**
    - Se usó r = 0.33. Con ε pequeño, r ≈ 2.5–4 en este rango, pero
      ℓ_k ∝ (1 + r)^0.1 sólo sube ~15 %.
    - Lo importante: el escalado ΔS ∝ (ρV)^0.75 con ε ~ 10⁻⁴⁹ NO queda
      garantizado por esta simulación. Siguiente paso: la forma del J⁶ conexo
      (cálculo semianalítico).
+
+## Goal 5b: descomposición del resto en los términos de MYZ
+
+Pregunta: ¿qué término de MYZ hace crecer resto⊥/J¹ con suavizado fuerte
+(Goal 5)?
+
+Código: `scripts/goal5b_decomposition.py`; test en `tests/test_goal5b.py`;
+resultados en `figures/goal5b_results.json`; estadísticos por sprinkling en
+`data/goal5b/` (no versionado).
+
+**Método:**
+- En cada sprinkling se construye la matriz f(y, x) (0 si y ⊀ x), con sus sumas
+  por filas R_y y por columnas C_x.
+- Estimadores insesgados de cada término (Moradi, Yazdi & Zilhão,
+  arXiv:2407.03395, ecs. 5.47–5.60):
+  - Σf² → J¹ (mismo par).
+  - ΣR² − Σf² → J² (vértice inferior común).
+  - ΣC² − Σf² → J³ (vértice superior común).
+  - Σ C_z R_z → J⁴ (cadenas; entra dos veces).
+  - (F − ⟨F⟩)² menos todo lo anterior → J⁶ conexo.
+- Mismas densidades que el Goal 5 (ρV = 400–6400) con semillas nuevas, y
+  ε = 0.5, 0.2 y 0.1.
+- El integrador genérico de MYZ (`FluctuationKernel`) no sirve aquí: a
+  ρV = 6400 su error en J⁶c era unas 10 veces la señal, incluso con 4·10⁵
+  muestras.
+
+**Criterios (prerregistrados, 4σ) y resultados:**
+
+| Criterio | Resultado | ¿Pasa? |
+|---|---|---|
+| G0a: J¹ estimado = exacto (15 casos) | \|z\| máx. = 0.86 | sí |
+| G0b: J⁴ (ε = 0.1, ρV = 400) frente al integrador MYZ (19.4 ± 2.1) | 17.86 ± 0.06 (z = −0.7) | sí |
+| G1: pendiente de resto⊥/J¹ (ε = 0.1) frente al Goal 5 (0.55 ± 0.08) | 0.47 ± 0.08 (z = −0.7) | sí |
+
+**G2 (descriptivo): pendiente de término/J¹ frente a ln ρV**
+
+| ε | J² | J³ | 2J⁴ | J⁶c | resto | resto⊥ |
+|---|---|---|---|---|---|---|
+| 0.5 | +0.010 | +0.012 | −0.017 | +0.06 ± 0.05 | +0.07 ± 0.05 | +0.08 ± 0.05 |
+| 0.2 | −0.073 | −0.069 | −0.179 | +0.53 ± 0.08 | +0.17 ± 0.08 | +0.35 ± 0.07 |
+| 0.1 | −0.472 | −0.463 | −0.519 | +1.30 ± 0.11 | −0.29 ± 0.11 | +0.47 ± 0.08 |
+
+(Los errores de J², J³ y 2J⁴ son ≤ 0.004.)
+
+![Goal 5b](figures/goal5b_decomposition.png)
+
+**Tests:** 1 en `tests/test_goal5b.py`: los estadísticos de filas y columnas
+coinciden exactamente con un recuento explícito de pares de pares. Error
+deliberado: calcular J² con las sumas por columnas lo hace fallar.
+
+**Conclusiones (interpretación a posteriori):**
+1. **No hay un término que crezca sin control.**
+   - Con ε = 0.1, los términos con un vértice compartido (J², J³, J⁴) bajan
+     respecto a J¹ y el J⁶ conexo sube (de −3.7 a −0.1).
+   - Se compensan casi exactamente: resto/J¹ (sin proyectar) se queda en
+     ≈ 4.5 con ε = 0.1 y ≈ 3.0 con ε = 0.2, con pendientes de −0.29 ± 0.11 y
+     +0.17 ± 0.08 (menos de 3σ).
+2. **El crecimiento del Goal 5 venía de la proyección.**
+   - resto⊥ = resto − ρV g², y ρV g²/J¹ decae como (ρV)^−½ (de 2.75 a 0.55
+     con ε = 0.1).
+   - Restar algo que decae a una cantidad casi constante hace que resto⊥/J¹
+     suba hacia ella. Asintóticamente resto⊥ → resto: debería saturar.
+   - El F2 del Goal 5 sigue siendo NO tal como se prerregistró; lo que cambia
+     es su interpretación.
+3. **Consecuencia:** en el rango medido, Var(S)/J¹ es compatible con una
+   constante también con suavizado fuerte, lo que apunta a p → 0.75.
+4. **Límites:**
+   - Los términos individuales siguen moviéndose (J⁶c todavía sube) y la
+     pendiente del total con ε = 0.1 no es exactamente nula.
+   - No está demostrado que el total sea constante para ε → 0 (el
+     ε ~ 10⁻⁴⁹ del Goal 4a); sólo que no hay indicio de crecimiento con
+     ερV ≤ 640.
 
 ## Referencias
 

@@ -205,7 +205,15 @@ lineal en N) sí con ε = 0.5 (≈ 1.3), NO con ε = 0.2 (4.1σ) ni 0.1 (6.7σ):
 crece ∝ ln ρV aprox. (2.4 → 3.9 con ε = 0.1). ¿Preasintótico (ερV ≤ 640) o
 real? Probablemente el J⁶ conexo. El exponente 0.75 con ε ~ 10⁻⁴⁹ (Goal 4a)
 NO queda garantizado. Siguiente: forma del J⁶ conexo, semianalítico.
-Total: 208 tests pasando.
+Goal 5b (2026-10-12): descomposición de Var(F) en J¹, J², J³, J⁴, J⁶c con
+estimadores por sprinkling (sumas por filas y columnas de f). El integrador
+MYZ genérico no sirve (error ~10× la señal). G0 y G1 sí. Con ε = 0.1, J², J³
+y J⁴ bajan respecto a J¹ y J⁶c sube (−3.7 → −0.1); se compensan: resto/J¹ sin
+proyectar ≈ 4.5 (ε = 0.1) y ≈ 3.0 (ε = 0.2), pendientes < 3σ. El
+crecimiento del Goal 5 venía de restar ρVg² (decae como (ρV)^−½), no de un
+término que crezca (a posteriori). Apunta a p → 0.75 también con suavizado
+fuerte; no demostrado para ε → 0.
+Total: 209 tests pasando.
 
 Goal 4 no lanzado y por REPLANTEAR según el Goal 3c: no generar Λ(t)
 suponiendo que las fluctuaciones de S_BD tienen el escalado de Poisson;
