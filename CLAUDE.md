@@ -182,7 +182,13 @@ Goal 4d (2026-10-10): SN + BAO DESI DR2 + priors de distancia del CMB
 sobrevive: corrige la conclusión 1 del 4c. El χ²_SN del ΛCDM combinado
 (1486.3) explica probablemente el 1485.3 de DNY. Variante calibrada (a
 posteriori): sin cambios.
-Total: 202 tests pasando.
+Goal 4e (2026-10-12): robustez de la exclusión de BD (mismo χ² que el 4d).
+E1: β = 0.5, 0.88, 0.97, 1.0 con 10 000 semillas: 0 buenas en todas
+(Δχ² mín. +45, +116, +135, +154) → robusta en β. E2: mapa (q, c) de la
+familia OU, 1000 semillas por celda: ninguna celda con semillas buenas; la
+mejor es q = 1/8, c = 0.25 (+17); los datos sólo toleran Λ casi constante.
+Abierto: dinámicas fuera de la familia OU.
+Total: 205 tests pasando.
 
 Goal 4 no lanzado y por REPLANTEAR según el Goal 3c: no generar Λ(t)
 suponiendo que las fluctuaciones de S_BD tienen el escalado de Poisson;

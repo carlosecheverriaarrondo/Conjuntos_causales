@@ -1449,6 +1449,80 @@ tests de r_s.
      explorada.
    - Para Model 1, el χ²_CMB con priors de distancia es sólo orientativo.
 
+## Goal 4e: ¿es robusta la exclusión de la acción BD?
+
+Código: `scripts/goal4e_robustness.py` (resultados en
+`figures/goal4e_q*_c*_n*.json` y `figures/goal4e_results.json`), tests en
+`tests/test_goal4e.py`.
+
+**Por qué este goal.** El Goal 4d excluye la acción BD para una sola
+dinámica: Λ = λ V^(−q) s, con s un proceso de Ornstein-Uhlenbeck en ln V de
+tasa c. Ahí q = 1/4 (ΔS ∝ V^(3/4) y δΛ ∝ ΔS/V) y c = 3β/4 con β = 0.9. Aquí se
+varían esas elecciones con el mismo ajuste por semilla y el mismo χ² (SN + BAO
++ CMB, análisis principal sin calibrar del 4d).
+
+**Método.** La amplitud se escala como λ V_ref^(q − 1/4), con V_ref = 0.5976
+(volumen del pasado causal hoy en el ΛCDM de Planck, unidades H_100), para que
+Λ hoy cubra el mismo rango para todo q. Con q = 1/4 la rejilla es idéntica a
+la del 4d.
+
+**Criterios (fijados antes de calcular, en el docstring del script) y resultados:**
+
+| Criterio | Resultado |
+|---|---|
+| E0: la variante (q = 1/4, c = 0.675) reproduce el 4d semilla a semilla | sí (test) |
+| E1: acción BD con β ∈ {0.5, 0.88, 0.97, 1.0}, 10 000 semillas; robusta si ninguna tiene semillas buenas | **robusta**: 0 buenas en las cuatro |
+| E2: mapa (q, c), 1000 semillas por celda; repetir con 10 000 las celdas con semillas buenas | ninguna celda con semillas buenas |
+| Bordes: repetir si la mejor semilla cae en un borde de la rejilla | ninguna |
+
+**E1** (q = 1/4; 0.88–0.97 es el rango medido en el Goal 4b-1, 1.0 es un
+paseo aleatorio y 0.5 una prueba de estrés):
+
+| β | c | Semillas buenas | Δχ² mínimo | Mejor semilla: ΔSN / ΔBAO / ΔCMB |
+|---|---|---|---|---|
+| 0.5 | 0.375 | 0 | +45 | +40 / +4 / +1 |
+| 0.88 | 0.66 | 0 | +116 | +47 / +69 / +0.5 |
+| 0.9 (Goal 4d) | 0.675 | 0 | +124 | +37 / +82 / +4.5 |
+| 0.97 | 0.7275 | 0 | +135 | +50 / +79 / +6 |
+| 1.0 | 0.75 | 0 | +154 | +56 / +79 / +20 |
+
+**E2** (Δχ² mínimo frente a ΛCDM; 1000 semillas por celda, así que los
+valores son algo más altos que con 10 000):
+
+| | q = 0 | 1/8 | 1/4 | 3/8 | 1/2 |
+|---|---|---|---|---|---|
+| c = 0.25 | 50 | 17 | 85 | 140 | 1109 |
+| c = 0.5 | 111 | 80 | 118 | 214 | 1035 |
+| c = 0.75 | 124 | 136 | 182 | 283 | 1249 |
+| c = 1 | 123 | 133 | 228 | 251 | 1350 |
+
+![Goal 4e](figures/goal4e_robustness.png)
+
+**Tests:** 3 en `tests/test_goal4e.py`: escalado de la rejilla de amplitudes,
+V_ref frente al ΛCDM de Planck y E0 (4 semillas del 4d, |Δχ²| < 10⁻⁶).
+Errores deliberados:
+- Intercambiar q y c en la dinámica hace fallar E0.
+- V_ref = 0.6 hace fallar el test de V_ref.
+
+**Conclusiones:**
+1. **La exclusión de la acción BD no depende de β.** En el rango medido, el
+   Δχ² mínimo está entre +116 y +135. Más memoria ajusta mejor, pero ni con
+   β = 0.5 llega al umbral (+45).
+2. **Los datos sólo toleran un Λ que fluctúe poco:** mucha memoria (c pequeño)
+   y poca dependencia del volumen (q pequeño), es decir, acercarse a una
+   constante cosmológica (c → 0). La mejor celda (q = 1/8, c = 0.25) se queda
+   en +17. La acción BD (q = 1/4, c ≈ 0.66–0.73) está lejos de esa zona.
+3. **q = 1/2 (el exponente de Model 1) es lo peor del mapa** (Δχ² > 1000),
+   coherente con el 4d y con DNY.
+4. **Límites:**
+   - Sólo se ha explorado la familia de Ornstein-Uhlenbeck en ln V con la
+     retroacción del Goal 4b-2. Otras formas (no gaussianas, o un
+     acoplamiento distinto de δΛ ∝ ΔS/V) no.
+   - El mapa usa 1000 semillas por celda: no descarta fracciones de semillas
+     buenas por debajo de ~3·10⁻³.
+   - Para q = 1/2 los priors de distancia del CMB no son fiables (Λ no es
+     despreciable en z ~ 1100; ver el Goal 4d).
+
 ## Referencias
 
 - Bombelli, Lee, Meyer & Sorkin (1987), Phys. Rev. Lett. 59, 521 — sprinkling de Poisson.

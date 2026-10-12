@@ -29,6 +29,7 @@ analysis() {
     python scripts/goal4b_lambda.py plot
     python scripts/goal4c_sn_fit.py fit
     python scripts/goal4d_combined.py fit
+    python scripts/goal4e_robustness.py fit
 }
 
 full() {
@@ -66,6 +67,10 @@ full() {
     python scripts/goal4d_combined.py seeds bd            #           (~15 min)
     python scripts/goal4d_combined.py seeds model1 --cal  #           (~15 min)
     python scripts/goal4d_combined.py seeds bd --cal      #           (~15 min)
+    for b in 0.5 0.88 0.97 1.0; do                # Goal 4e           (~20 min cada una)
+        python scripts/goal4e_robustness.py beta $b
+    done
+    python scripts/goal4e_robustness.py map 0 1   #                   (~35 min)
 }
 
 case "${1:-fast}" in
