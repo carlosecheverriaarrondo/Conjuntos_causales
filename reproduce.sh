@@ -30,6 +30,7 @@ analysis() {
     python scripts/goal4c_sn_fit.py fit
     python scripts/goal4d_combined.py fit
     python scripts/goal4e_robustness.py fit
+    python scripts/goal5_smeared4d.py plot
 }
 
 full() {
@@ -71,6 +72,10 @@ full() {
         python scripts/goal4e_robustness.py beta $b
     done
     python scripts/goal4e_robustness.py map 0 1   #                   (~35 min)
+    python scripts/goal5_smeared4d.py sim 400 800 1600 3200   # Goal 5 (~30 min)
+    python scripts/goal5_smeared4d.py sim 6400    #                   (~1.2 h)
+    python scripts/goal5_smeared4d.py pred        #                   (~20 min)
+    python scripts/goal5_smeared4d.py fit
 }
 
 case "${1:-fast}" in

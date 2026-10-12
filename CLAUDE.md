@@ -188,7 +188,24 @@ E1: β = 0.5, 0.88, 0.97, 1.0 con 10 000 semillas: 0 buenas en todas
 familia OU, 1000 semillas por celda: ninguna celda con semillas buenas; la
 mejor es q = 1/8, c = 0.25 (+17); los datos sólo toleran Λ casi constante.
 Abierto: dinámicas fuera de la familia OU.
-Total: 205 tests pasando.
+Búsqueda bibliográfica (2026-10-12, INSPIRE y arXiv): MYZ sigue con 2 citas
+(las mismas); las 18 citas a DNY (I y II) son cosmología genérica, ninguna
+prueba Everpresent Λ con DESI DR2 ni deriva Λ de la acción BD. Nadie evalúa la
+varianza de la acción BD. Relacionado y a citar: Boguñá & Krioukov,
+arXiv:2610.03247 (oct. 2026): sesgo por el rango de rapidez NO compacto en la
+estadística de links (mismo origen geométrico que nuestro J¹ ∝ rango de
+boosts; no tratan la acción ni Λ). Barrow, gr-qc/0612128: la isotropía del CMB
+restringe las fluctuaciones ESPACIALES de Λ (nuestros modelos, como los de
+DNY, usan Λ homogéneo: límite a declarar). Zwane, Afshordi & Sorkin,
+arXiv:1703.06265: tests cosmológicos anteriores de Everpresent Λ.
+Goal 5 (2026-10-12): acción SUAVIZADA en Minkowski 4D, ρV = 400–6400, ε = 1,
+0.5, 0.2, 0.1 (mismos sprinklings, histogramas en data/goal5). J¹_ε exacto y
+Cov(N, F) por Mecke. F0 y F1 sí. F2 (resto⊥/J¹ constante, resto⊥ sin la parte
+lineal en N) sí con ε = 0.5 (≈ 1.3), NO con ε = 0.2 (4.1σ) ni 0.1 (6.7σ):
+crece ∝ ln ρV aprox. (2.4 → 3.9 con ε = 0.1). ¿Preasintótico (ερV ≤ 640) o
+real? Probablemente el J⁶ conexo. El exponente 0.75 con ε ~ 10⁻⁴⁹ (Goal 4a)
+NO queda garantizado. Siguiente: forma del J⁶ conexo, semianalítico.
+Total: 208 tests pasando.
 
 Goal 4 no lanzado y por REPLANTEAR según el Goal 3c: no generar Λ(t)
 suponiendo que las fluctuaciones de S_BD tienen el escalado de Poisson;

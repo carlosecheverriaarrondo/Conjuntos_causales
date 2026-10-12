@@ -1523,6 +1523,72 @@ Errores deliberados:
    - Para q = 1/2 los priors de distancia del CMB no son fiables (Λ no es
      despreciable en z ~ 1100; ver el Goal 4d).
 
+## Goal 5: acción suavizada en Minkowski 4D
+
+Pregunta: ¿se mantiene con la acción SUAVIZADA (la que usa el Goal 4a) el
+exponente asintótico p = 0.75 del Paso 2, medido con la acción local?
+
+Código: `scripts/goal5_smeared4d.py`; momentos exactos en
+`causets/fluctuations.py` (`smeared_pair_moment`, `smeared_pair_mecke_slope`);
+tests en `tests/test_goal5.py`. Resultados en `figures/goal5_pred.json` y
+`figures/goal5_results.json`; histogramas en `data/goal5/` (no versionado).
+
+**Método:**
+- S_ε = a_N N + F, con F = Σ_pares f_ε(n).
+- J¹_ε = E[Σ_pares f_ε(n)²] exacto (integral doble del Paso 2 con
+  H(z) = E_{n~Poisson(z)}[f_ε(n)²]).
+- Cov(N, F) = ρV·g, con g = dE[F]/d(ρV). Sale de la ecuación de Mecke
+  (Last & Penrose 2017, teor. 4.1). Con ε = 1 reproduce el cruzado exacto del
+  Paso 2.
+- resto = Var(F) − J¹ (como en el Paso 2). La parte lineal en N, ρV·g², es de
+  tipo Poisson y con ε pequeño domina a densidades bajas (ρVg²/J¹ = 2.75 con
+  ε = 0.1 y ρV = 400). Por eso el criterio usa el resto PROYECTADO:
+  resto⊥ = Var(F − gN) − J¹.
+- Diamante 4D con ρV = 400, 800, 1600, 3200 y 6400 (2000, 2000, 1000, 1000 y
+  500 sprinklings). Se guarda el histograma completo de cardinalidades de
+  intervalo, así los cuatro ε (1, 0.5, 0.2, 0.1) salen de los mismos
+  sprinklings.
+
+**Criterios (prerregistrados, 4σ) y resultados:**
+
+| Criterio | Resultado | ¿Pasa? |
+|---|---|---|
+| F0: media de F y Cov(N, F) exactas (40 comparaciones) | \|z\| máx. = 2.35 | sí |
+| F1: ε = 1 reproduce el Paso 2 (0.317 ± 0.014) | resto/J¹ = 0.345 ± 0.025 (z = 1.0) | sí |
+| F2: pendiente de resto⊥/J¹ frente a ln ρV, ε = 0.5 | 0.04 ± 0.05 (0.9σ) | sí |
+| F2, ε = 0.2 | 0.31 ± 0.07 (4.1σ) | **NO** |
+| F2, ε = 0.1 | 0.55 ± 0.08 (6.7σ) | **NO** |
+
+F3 (descriptivo): media de resto⊥/J¹ = 0.34 (ε = 1), 1.32 (0.5), 2.46 (0.2),
+2.80 (0.1).
+
+![Goal 5](figures/goal5_smeared4d.png)
+
+**Tests:** 3 en `tests/test_goal5.py`:
+- Límite ε = 1 frente a las fórmulas del Paso 2.
+- Histograma frente a las abundancias adelgazadas.
+- Mecke por Monte Carlo (ε = 0.5, ρV = 50, 3000 sprinklings, |z| < 4).
+
+Error deliberado: quitar el factor 2 de la derivada central hace fallar el
+primero y el tercero (este último por ~15σ).
+
+**Conclusiones:**
+1. **El cálculo exacto es correcto** (F0, F1).
+2. **Con suavizado moderado (ε = 0.5) se mantiene el escalado:** las
+   correlaciones son una fracción constante de J¹ (≈ 1.3) y p → 0.75.
+3. **Con suavizado fuerte (ε ≤ 0.2) NO:** resto⊥/J¹ crece con ρV. Con
+   ε = 0.1 pasa de 2.4 a 3.9 entre ρV = 400 y 6400, de forma compatible con
+   un crecimiento ∝ ln ρV (χ² = 0.07 con 3 grados de libertad).
+   - No se sabe si es preasintótico (aquí ερV ≤ 640) o real.
+   - Es coherente con el Goal 3d en 2D: el J⁶ conexo crece y domina con
+     suavizado fuerte.
+4. **Consecuencias para el Goal 4a:**
+   - Se usó r = 0.33. Con ε pequeño, r ≈ 2.5–4 en este rango, pero
+     ℓ_k ∝ (1 + r)^0.1 sólo sube ~15 %.
+   - Lo importante: el escalado ΔS ∝ (ρV)^0.75 con ε ~ 10⁻⁴⁹ NO queda
+     garantizado por esta simulación. Siguiente paso: la forma del J⁶ conexo
+     (cálculo semianalítico).
+
 ## Referencias
 
 - Bombelli, Lee, Meyer & Sorkin (1987), Phys. Rev. Lett. 59, 521 — sprinkling de Poisson.
@@ -1547,3 +1613,4 @@ Errores deliberados:
 - Das, Nasiri & Yazdi (2024), JCAP 10, 076, arXiv:2307.13743 — Everpresent Λ (II), tests cosmológicos.
 - Dowker & Glaser (2013), Class. Quantum Grav. 30, 195016, arXiv:1305.2588 — f_d(n, ε) en dimensión d.
 - Moradi, Yazdi & Zilhão, arXiv:2407.03395 — kernels de fluctuación (Goal 3).
+- Last & Penrose (2017), "Lectures on the Poisson Process", Cambridge UP, teor. 4.1 — ecuación de Mecke (Goal 5).

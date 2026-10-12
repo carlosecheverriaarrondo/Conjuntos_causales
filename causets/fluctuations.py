@@ -835,3 +835,38 @@ def same_pair_log_coefficient(eps: float = 1.0, n_max: int = 20_000) -> float:
     Para h = f_eps² sale b = sum_n f_eps(n)². El término cruzado con N lleva
     sum_n f_eps(n) = 0 (porque sum_k C_k = 0), y no tiene logaritmo."""
     return float(np.sum(pair_weight(2, np.arange(n_max), eps) ** 2))
+
+
+def smeared_pair_moment(dim: int, lam: float, eps: float = 1.0, power: int = 1) -> float:
+    """E[sum_{pares y ≺ x} f_eps(n(y,x))^power] exacto en un diamante plano
+    con rho V = lam (``continuum._diamond_pair_integral`` con
+    H(z) = E_{n~Poisson(z)}[f_eps(n)^power]). Con power = 2 es el término
+    "mismo par" J¹ de MYZ para la acción suavizada; con power = 1, la media de
+    la parte de pares de S_eps. Sólo d = 4 o 2 (núcleo de ``continuum``)."""
+    from scipy.stats import poisson
+
+    from .continuum import _diamond_pair_integral
+
+    n_max = int(80 / eps) + 200
+    n = np.arange(n_max)
+    g = pair_weight(dim, n, eps) ** power
+
+    def H(z):
+        lo = max(0, int(z - 12 * np.sqrt(z + 1) - 10))
+        hi = min(n_max, int(z + 12 * np.sqrt(z + 1) + 20))
+        return float(poisson.pmf(n[lo:hi], z) @ g[lo:hi]) if lo < n_max else 0.0
+
+    return _diamond_pair_integral(H, dim, lam, decay=eps)
+
+
+def smeared_pair_mecke_slope(dim: int, lam: float, eps: float = 1.0, h: float = 0.01) -> float:
+    """g = d E[sum_pares f_eps] / d(rho V). Con la ecuación de Mecke (Last &
+    Penrose, "Lectures on the Poisson Process", Cambridge UP 2017, teor. 4.1),
+    E[N F] = rho ∫ E[F(eta + δ_x)] dx, y la derivada respecto a la intensidad,
+    rho dE[F]/drho = rho ∫ E[F(eta + δ_x) - F(eta)] dx, sale
+    Cov(N, F) = rho dE[F]/drho = lam * g. Con eps = 1 reproduce el cruzado
+    exacto (k+2)L_k - (k+1)L_{k+1} del Paso 2 (test). Diferencia central
+    relativa de paso h."""
+    up = smeared_pair_moment(dim, lam * (1 + h), eps)
+    dn = smeared_pair_moment(dim, lam * (1 - h), eps)
+    return (up - dn) / (2 * h * lam)
