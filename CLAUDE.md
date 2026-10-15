@@ -214,6 +214,10 @@ crecimiento del Goal 5 venía de restar ρVg² (decae como (ρV)^−½), no de u
 término que crezca (a posteriori). Apunta a p → 0.75 también con suavizado
 fuerte; no demostrado para ε → 0.
 Total: 209 tests pasando.
+Documentación (2026-10-15): el cuaderno detallado en español pasó a
+README.es.md (los "ver README" de arriba se refieren a él); README.md es el
+resumen en inglés para los lectores del paper. Licencia MIT; CITATION.cff y
+.zenodo.json para archivar en Zenodo. Paper (inglés, IOP/CQG) en paper/.
 
 Goal 4 no lanzado y por REPLANTEAR según el Goal 3c: no generar Λ(t)
 suponiendo que las fluctuaciones de S_BD tienen el escalado de Poisson;

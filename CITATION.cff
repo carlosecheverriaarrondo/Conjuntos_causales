@@ -1,0 +1,16 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "Conjuntos causales: fluctuations of the Benincasa-Dowker action and Everpresent Lambda"
+authors:
+  - family-names: "Echeverría-Arrondo"
+    given-names: "Carlos"
+    email: "cecharr@idf.upv.es"
+    affiliation: "Instituto de Diseño para la Fabricación y Producción Automatizada, MALTA Consolider Team, Universitat Politècnica de València"
+license: MIT
+repository-code: "https://github.com/carlosecheverriaarrondo/Conjuntos_causales"
+keywords:
+  - causal sets
+  - Benincasa-Dowker action
+  - Everpresent Lambda
+  - cosmological constant
+  - Poisson sprinkling

@@ -1,0 +1,13 @@
+{
+  "title": "Conjuntos causales: fluctuations of the Benincasa-Dowker action and Everpresent Lambda",
+  "upload_type": "software",
+  "description": "Code, saved results and test suite for the paper 'Non-Poissonian fluctuations of the Benincasa-Dowker action and the fate of Everpresent Lambda'. Poisson sprinkling of causal sets, exact finite-density means, the Moradi-Yazdi-Zilhão variance formalism for the local and smeared Benincasa-Dowker action, and fits of stochastic Lambda(t) histories to Pantheon+SH0ES, DESI DR2 BAO and Planck distance priors.",
+  "creators": [
+    {
+      "name": "Echeverría-Arrondo, Carlos",
+      "affiliation": "Instituto de Diseño para la Fabricación y Producción Automatizada, MALTA Consolider Team, Universitat Politècnica de València"
+    }
+  ],
+  "license": "MIT",
+  "keywords": ["causal sets", "Benincasa-Dowker action", "Everpresent Lambda", "cosmological constant", "Poisson sprinkling"]
+}
