@@ -55,14 +55,16 @@ power law in their ratio to $|\delta|\lesssim0.1$. Extrapolating, the
 asymptotic exponent is $\Delta S\propto(\rhoV)^{3/4}$, so that
 $\delta\Lambda\propto V^{-1/4}$, rather than the Poisson value; the geometry
 only fixes the amplitude, through a boost-range integral that we compute. For
-the smeared action the same holds within a smaller range, and the physically
-relevant limit of strong smearing remains an extrapolation. Reading the
+the smeared action the correlations do not grow faster than the leading term
+within a smaller range, and the physically relevant limit of strong smearing
+remains an extrapolation. Reading the
 action fluctuation as a fluctuation of the cosmological term, we build
 zero-mean stochastic $\Lambda(t)$ histories with this scaling, the measured
 temporal correlation and a free amplitude, and confront them with
 Pantheon+SH0ES supernovae, DESI DR2 baryon acoustic oscillations and Planck
 distance priors. None of $10^4$ histories fits the data as well as
-$\Lambda$CDM ($\Delta\chi^2_{\rm min}=+124$), and the exclusion is robust
+$\Lambda$CDM ($\Delta\chi^2_{\rm min}=+124$ for the BD scaling with all
+three probes; $+26$ already without the CMB), and the exclusion is robust
 against the memory of the process and across a family of Ornstein--Uhlenbeck
 dynamics.
 \end{abstract}
@@ -162,7 +164,7 @@ d=2:\quad (a_N;a_0,a_1,a_2)=(1;-2,4,-2),\qquad
 d=4:\quad (a_N;a_0,\dots,a_3)=\frac{4}{\sqrt6}(1;-1,9,-16,8),
 \label{eq:coeffs}
 \end{equation}
-In four dimensions these are the coefficients of~\cite{Benincasa2010}, normalised
+in four dimensions these are the coefficients of~\cite{Benincasa2010}, normalised
 so that the mean action tends to $\frac{1}{2\ell^2}\int R\,\rmd V$ (plus
 boundary terms~\cite{Buck2015,Dowker2025}), with $\ell=\rho^{-1/4}$; MYZ use a
 different global constant. In two dimensions they are those
@@ -227,7 +229,9 @@ $(y_1,x_1)$, $(y_2,x_2)$ in $F^2$ share their endpoints:
 \end{equation}
 Here $\Jone=\langle\sum_{y\prec x}f(n)^2\rangle$ is the \emph{same-pair} term;
 $J^2$ and $J^3$ collect distinct pairs sharing their past or future endpoint;
-$J^4$ collects chains $y_1\prec x_1=y_2\prec x_2$; and $J^6_{\rm c}$ is the
+$J^4$ collects chains $y_1\prec x_1=y_2\prec x_2$ (MYZ's $J^5$, the chain
+with the opposite orientation, equals $J^4$ by symmetry and is absorbed in
+the factor $2$); and $J^6_{\rm c}$ is the
 connected part of the contribution of pairs with four distinct endpoints,
 which is non-zero only when the two intervals overlap. MYZ write all terms as
 integrals over configurations of points, with the joint distribution of the
@@ -350,7 +354,7 @@ that the slope of a weighted linear fit of $r$ against $\ln\rhoV$ be
 compatible with zero at $4\sigma$. It was fixed before the corresponding
 simulations, except for the causal diamond, where it was fixed after a first
 set of five densities and before the larger ones. The point at
-$\rhoV=12\,800$, the FLRW cones at $\rhoV=6400$ and the tests marked as
+$\rhoV=12\,800$, the FLRW cones at $\rhoV=6400$ and the tests described as
 additional below were added, with their criteria fixed in advance, after an
 independent review of a first draft. A slope compatible with zero is a weak
 statement on its own, so we also quote the bound it implies on a residual
@@ -377,7 +381,18 @@ $r=0.324\pm0.012$, i.e.\ $(\Delta S)^2\simeq1.32\,\Jone$, with slope
 $+0.007\pm0.008$ ($1.0\sigma$, $\chi^2=12.4$ for 8 degrees of freedom;
 \fref{fig:diamond}(c)). The implied bound on a residual power law is
 $-0.02<\delta<0.07$ at $2\sigma$ ($-0.07<\delta<0.12$ at $4\sigma$), i.e.\
-$p\le0.78$ ($0.81$). An exponent as low as the Poisson value would require
+$p\le0.78$ ($0.81$). Two different but unbiased estimators of ${\rm Var}\,F$
+are combined here: for the first set, the variance of the full action minus
+the exact $N$ contributions; for the others, the variance of $F$ itself.
+Since the per-density errors, ${\rm std}(d^2)/\sqrt M$, could be
+underestimated for a heavy-tailed $d^2$, we checked them a posteriori with a
+bootstrap over sprinklings wherever the individual sprinklings were stored:
+the two errors agree within $3\%$ in all 39 sets. The bound is also stable
+against the fitted range and the scatter of the points: scaling the slope
+error by $\sqrt{\chi^2/{\rm dof}}$ gives $\delta<0.08$, and restricting the
+fit to $\rhoV\ge400$ gives $\delta<0.09$ ($2\sigma$; $0.15$ with the scaled
+error, the scatter being larger in this subset, $\chi^2=10.6$ for 4 degrees
+of freedom). An exponent as low as the Poisson value would require
 $r\to-1$, correlations that cancel $\Jone$; we see no trend in that direction.
 
 \begin{figure}
@@ -385,10 +400,11 @@ $r\to-1$, correlations that cancel $\Jone$; we see no trend in that direction.
 \includegraphics[width=\textwidth]{fig_diamond}
 \caption{Local BD action in a four-dimensional causal diamond. (a) Total
 variance per element from sprinklings (points) and the exact same-pair term
-$\Jone$ (line); the dotted line has the asymptotic slope of $\Jone$, $p=3/4$.
+$\Jone$ (line); the dotted line has the asymptotic slope of $\Jone$, $p=3/4$; the square is the independent set at $\rhoV=12\,800$.
 (b) Local exponent of $\Delta S\propto(\rhoV)^p$ for $\Jone$ (line, exact)
-and for the total variance (points). The total follows $\Jone$ towards
-$0.75$; the Poisson value $0.5$ is not approached. (c) Remainder
+and for the total variance (points; the square uses the point at $12\,800$).
+The total follows $\Jone$ towards $0.75$; the Poisson value $0.5$ is not
+approached. (c) Remainder
 $r=({\rm Var}\,F-\Jone)/\Jone$ combining all independent sprinklings,
 including $\rhoV=12\,800$; the band is the weighted mean. The shading in (a)
 and (b) marks the simulated range; beyond it only $\Jone$ is computed.}
@@ -479,7 +495,8 @@ $\epsilon\rhoV\gg1$.
 
 We sprinkled the four-dimensional diamond at $\rhoV=400$--$6400$ (2000 to 500
 sprinklings per density) and analysed the same sprinklings with
-$\epsilon=1,0.5,0.2,0.1$. The exact means and covariances~\eref{eq:covNF}
+$\epsilon=1,0.5,0.2,0.1$; the decomposition described below uses a second,
+independent set of sprinklings of the same sizes. The exact means and covariances~\eref{eq:covNF}
 agree with the simulation in all 40 comparisons ($|z|\le2.35$), and
 $\epsilon=1$ reproduces the local result, $r=0.345\pm0.025$.
 
@@ -509,8 +526,9 @@ four-dimensional diamond, relative to the exact same-pair term $\Jone$, for
 three values of the non-locality parameter. The terms with a shared endpoint
 ($J^2$, $J^3$, $2J^4$) decrease with $\rhoV$ and the connected overlap term
 $J^6_{\rm c}$ increases; their sum, the remainder $r$ (black), stays
-approximately constant. Points of different terms are shifted horizontally by
-a few per cent for clarity.}
+approximately constant. The figure shows the second of the two independent
+sets of sprinklings described in the text. Points of different terms are
+shifted horizontally by a few per cent for clarity.}
 \label{fig:smeared}
 \end{figure}
 
@@ -535,14 +553,18 @@ $\epsilon\rhoV$), must be compatible with zero at $4\sigma$. At
 $\rhoV=12\,800$ we find $r=1.23\pm0.13$, $3.03\pm0.26$ and $4.38\pm0.32$ for
 $\epsilon=0.5$, $0.2$ and $0.1$, and the slopes over $\rhoV=400$--$12\,800$
 are $+0.02\pm0.03$ ($0.8\sigma$), $+0.11\pm0.05$ ($2.3\sigma$) and
-$-0.25\pm0.07$ ($-3.7\sigma$). The criterion is met, though not by a wide
-margin for $\epsilon=0.1$, where $r$ decreases slightly. A decreasing $r$
-means that the correlations grow more slowly than $\Jone$, which does not
-threaten the exponent; the upper bounds on $\delta$ at $2\sigma$ are $0.06$,
-$0.07$ and $-0.02$.
+$-0.25\pm0.07$ ($-3.7\sigma$, $\chi^2=9.4$ for 4 degrees of freedom). The
+criterion is met, though not by a wide margin for $\epsilon=0.1$, where $r$
+decreases. This trend comes from the point at $\rhoV=400$, where
+$\epsilon\rhoV=40$ is clearly pre-asymptotic; for $\rhoV\ge800$ the slope is
+$-0.09\pm0.09$. In any case, the exponent only requires the one-sided
+statement that $r$ does not grow: a decreasing $r$ means that the
+correlations grow more slowly than $\Jone$. The upper bounds on $\delta$ at
+$2\sigma$ are $0.06$, $0.07$ and $-0.02$ (with bootstrap errors, which agree
+with the formula, the same).
 
 Within the accessible range, $\epsilon\rhoV\le1280$, the smeared action thus
-behaves like the local one: the variance is a roughly constant multiple of
+behaves like the local one: the correlations do not grow faster than
 $\Jone$, and $\Delta S\propto(\rhoV)^{3/4}$. The individual terms are still
 drifting, so we cannot exclude a different behaviour for $\epsilon\to0$ at
 fixed $\epsilon\rhoV$; we return to this point in
@@ -587,8 +609,8 @@ therefore excluded as a source.
 For the smeared action we find numerically that
 $\sum_nf_\epsilon(n)^2\Gamma(n+\frac12)/n!\to4.112\,\epsilon^{5/2}$ as
 $\epsilon\to0$, so $A\propto\epsilon^{5/4}=(\ell/\ell_k)^5$. The observed
-$\Lambda$ is obtained for $\ell_k\approx2.5\times10^{-23}\,$m with
-$\ell=\ell_p$ ($\epsilon\sim10^{-49}$), or $\ell_k\approx1.2\times10^{-22}\,$m
+$\Lambda$ is obtained for $\ell_k\approx2.6\times10^{-23}\,$m with
+$\ell=\ell_p$ ($\epsilon\sim10^{-49}$), or $\ell_k\approx1.25\times10^{-22}\,$m
 with $\ell=\ell_{\rm cs}=7.1\,\ell_p$, the discreteness length that corresponds
 to $\alpha=0.01$ in Model~1. These values use $r=0.33$; since
 $\ell_k\propto(1+r)^{1/10}$, the larger $r\approx3$--$4.5$ found above for small
@@ -682,7 +704,10 @@ $r_d$ are rescaled so that the Planck best fit reproduces their published
 values exactly gives the same conclusions. Distance priors assume standard
 early physics. This holds for the BD model, where $\Lambda/3H^2\sim4\times10^{-5}$
 at $z=1100$, but not for Model~1 ($\sim0.5$), which we therefore fit to
-supernovae and BAO only.
+supernovae and BAO only. Its BAO term still uses the sound horizon
+integrated over each history, which stretches the fitting formulae for
+$z_{\rm drag}$; the conclusion does not depend on it, since the supernova
+part of its best seed alone is already $+46$.
 
 \subsection{Results}
 
@@ -697,7 +722,7 @@ the amplitude alone. Both, however, prefer $\Omega_m\approx0.5$.
 seeds per row). $\Delta\chi^2$ is relative to the $\Lambda$CDM fit to the same
 data ($\chi^2=1488.2$ for SN + BAO, $1504.0$ for SN + BAO + CMB). The last
 column splits the $\Delta\chi^2$ of the best seed by probe. Model~1 is shown
-without the CMB, for which the distance priors are not applicable to it.}
+without the CMB, since the distance priors are not applicable to it.}
 \centering
 \begin{tabular}{@{}lccc}
 \hline
@@ -753,8 +778,9 @@ $\Delta\chi^2$ stays between $+116$ and $+135$, and even an unrealistically
 long memory ($\beta=0.5$) remains above the threshold. Over the whole family
 $(q,c)\in[0,\frac12]\times[\frac14,1]$ no cell has good seeds. The best cell,
 $q=1/8$, $c=1/4$, reaches $+17$ with 1000 seeds; since this is close to the
-threshold, we repeated it with $10^4$ seeds as an additional test, with the
-same result: no good seed and $\Delta\chi^2_{\rm min}=+17.0$. The data only
+threshold, we extended it to $10^4$ seeds (which include the original 1000)
+as an additional test: no seed is good, and the minimum is unchanged,
+$\Delta\chi^2_{\rm min}=+17.0$. The data only
 tolerate a $\Lambda$ that
 depends weakly on the volume and decorrelates slowly, i.e.\ one close to a
 true constant. The Model~1 exponent $q=1/2$ is the worst column of the map
@@ -828,7 +854,8 @@ the content.}
 \data{The code that produces every number and figure of this paper, together with
 its test suite (213 automated tests) and the saved intermediate results, is
 publicly available at
-\url{https://github.com/carlosecheverriaarrondo/Conjuntos_causales}. The
+\url{https://github.com/carlosecheverriaarrondo/Conjuntos_causales} and
+archived on Zenodo, \url{https://doi.org/10.5281/zenodo.23413234}. The
 supernova and BAO data are public and are downloaded, with checksum
 verification, by a script in the repository. Most tests check the code
 against exact results or fresh sprinklings; some re-read the saved results of

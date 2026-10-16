@@ -55,17 +55,26 @@ def fig_diamond():
         ax.axvspan(lam.min(), smax, color=GRID, alpha=0.5, lw=0)
     a1.plot(lj, j1 / lj, "-", color=BLUE, label=r"$J^1$ (exact)")
     a1.errorbar(lam, [p["sim"] / p["rhoV"] for p in pts], yerr=[p["sim_se"] / p["rhoV"] for p in pts],
-                fmt="o", color=INK, mfc="white", capsize=2, label=r"total (sprinklings)")
+                fmt="o", color=INK, mfc="white", capsize=2, label="total")
+    # rho V = 12 800: independent set (goal6_referee.py), same estimator of the total variance
+    v12, v12se = R1["varS_12800"], R1["varS_12800_se"]
+    a1.errorbar([smax], [v12 / smax], yerr=[v12se / smax], fmt="s", color=ORANGE, mfc="white", capsize=2,
+                label=r"total, $\rho V=12\,800$")
     ref = lj[lj >= 1e4]
-    a1.plot(ref, j1[-1] / lj[-1] * (ref / lj[-1]) ** 0.5, ":", color=INK2, label=r"slope $p=3/4$")
+    a1.plot(ref, j1[-1] / lj[-1] * (ref / lj[-1]) ** 0.5, ":", color=INK2, label=r"$p=3/4$")
     a1.set(xscale="log", yscale="log", xlabel=r"$\rho V$", ylabel=r"$(\Delta S)^2/\rho V$", title="(a)")
-    a1.legend(frameon=False, loc="lower right")
+    a1.legend(frameon=False, loc="lower right", fontsize=7, handlelength=1.5)
     mid = np.sqrt(lj[1:] * lj[:-1])
     pj = np.log(j1[1:] / j1[:-1]) / np.log(lj[1:] / lj[:-1]) / 2
     a2.plot(mid, pj, "-", color=BLUE, label=r"$J^1$ (exact)")
     ps = d["p_local_sim"]
     a2.errorbar([np.sqrt(p["rhoV"][0] * p["rhoV"][1]) for p in ps], [p["p"] for p in ps],
                 yerr=[p["se"] for p in ps], fmt="o", color=INK, mfc="white", capsize=2, label="total")
+    last = pts[-1]
+    l12 = np.log(smax / last["rhoV"])
+    a2.errorbar([np.sqrt(smax * last["rhoV"])], [np.log(v12 / last["sim"]) / l12 / 2],
+                yerr=[np.hypot(v12se / v12, last["sim_se"] / last["sim"]) / l12 / 2], fmt="s", color=ORANGE,
+                mfc="white", capsize=2)
     a2.axhline(0.75, color=BLUE, ls=":", lw=1)
     a2.axhline(0.5, color=ORANGE, ls="--", lw=1)
     a2.text(1.5e5, 0.68, r"$3/4$", color=INK2)

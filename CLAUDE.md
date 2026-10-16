@@ -220,6 +220,10 @@ Diamante con ρV = 12 800: r = 0.38 ± 0.10; combinado 25-12 800 r = 0.324 ±
 pendientes 0.8σ, 2.3σ, −3.7σ (ε = 0.5, 0.2, 0.1). FLRW con ρV = 6400:
 compatible. La celda (1/8, 1/4) con 10⁴ semillas: 0 buenas (+17.0). SN + BAO
 sin CMB: Model 1 +87, BD +26, 0 buenas (sustituye al +364 de la tabla 2).
+Segunda revisión de Fable (2026-10-16): revisión menor. Bootstrap a
+posteriori (`goal6_referee.py boot`): los errores de fórmula son correctos
+(0.97–1.03); cotas de δ estables (< 0.08 escalada, < 0.09 con ρV ≥ 400).
+Zenodo: DOI 10.5281/zenodo.23413234 (todas las versiones; v1.0.0 = .23413235).
 Total: 213 tests pasando.
 Documentación (2026-10-15): el cuaderno detallado en español pasó a
 README.es.md (los "ver README" de arriba se refieren a él); README.md es el

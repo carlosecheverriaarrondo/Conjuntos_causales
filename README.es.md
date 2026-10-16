@@ -1709,6 +1709,39 @@ errores deliberados, restaurando después el código y los resultados:
 - La §6.2 recoge R4 y R5.
 - La Fig. 1 tiene un panel (c) con r frente a ρV.
 
+### Segunda revisión de Fable (2026-10-16)
+
+Veredicto: revisión menor. Confirma que los seis puntos de la primera ronda
+están resueltos y que todos los números del paper cuadran con los JSON.
+
+Comprobación a posteriori (no es un criterio): `goal6_referee.py boot`, con
+salida en `figures/goal6_bootstrap.json`. Es un bootstrap con 2000 réplicas
+sobre los sprinklings de los 39 conjuntos guardados (Goal 5, Goal 5b y
+12 800):
+- Error bootstrap / error de fórmula = 0.97–1.03: los errores std(d²)/√M son
+  correctos. El Paso 2 no guardó los sprinklings, así que en él sólo hay error
+  de fórmula.
+- R1 con el error escalado por √(χ²/dof): δ < 0.08 (2σ).
+- R1 sólo con ρV ≥ 400: δ < 0.09 (0.15 con el error escalado; χ² = 10.6 con
+  4 g.l.).
+- R2 con ε = 0.1 sólo con ρV ≥ 800: pendiente −0.09 ± 0.09. La tendencia de
+  −3.7σ viene del punto ρV = 400 (ερV = 40).
+
+Cambios en el paper:
+- Fig. 1(a,b): el punto ρV = 12 800. Para ello, `fit` guarda ahora Var S en
+  R1; el resto del JSON no cambia.
+- Redacción unilateral para ε = 0.1 ("no crecen más rápido que J¹").
+- Se dice que se combinan dos estimadores de Var F.
+- J⁵ = J⁴.
+- La celda del mapa con 10⁴ semillas incluye las 1000 originales.
+- Advertencia sobre r_d en el BAO de Model 1.
+- ℓ_k = 2.6·10⁻²³ m (con r = 0.33).
+- Referencias verificadas en arXiv y Crossref:
+  - Título de Belenchia et al. corregido al de PRL.
+  - Sorkin 2007, como capítulo de *Approaches to Quantum Gravity* (CUP 2009).
+  - DESI 2025 y Dowker 2025, correctas.
+- DOI de Zenodo (todas las versiones): 10.5281/zenodo.23413234.
+
 ## Referencias
 
 - Bombelli, Lee, Meyer & Sorkin (1987), Phys. Rev. Lett. 59, 521 — sprinkling de Poisson.

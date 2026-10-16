@@ -109,7 +109,8 @@ means i ≺ j strictly. Since points are sorted by t, `C` is upper triangular.
 ## Citation
 
 If you use this code, please cite the paper and the archived version of the
-software (see [`CITATION.cff`](CITATION.cff)).
+software, [doi:10.5281/zenodo.23413234](https://doi.org/10.5281/zenodo.23413234)
+(all versions; see [`CITATION.cff`](CITATION.cff)).
 
 ## License
 

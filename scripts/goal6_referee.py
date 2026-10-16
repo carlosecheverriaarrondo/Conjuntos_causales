@@ -270,6 +270,9 @@ def fit():
             pts.setdefault(p["rhoV"], []).append((p["rest_over_J1"], p["rest_over_J1_se"]))
     r_new, se_new, m_new = _rest_new(1.0, P)
     pts.setdefault(LAM_D, []).append((r_new, se_new))
+    # Var S total con ρV = 12 800 (para la figura 1 del paper; añadido en la segunda revisión)
+    N12, h12 = g5.load(LAM_D)
+    varS12 = g5._var_se(g5.action_coefficients(4, 1.0)[0] * N12 + h12 @ pair_weight(4, np.arange(h12.shape[1]), 1.0))
     rows = _combine(pts)
     z1 = (r_new - STEP2_R[0]) / np.hypot(se_new, STEP2_R[1])
     sl = _slope(np.log([r["rhoV"] for r in rows]), [r["r"] for r in rows], [r["se"] for r in rows])
@@ -278,6 +281,7 @@ def fit():
     delta = [(sl["slope"] - k * sl["slope_se"]) / mean for k in (4, 2)] + \
             [(sl["slope"] + k * sl["slope_se"]) / mean for k in (2, 4)]
     res["R1"] = dict(points=rows, r_12800=r_new, r_12800_se=se_new, M=m_new, z_12800=float(z1),
+                     varS_12800=varS12[0], varS_12800_se=varS12[1],
                      slope=sl, mean=mean, mean_se=mean_se,
                      delta_4sigma=[delta[0], delta[3]], delta_2sigma=[delta[1], delta[2]],
                      passed=bool(abs(z1) < K and abs(sl["z"]) < K))
@@ -338,6 +342,107 @@ def fit():
                       for k, v in res.items()}, indent=1, default=str))
 
 
+BOOT = ROOT / "figures" / "goal6_bootstrap.json"
+
+
+def boot(B: int = 2000):
+    """A POSTERIORI (segunda revisión, 2026-10-16): bootstrap de los errores de r.
+
+    El error std(d²)/√M de la varianza puede subestimarse con colas pesadas.
+    Para cada conjunto con datos por sprinkling (Goal 5, Goal 5b y ρV = 12 800)
+    se remuestrean los sprinklings (B réplicas) y se compara el error bootstrap
+    de r = (Var F − J¹)/J¹ con el de la fórmula. Después se repiten las
+    pendientes de R1 y R2 con el mayor de los dos errores, con el error
+    escalado por sqrt(χ²/dof) y restringiendo el rango (ρV ≥ 400, ≥ 800).
+    No es un criterio: es una comprobación de la robustez de las cotas.
+    """
+    import goal5b_decomposition as g5b
+
+    rng = np.random.default_rng(161_016)
+    P5 = json.loads(g5.PRED.read_text())
+    P6 = json.loads(PRED.read_text())
+    ratios = []
+
+    def r_boot(F, J1):
+        M = len(F)
+        idx = rng.integers(0, M, size=(B, M))
+        v = np.var(F[idx], axis=1, ddof=1)
+        return float(np.std((v - J1) / J1, ddof=1)), g5._var_se(F)[1] / J1
+
+    se_boot = {}
+    for lam in list(g5.PLAN) + [LAM_D]:
+        N, hist = g5.load(lam)
+        P = P6 if lam == LAM_D else P5
+        for eps in EPS:
+            F = hist @ pair_weight(4, np.arange(hist.shape[1]), eps)
+            b, f = r_boot(F, P[f"{eps}_{lam}"]["J1"])
+            src = "goal6" if lam == LAM_D else "goal5"
+            se_boot[(src, eps, lam)] = (b, f)
+            ratios.append(dict(set=src, eps=eps, rhoV=lam, se_boot=b, se_formula=f, ratio=b / f))
+    Pb = json.loads(g5b.PRED.read_text()) if hasattr(g5b, "PRED") else P5
+    for lam in g5b.PLAN:
+        st = g5b.load(lam)
+        for j, eps in enumerate(g5b.EPS):
+            b, f = r_boot(st[:, j, 1], Pb[f"{eps}_{lam}"]["J1"])
+            se_boot[("goal5b", eps, lam)] = (b, f)
+            ratios.append(dict(set="goal5b", eps=eps, rhoV=lam, se_boot=b, se_formula=f, ratio=b / f))
+    out = dict(B=B, ratios=ratios)
+    res = json.loads(OUT.read_text())
+
+    def variants(rows_by_set):
+        """rows_by_set: {ρV: [(r, se_formula, se_boot or None), ...]} -> pendientes."""
+        v = {}
+        for name, use_boot, lmin in (("formula", False, 0), ("max_boot", True, 0),
+                                     ("max_boot_ge400", True, 400), ("max_boot_ge800", True, 800)):
+            pts = {lam: [(r, max(sf, sb) if (use_boot and sb) else sf) for r, sf, sb in lst]
+                   for lam, lst in rows_by_set.items() if lam >= lmin}
+            rows = _combine(pts)
+            sl = _slope(np.log([r["rhoV"] for r in rows]), [r["r"] for r in rows], [r["se"] for r in rows])
+            mean = _wmean([r["r"] for r in rows], [r["se"] for r in rows])[0]
+            scale = max(1.0, np.sqrt(sl["chi2"] / sl["dof"]))
+            v[name] = dict(slope=sl, mean=mean, chi2_scale=float(scale),
+                           delta_2sigma=[(sl["slope"] - 2 * sl["slope_se"]) / mean,
+                                         (sl["slope"] + 2 * sl["slope_se"]) / mean],
+                           delta_2sigma_scaled=[(sl["slope"] - 2 * scale * sl["slope_se"]) / mean,
+                                                (sl["slope"] + 2 * scale * sl["slope_se"]) / mean])
+        return v
+
+    # R1: Paso 2 (sin datos por sprinkling: sólo error de fórmula) + Goal 5 (ε = 1) + 12 800
+    sets = {}
+    for p in json.loads((ROOT / "figures" / "step2_4d_results.json").read_text())["points"]:
+        sets.setdefault(p["rhoV"], []).append((p["rest_over_J1"], p["rest_over_J1_se"], None))
+    for p in json.loads((ROOT / "figures" / "goal5_results.json").read_text())["points"]:
+        if p["eps"] == 1.0:
+            sets.setdefault(p["rhoV"], []).append((p["rest_over_J1"], p["rest_over_J1_se"],
+                                                   se_boot[("goal5", 1.0, p["rhoV"])][0]))
+    sets.setdefault(LAM_D, []).append((res["R1"]["r_12800"], res["R1"]["r_12800_se"], se_boot[("goal6", 1.0, LAM_D)][0]))
+    out["R1"] = variants(sets)
+    out["R2"] = {}
+    g5pts = json.loads((ROOT / "figures" / "goal5_results.json").read_text())["points"]
+    g5bpts = json.loads((ROOT / "figures" / "goal5b_results.json").read_text())["points"]
+    for eps in (0.5, 0.2, 0.1):
+        sets = {}
+        for src, pts in (("goal5", g5pts), ("goal5b", g5bpts)):
+            for p in pts:
+                if p["eps"] == eps:
+                    sets.setdefault(p["rhoV"], []).append((p["rest_over_J1"], p["rest_over_J1_se"],
+                                                           se_boot[(src, eps, p["rhoV"])][0]))
+        R2 = res["R2"][str(eps)]
+        sets.setdefault(LAM_D, []).append((R2["r_12800"], R2["r_12800_se"], se_boot[("goal6", eps, LAM_D)][0]))
+        out["R2"][str(eps)] = variants(sets)
+    BOOT.write_text(json.dumps(out, indent=1))
+    rr = np.array([x["ratio"] for x in ratios])
+    print(f"se_boot/se_formula: min {rr.min():.3f} mediana {np.median(rr):.3f} max {rr.max():.3f}")
+    for k in ("R1",):
+        for name, v in out[k].items():
+            print(k, name, {kk: (round(vv, 4) if isinstance(vv, float) else vv) for kk, vv in v["slope"].items()},
+                  "δ2σ", np.round(v["delta_2sigma"], 3), "escalado", np.round(v["delta_2sigma_scaled"], 3))
+    for e, vs in out["R2"].items():
+        for name, v in vs.items():
+            print("R2", e, name, round(v["slope"]["slope"], 3), "±", round(v["slope"]["slope_se"], 3),
+                  "z", round(v["slope"]["z"], 2), "δ2σ", np.round(v["delta_2sigma"], 3))
+
+
 if __name__ == "__main__":
     cmd = sys.argv[1]
     if cmd == "flrw":
@@ -345,4 +450,4 @@ if __name__ == "__main__":
     elif cmd == "snbao":
         snbao(sys.argv[2])
     else:
-        {"diamond": diamond, "pred": pred, "cell": cell, "fit": fit}[cmd]()
+        {"diamond": diamond, "pred": pred, "cell": cell, "fit": fit, "boot": boot}[cmd]()
