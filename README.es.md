@@ -1663,6 +1663,52 @@ deliberado: calcular J² con las sumas por columnas lo hace fallar.
      ε ~ 10⁻⁴⁹ del Goal 4a); sólo que no hay indicio de crecimiento con
      ερV ≤ 640.
 
+## Goal 6: cálculos pedidos por la revisión externa del borrador
+
+Script: `scripts/goal6_referee.py`; resultados en `figures/goal6_results.json`;
+tests en `tests/test_goal6.py`. Un árbitro independiente (Fable) revisó el
+proyecto y el borrador del paper (2026-10-15). Tres de sus críticas se podían
+contestar con más datos, y se añadió una cuarta (R5). Los criterios se
+prerregistraron (4σ) en el docstring del script antes de calcular; los
+resultados de los goals anteriores no se tocan.
+
+**Cálculos** (semillas nuevas):
+- Diamante 4D con ρV = 12 800: 500 sprinklings, histogramas en `data/goal5/`.
+- FLRW 4D (α = 1, 2) con ρV = 6400: 500 sprinklings y medias MC.
+- La celda (q, c) = (1/8, 1/4) del Goal 4e, con 10 000 semillas.
+- Ajuste SN + BAO sin CMB para Model 1 y BD (β = 0.9), 10 000 semillas cada uno.
+
+**Resultados**: R1–R5 se cumplen todos.
+
+| Criterio | Resultado |
+|---|---|
+| R1, diamante, acción local | r(12 800) = 0.38 ± 0.10 (0.6σ de 0.317); con todos los sprinklings independientes, r = 0.324 ± 0.012 en ρV = 25–12 800, pendiente +0.007 ± 0.008 (1.0σ, χ² = 12.4 con 8 g.l.). Cota: −0.02 < δ < 0.07 a 2σ (−0.07 a 0.12 a 4σ), es decir p ≤ 0.78 (0.81). |
+| R2, suavizada, resto sin proyectar | ε = 0.5: pendiente +0.02 ± 0.03 (0.8σ); ε = 0.2: +0.11 ± 0.05 (2.3σ); ε = 0.1: −0.25 ± 0.07 (−3.7σ, pasa por poco; r baja, lo que no amenaza el exponente). r(12 800) = 1.23 / 3.03 / 4.38. |
+| R3, FLRW 6400 | r = 0.28 ± 0.08 (α = 1) y 0.37 ± 0.09 (α = 2), a menos de 0.8σ del punto 1d; pendientes 0.2σ y −0.4σ. |
+| R4, celda (1/8, 1/4) | 0 semillas buenas de 10⁴; Δχ²_min = +17.0 (con 1000 semillas era +17). |
+| R5, SN + BAO sin CMB | ΛCDM: χ² = 1488.2 (Ω_m = 0.310, h = 0.694). Model 1: 0 buenas, Δχ²_min = +87 (mejor semilla SN +46, BAO +40). BD: 0 buenas, +26 (SN −13, BAO +39). Sustituye en la tabla 2 del paper al +364 de Model 1, que incluía un CMB no aplicable. |
+
+**Incidencia**: el primer `fit` falló por un error de desempaquetado en
+`_slope` (`g5._slope` devuelve 4 valores). Se corrigió sin tocar los
+criterios.
+
+**Tests y errores deliberados**: 4 tests nuevos, que recalculan las
+pendientes con `np.polyfit`, r de FLRW con `flrw4d_scaling.parts`, los recuentos
+de semillas y el mínimo del ΛCDM SN + BAO. Se comprobó que fallan con tres
+errores deliberados, restaurando después el código y los resultados:
+- Pesos 1/se en la pendiente: falla test_R1_R2.
+- No restar el término cruzado N–k en FLRW: al principio pasaba, porque el
+  efecto es de 3·10⁻⁴ en r. Se añadió el recálculo independiente y ahora falla.
+- ΛCDM desplazado del mínimo: falla test_snbao_lcdm.
+
+**Consecuencias para el paper**:
+- El resumen da el rango simulado y la cota sobre δ.
+- La §4.2 incluye el punto 12 800 y la tabla 1 una columna con el rango de ρV.
+- La §4.4 recoge R2, con ερV ≤ 1280.
+- La tabla 2 lleva un bloque SN + BAO.
+- La §6.2 recoge R4 y R5.
+- La Fig. 1 tiene un panel (c) con r frente a ρV.
+
 ## Referencias
 
 - Bombelli, Lee, Meyer & Sorkin (1987), Phys. Rev. Lett. 59, 521 — sprinkling de Poisson.

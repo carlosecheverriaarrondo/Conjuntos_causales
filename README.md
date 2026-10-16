@@ -2,8 +2,8 @@
 
 Code and results for the paper
 
-> C. Echeverría-Arrondo, *Non-Poissonian fluctuations of the Benincasa–Dowker
-> action and the fate of Everpresent Λ* (in preparation).
+> C. Echeverría-Arrondo, *Boost-range scaling of the fluctuations of the
+> Benincasa–Dowker action and its consequences for Everpresent Λ* (in preparation).
 
 The package simulates causal sets by Poisson sprinkling, evaluates the
 Benincasa–Dowker (BD) action and its fluctuations (formalism of Moradi, Yazdi &
@@ -35,7 +35,7 @@ Tested with Python 3.12.3 on Linux.
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
-python -m pytest -q          # 209 tests, ~12 min
+python -m pytest -q          # 213 tests, ~12 min
 ```
 
 The observational data are not stored in the repository. Download them (with
@@ -75,6 +75,7 @@ numbers come from fixed seeds.
 | §6, supernovae only | `scripts/goal4c_sn_fit.py` | `figures/goal4c_*.json` | `test_goal4c.py` |
 | §6, SN + BAO + CMB (table 2) | `scripts/goal4d_combined.py` | `figures/goal4d_*.json` | `test_goal4d.py` |
 | §6, robustness (figure 3) | `scripts/goal4e_robustness.py` | `figures/goal4e_*.json` | `test_goal4e.py` |
+| §4.2–4.4, §6 and figure 1(c), additional tests (ρV = 12 800, FLRW at 6400, SN + BAO without CMB) | `scripts/goal6_referee.py` | `figures/goal6_*.json`, `figures/goal4e_q0.125_c0.25_n10000.json` | `test_goal6.py` |
 
 Large intermediate files (interval-cardinality histograms of the 4D
 sprinklings) go to `data/`, which is not versioned; the scripts regenerate

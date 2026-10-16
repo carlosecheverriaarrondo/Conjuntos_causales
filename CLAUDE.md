@@ -213,7 +213,14 @@ proyectar ≈ 4.5 (ε = 0.1) y ≈ 3.0 (ε = 0.2), pendientes < 3σ. El
 crecimiento del Goal 5 venía de restar ρVg² (decae como (ρV)^−½), no de un
 término que crezca (a posteriori). Apunta a p → 0.75 también con suavizado
 fuerte; no demostrado para ε → 0.
-Total: 209 tests pasando.
+Goal 6 (2026-10-16): cálculos pedidos por la revisión externa del borrador
+(`scripts/goal6_referee.py`, criterios R1-R5 prerregistrados). R1-R5 sí.
+Diamante con ρV = 12 800: r = 0.38 ± 0.10; combinado 25-12 800 r = 0.324 ±
+0.012, pendiente 1.0σ, cota −0.02 < δ < 0.07 (2σ). Suavizada hasta ερV = 1280:
+pendientes 0.8σ, 2.3σ, −3.7σ (ε = 0.5, 0.2, 0.1). FLRW con ρV = 6400:
+compatible. La celda (1/8, 1/4) con 10⁴ semillas: 0 buenas (+17.0). SN + BAO
+sin CMB: Model 1 +87, BD +26, 0 buenas (sustituye al +364 de la tabla 2).
+Total: 213 tests pasando.
 Documentación (2026-10-15): el cuaderno detallado en español pasó a
 README.es.md (los "ver README" de arriba se refieren a él); README.md es el
 resumen en inglés para los lectores del paper. Licencia MIT; CITATION.cff y

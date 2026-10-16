@@ -32,6 +32,7 @@ analysis() {
     python scripts/goal4e_robustness.py fit
     python scripts/goal5_smeared4d.py plot
     python scripts/goal5b_decomposition.py plot
+    python paper/make_figures.py                  # figuras del paper (incluye goal6_results.json)
 }
 
 full() {
@@ -80,6 +81,14 @@ full() {
     python scripts/goal5b_decomposition.py sim 400 800 1600 3200  # Goal 5b (~1.5 h)
     python scripts/goal5b_decomposition.py sim 6400   #               (~4 h)
     python scripts/goal5b_decomposition.py fit
+    python scripts/goal6_referee.py diamond       # Goal 6: ρV = 12 800 (~6 h, 3 GB por sprinkling)
+    python scripts/goal6_referee.py pred          #   (~5 min)
+    python scripts/goal6_referee.py flrw 1        #   FLRW 6400 (~2 h)
+    python scripts/goal6_referee.py flrw 2        #   (~3 h)
+    python scripts/goal6_referee.py cell          #   celda del Goal 4e con 10⁴ semillas (~40 min)
+    python scripts/goal6_referee.py snbao model1  #   SN + BAO sin CMB (~35 min)
+    python scripts/goal6_referee.py snbao bd
+    python scripts/goal6_referee.py fit
 }
 
 case "${1:-fast}" in
