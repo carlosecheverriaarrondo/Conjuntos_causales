@@ -21,7 +21,9 @@ supernova, BAO and CMB data.
   within the simulated range (ρV ≤ 25 600). The smeared action is compatible
   with it over a smaller range, with weak residual trends; the strong-smearing
   limit remains open.
-- Stochastic Λ(t) histories with this scaling and the measured memory fail
+- Only the strongly smeared action has an acceptable amplitude. Assuming that
+  the exponent and the memory measured for the local action carry over to it,
+  stochastic Λ(t) histories with this scaling and the measured memory fail
   Pantheon+SH0ES + DESI DR2 BAO + Planck distance priors (0 of 10⁴ histories
   acceptable, Δχ²_min = +74). Within a wider family of Ornstein–Uhlenbeck
   dynamics, rare acceptable histories appear only when Λ stays close to a
