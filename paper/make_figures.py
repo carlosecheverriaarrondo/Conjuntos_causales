@@ -70,8 +70,10 @@ def fig_diamond():
                 label=r"total, $\rho V\geq12\,800$")
     ref = lj[lj >= 1e4]
     a1.plot(ref, j1[-1] / lj[-1] * (ref / lj[-1]) ** 0.5, ":", color=INK2, label=r"$p=3/4$")
+    # Poisson reference, p = 1/2: flat in (Delta S)^2 / rho V, drawn from the last simulated point
+    a1.plot(ref, np.full_like(ref, vs[-1] / xs[-1]), "--", color=ORANGE, lw=1, label=r"$p=1/2$ (Poisson)")
     a1.set(xscale="log", yscale="log", xlabel=r"$\rho V$", ylabel=r"$(\Delta S)^2/\rho V$", title="(a)")
-    a1.legend(frameon=False, loc="lower right", fontsize=7, handlelength=1.5)
+    a1.legend(frameon=False, loc="lower right", fontsize=7.5, handlelength=1.5)
     mid = np.sqrt(lj[1:] * lj[:-1])
     pj = np.log(j1[1:] / j1[:-1]) / np.log(lj[1:] / lj[:-1]) / 2
     a2.plot(mid, pj, "-", color=BLUE, label=r"$J^1$ (exact)")
@@ -82,7 +84,7 @@ def fig_diamond():
     l12 = np.log(smax / last["rhoV"])
     a2.errorbar([np.sqrt(smax * last["rhoV"])], [np.log(v12 / last["sim"]) / l12 / 2],
                 yerr=[np.hypot(v12se / v12, last["sim_se"] / last["sim"]) / l12 / 2], fmt="s", color=ORANGE,
-                mfc="white", capsize=2)
+                mfc="white", capsize=2, label=r"with $\rho V=12\,800$, $25\,600$")
     if g7:
         l2 = np.log(xs[1] / xs[0])
         a2.errorbar([np.sqrt(xs[0] * xs[1])], [np.log(vs[1] / vs[0]) / l2 / 2],
@@ -93,7 +95,7 @@ def fig_diamond():
     a2.text(1.5e5, 0.68, r"$3/4$", color=INK2)
     a2.text(1.5e3, 0.52, r"Poisson, $1/2$", color=INK2)
     a2.set(xscale="log", xlabel=r"$\rho V$", ylabel=r"local exponent $p$", ylim=(0.4, 1.35), title="(b)")
-    a2.legend(frameon=False, loc="upper right")
+    a2.legend(frameon=False, loc="upper right", fontsize=7.5)
     rows = g7["R6"]["points"] if g7 else R1["points"]
     x = np.array([p["rhoV"] for p in rows], float)
     m, ms = (g7["R6"]["mean"], g7["R6"]["mean_se"]) if g7 else (R1["mean"], R1["mean_se"])
@@ -102,7 +104,7 @@ def fig_diamond():
     a3.errorbar(x, [p["r"] for p in rows], yerr=[p["se"] for p in rows], fmt="o", color=INK, mfc="white",
                 capsize=2, label="sprinklings")
     a3.set(xscale="log", xlabel=r"$\rho V$", ylabel=r"remainder $r$", ylim=(0, 0.6), title="(c)")
-    a3.legend(frameon=False, loc="lower right")
+    a3.legend(frameon=False, loc="lower right", fontsize=7.5)
     for ax in (a1, a2, a3):
         _style(ax)
     fig.savefig(OUT / "fig_diamond.pdf")
@@ -163,8 +165,14 @@ def fig_data():
            ylim=(0, 190))
     _style(a1)
     qs, cs = (0, 0.125, 0.25, 0.375, 0.5), (0.25, 0.5, 0.75, 1.0)
-    # refined minimum where available (cells with q <= 3/8); the q = 1/2 column keeps the grid value (> 1000)
+    # refined minimum where available (cells with q <= 3/8); the q = 1/2 column keeps the grid value (> 1000).
+    # Cells also run with 10^4 seeds show that value (marked with *): (1/8, 1/4) and (1/4, 3/4) = BD with beta = 1
+    big = {(0.125, 0.25): "cell", (0.25, 0.75): "beta1"}
+
     def cell(q, c):
+        if (q, c) in big and (ROOT / "figures" / f"goal7_refine_{big[q, c]}.json").exists():
+            s = load(f"goal7_refine_{big[q, c]}.json")["summary"]
+            return s["dchi2_min_refined"], s["n_good"]["14.7"]
         f = ROOT / "figures" / f"goal7_refine_map_q{q:g}_c{c:g}.json"
         if f.exists():
             s = load(f.name)["summary"]
@@ -176,7 +184,8 @@ def fig_data():
     im = a2.imshow(L, origin="lower", cmap="Blues", aspect="auto", vmin=1, vmax=3.3)
     for i in range(len(cs)):
         for j in range(len(qs)):
-            lab = f"{Z[i, j]:.0f}".replace("-", "\u2212") + (f"\n({G[i, j]} good)" if G[i, j] else "")
+            star = "*" if (qs[j], cs[i]) in big else ""
+            lab = f"{Z[i, j]:.0f}{star}".replace("-", "\u2212") + (f"\n({G[i, j]} good)" if G[i, j] else "")
             a2.text(j + (0.25 if (i, j) == (2, 2) else 0), i + (0.12 if (i, j) == (2, 2) else 0), lab, ha="center",
                     va="center", fontsize=7.5 if not G[i, j] else 6.5, color="white" if L[i, j] > 2.4 else INK,
                     fontweight="bold" if G[i, j] else "normal")

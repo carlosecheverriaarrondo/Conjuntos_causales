@@ -236,6 +236,12 @@ R6 sí (r combinado 0.321 ± 0.012, pendiente 0.3σ, −0.04 < δ < 0.05);
 R7 sí con ε = 0.5 y 0.2 (2.9σ), NO con ε = 0.1 (−4.1σ, r baja; −1.6σ sin
 ρV = 400). Paper rebajado: exponente 3/4 sólo para la acción local en el
 rango simulado; con suavizado fuerte, conjetura. Total: 221 tests pasando.
+Cuarta revisión de Fable (2026-10-30): revisión menor, sin cálculos nuevos.
+Aplicada: test de datos condicionado a que q y β pasen a la acción suavizada;
+cita a Benincasa-Dowker-Schmitzer 2011 y Schmitzer 2010 (ya vieron crecer las
+fluctuaciones en 2D); cota de δ con error reescalado (−0.05 < δ < 0.06) y
+χ²/dof en la tabla 1; notación (T(x,n̂), γ, Λ₀); nota metodológica; apéndice D
+con las comparaciones MYZ-sprinklings; figura 3 con 10⁴ semillas donde existen.
 Documentación (2026-10-15): el cuaderno detallado en español pasó a
 README.es.md (los "ver README" de arriba se refieren a él); README.md es el
 resumen en inglés para los lectores del paper. Licencia MIT; CITATION.cff y

@@ -1833,3 +1833,23 @@ prerregistrados (4σ) en el docstring del script.
 - Dowker & Glaser (2013), Class. Quantum Grav. 30, 195016, arXiv:1305.2588 — f_d(n, ε) en dimensión d.
 - Moradi, Yazdi & Zilhão, arXiv:2407.03395 — kernels de fluctuación (Goal 3).
 - Last & Penrose (2017), "Lectures on the Poisson Process", Cambridge UP, teor. 4.1 — ecuación de Mecke (Goal 5).
+
+## Cuarta revisión externa (Fable, 2026-10-30)
+
+Veredicto: revisión menor; ningún cálculo nuevo. Cambios en `paper/`:
+- El test con datos (sección 6) se presenta como condicionado: supone que el
+  exponente q = 1/4 y la memoria β medidos con la acción local pasan a la
+  acción fuertemente suavizada.
+- Benincasa, Dowker y Schmitzer (2011, sec. 6) ya vieron, con simulaciones
+  preliminares (tesina de Schmitzer, 2010), que las fluctuaciones de la acción
+  2D crecen con la densidad; el paper lo cita y presenta su resultado 2D como
+  la respuesta cuantitativa.
+- Diamante: el ajuste combinado tiene χ² = 16.0 con 9 g.l.; la cota principal
+  usa ahora el error reescalado, −0.05 < δ < 0.06 (2σ). Tabla 1 con χ²/dof.
+- Notación: T(x, n̂) para la extensión del rayo nulo, γ para la memoria,
+  Λ₀ para la amplitud del proceso.
+- Nota metodológica única sobre los criterios prerregistrados.
+- Apéndice D con las comparaciones MYZ frente a sprinklings (2D y 4D).
+- Figura 3: celdas con 10⁴ semillas donde existen (marcadas con *).
+- Model 1: su exclusión con BAO depende del ajuste de z_drag fuera de su
+  rango; se dice explícitamente.

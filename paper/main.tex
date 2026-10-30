@@ -54,11 +54,13 @@ and $\delta\Lambda\propto V^{-1/4}$ there, rather than the Poisson value; the
 geometry only fixes the amplitude. For the smeared action this holds only
 within a smaller range, and the physically relevant limit of strong smearing
 remains open. Reading the action fluctuation as a fluctuation of the
-cosmological term, we confront stochastic $\Lambda(t)$ histories with this
-scaling and the measured temporal correlation with Pantheon+SH0ES
+cosmological term, and assuming that the exponent and the temporal
+correlation measured for the local action carry over to the strongly smeared
+one, we confront stochastic $\Lambda(t)$ histories with Pantheon+SH0ES
 supernovae, DESI DR2 baryon acoustic oscillations and Planck distance
-priors. None of $10^4$ histories fits as well as $\Lambda$CDM
-($\Delta\chi^2_{\rm min}=+74$ with all three probes, $+23$ without the CMB).
+priors. With the measured correlation, none of $10^4$ histories fits as well
+as $\Lambda$CDM ($\Delta\chi^2_{\rm min}=+74$ with all three probes, $+23$
+without the CMB).
 Within a wider family of dynamics, rare good histories appear only when
 $\Lambda$ stays close to a slowly wandering constant.
 \end{abstract}
@@ -80,8 +82,9 @@ $\delta\Lambda\sim V^{-1/2}\sim H^2$. The resulting dark energy density tracks
 the critical density at all epochs, which would explain why $\Omega_\Lambda$
 is of order one today without fine tuning.
 
-The exponent $-1/2$ is essential to the model. If $\delta\Lambda\propto
-V^{p-1}$ with $V\sim H^{-4}$, then $\delta\Lambda/H^2\propto H^{2-4p}$, and
+The exponent $-1/2$ is essential to the model. If the fluctuation of the
+action grows as $V^p$ (the exponent $p$ of $\Delta S$ used throughout), then
+$\delta\Lambda\propto V^{p-1}$ and, with $V\sim H^{-4}$, then $\delta\Lambda/H^2\propto H^{2-4p}$, and
 only $p=1/2$ gives an \emph{everpresent} $\Omega_\Lambda$. In the
 phenomenological realisation of Das, Nasiri and Yazdi (Model~1 of
 \cite{Das2023}), this exponent is imposed by construction: each causal-set
@@ -106,9 +109,14 @@ simulations indicate that the fluctuations of the smeared operator die away
 at fixed non-locality scale~\cite{Benincasa2010,Belenchia2016c}, and the
 stability of the continuum operators has been studied
 in~\cite{Aslanbeigi2014}. Efficient codes compute the BD action of large
-sprinkled causal sets~\cite{Cunningham2018}. To our knowledge, however, the
-variance of the action of a region, as opposed to that of the operator at a
-point, and its scaling with the number of elements have not been computed.
+sprinkled causal sets~\cite{Cunningham2018}. For the action of a region, as
+opposed to the operator at a point, Benincasa, Dowker and Schmitzer called the
+behaviour of the fluctuations at large density ``a major open
+question''~\cite{Benincasa2011}: preliminary two-dimensional simulations
+showed them growing with the density~\cite{Schmitzer2010}, and the authors
+suggested that a mesoscale might be needed to tame them. To our knowledge,
+the variance and its scaling with the number of elements have not been
+computed beyond these preliminary numerics.
 
 In this paper we compute them and follow the consequences through to
 cosmological data. Our main results are:
@@ -129,11 +137,12 @@ consistent with $3/4$ in four dimensions, not with the Poisson value $1/2$.
 For the smeared action this holds within a smaller range of $\epsilon\rhoV$,
 with a weak residual trend for the strongest smearing.
 \item If the action fluctuation is read as a fluctuation of the cosmological
-term, $\delta\Lambda\propto V^{-1/4}$ (section~\ref{sec:lambda}). We build
-stochastic $\Lambda(t)$ histories with this scaling and with the temporal
-correlation that we measure along nested past cones, and confront them with
-supernova, BAO and CMB data. They are excluded over the measured range of
-the memory, as is Model~1 in our implementation; within a wider family of
+term, $\delta\Lambda\propto V^{-1/4}$ (section~\ref{sec:lambda}). Only the
+strongly smeared action has an acceptable amplitude, so the data test assumes
+that the exponent and the temporal correlation that we measure for the local
+action, the latter along nested past cones, carry over to it. With this
+assumption we confront stochastic $\Lambda(t)$ histories with supernova, BAO
+and CMB data. They are excluded over the measured range of the memory, as is Model~1 in our implementation; within a wider family of
 dynamics, rare good histories appear only when $\Lambda$ stays close to a
 slowly wandering constant (section~\ref{sec:data}).
 \end{enumerate}
@@ -144,9 +153,13 @@ causal set~\cite{Bombelli2009}, and the mean abundances of small intervals in
 flat regions are known exactly~\cite{Glaser2013}. The same non-compact
 rapidity range biases the statistics of links~\cite{Boguna2026}. What is new
 here is its role in the \emph{fluctuations} of the action: we show that it
-controls their scaling, quantify the amplitude through $G$ in the regions
-relevant for cosmology, and follow the consequences for a fluctuating
-cosmological constant.
+controls their scaling, give the prefactor in closed form as a boost-range
+integral $G$ valid for any region, including FLRW past cones, quantify the
+amplitude in the regions relevant for cosmology, and follow the consequences
+for a fluctuating cosmological constant. In two dimensions this gives the
+quantitative answer to the question of~\cite{Benincasa2011}: the fluctuations
+grow as $\sqrt{\rhoV\ln\rhoV}$, and smearing reduces their amplitude but not
+their growth.
 
 % ---------------------------------------------------------------------------
 \section{The BD action and its variance}
@@ -168,7 +181,7 @@ which is the form analysed by MYZ~\cite{Moradi2025}. For the \emph{local}
 action, $f(n)=a_n$ for $n<n_d$ and $f=0$ otherwise, with
 \begin{equation}
 d=2:\quad (a_N;a_0,a_1,a_2)=(1;-2,4,-2),\qquad
-d=4:\quad (a_N;a_0,\dots,a_3)=\frac{4}{\sqrt6}(1;-1,9,-16,8),
+d=4:\quad (a_N;a_0,\dots,a_3)=\frac{4}{\sqrt6}(1;-1,9,-16,8).
 \label{eq:coeffs}
 \end{equation}
 In four dimensions these are the coefficients of~\cite{Benincasa2010}, normalised
@@ -178,8 +191,9 @@ The action of MYZ, their equation (4.1) evaluated at $\phi=-2\ell^2/\alpha_d$,
 is $-\sqrt6/2$ times ours in four dimensions; this multiplies the variance by
 $3/2$ and leaves the remainder $r$ and all exponents below unchanged. In two dimensions they are those
 of~\cite{Benincasa2011}, for which the mean action of a flat causal diamond
-tends to $1$, its Euler characteristic. The \emph{smeared} action of
-Sorkin~\cite{Sorkin2007} and Dowker and Glaser~\cite{Dowker2013} introduces a
+tends to $1$, its Euler characteristic, up to corrections that vanish as
+$\rho\to\infty$~\cite{Benincasa2011}. The \emph{smeared} action of
+Sorkin~\cite{Sorkin2007} and Dowker and Glaser~\cite{Dowker2013,Glaser2014} introduces a
 non-locality parameter $\epsilon\in(0,1]$, with $\epsilon=(\ell/\ell_k)^d$
 for a non-locality length $\ell_k$. It has the same form~\eref{eq:action}
 with
@@ -258,9 +272,8 @@ using Green's theorem for the intersection of discs at fixed time and fixed
 coordinate along one axis. In two dimensions the prediction agrees with
 direct sprinklings at five densities $\rhoV=25$--$400$ ($|z|\le1.56$, 4000
 sprinklings each) and, for the smeared action with $\epsilon=0.5,0.25$, at ten
-more points ($|z|\le1.72$); the comparisons are listed in the repository.
-In four dimensions the agreement holds for
-$\rhoV=25,50,100$, but the Monte Carlo error grows quickly with density
+more points ($|z|\le1.72$). In four dimensions the agreement holds for
+$\rhoV=25,50,100$ (\tref{tab:validation} in appendix~\ref{app:validation}), but the Monte Carlo error grows quickly with density
 (23\% at $\rhoV=100$). This makes the full MYZ integrals impractical as a
 scaling tool, and in the rest of the paper we follow a different strategy:
 we compute the terms that dominate asymptotically \emph{exactly}, and we
@@ -273,33 +286,34 @@ measure the remaining terms on sprinklings.
 Consider a nearly null pair, with small proper time $\tau$ between its
 endpoints. Its interval has volume $c_d\tau^d$ ($c_4=\pi/24$), so its
 cardinality is a Poisson variable of mean $\mu=\rho c_d\tau^d$ that stays of
-order one however large the region is. What grows with the size $L$ of the
+order one however large the region is. What grows with the size of the
 region is the number of such pairs. Writing
 $y=x-\tau(\cosh\chi,\sinh\chi\,\hat{\boldsymbol n})$, the measure of the past
 hyperboloid is $\tau^{d-1}\sinh^{d-2}\chi\,\rmd\tau\,\rmd\chi\,\rmd\Omega$,
 and the pair fits inside the region as long as its rapidity satisfies
-$\tau\rme^\chi/2\lesssim\ell(x,\hat{\boldsymbol n})$, where
+$\tau\rme^\chi/2\lesssim T(x,\hat{\boldsymbol n})$, where
 \begin{equation}
-\ell(x,\hat{\boldsymbol n})=\sup\{\lambda:\ x-\lambda(1,\hat{\boldsymbol n})\in M\}
+T(x,\hat{\boldsymbol n})=\sup\{\lambda:\ x-\lambda(1,\hat{\boldsymbol n})\in M\}
 \label{eq:ell}
 \end{equation}
 is the extent, in time, of the past null ray from $x$ in the direction
 $\hat{\boldsymbol n}$ that remains inside the region. The rapidity integral
-then gives a factor $(\ell/\tau)^{d-2}$, which is the volume of the available
+then gives a factor $(T/\tau)^{d-2}$, which is the volume of the available
 range of boosts. Inserting this in~\eref{eq:mecke} and changing variables to
 $\mu$ gives, to leading order in $\rhoV$ and for $d=4$ (appendix~\ref{app:boost}),
 \begin{equation}
 \Big\langle\sum_{y\prec x}h(n)\Big\rangle\simeq(\rhoV)^{3/2}\,
 \frac{G/V^{3/2}}{8\sqrt{c_4}}\,\sum_{n\ge0}h(n)\,\frac{\Gamma(n+\frac12)}{n!}\,,
 \qquad
-G=\int_M\rmd V_x\int_{S^2}\rmd\Omega\;\ell(x,\hat{\boldsymbol n})^2\,,
+G=\int_M\rmd V_x\int_{S^2}\rmd\Omega\;T(x,\hat{\boldsymbol n})^2\,,
 \label{eq:asym4}
 \end{equation}
-and in general dimension the exponent is $2-2/d$, with a weight
-$\Gamma(n+2/d)/n!$. Two special cases matter.
+where $\rmd V_x$ is the physical volume element (in FLRW, $a(\eta_x)^4\rmd^4x$).
+In general dimension the exponent is $2-2/d$, with a weight
+$\Gamma(n+2/d)/n!$. Two special cases are needed below.
 
 \paragraph{Two dimensions.} For $d=2$ the boost volume is
-$\ln(\ell/\tau)$ and the weight is $\Gamma(n+1)/n!=1$, so that
+$\ln(T/\tau)$ and the weight is $\Gamma(n+1)/n!=1$, so that
 $\langle\sum h\rangle=\rhoV\ln\rhoV\sum_n h(n)+O(\rhoV)$. The same-pair term
 therefore contributes $\sum_nf(n)^2$ ($=24$ for the local action) to the
 coefficient of $\rhoV\ln\rhoV$ in the variance. In two dimensions the
@@ -389,23 +403,28 @@ r=\frac{{\rm Var}(F)-\Jone}{\Jone}
 the relative size of all correlation terms. The asymptotic
 exponent~\eref{eq:pexp} holds if $r$ tends to a constant. Our criterion is
 that the slope of a weighted linear fit of $r$ against $\ln\rhoV$ be
-compatible with zero at $4\sigma$. It was fixed before the corresponding
-simulations, except for the causal diamond, where it was fixed after a first
-set of five densities and before the larger ones. The points at
-$\rhoV=12\,800$ and $25\,600$, the FLRW cones at $\rhoV=6400$ and the tests
-described as additional below were added, with their criteria fixed in
-advance, after independent reviews of earlier drafts. A slope compatible with zero is a weak
+compatible with zero at $4\sigma$. A slope compatible with zero is a weak
 statement on its own, so we also quote the bound it implies on a residual
 power law, $r\propto(\rhoV)^\delta$: to first order the slope equals
 $\delta\,\bar r$. Such a law would change the asymptotic exponent to
-$p=3/4+\delta/2$ once the correlations dominate. The $4\sigma$ threshold is
-the tolerance used for all the automated tests of this work, fixed before any
-result; it serves as a pass/fail criterion that guards against false alarms
-among many comparisons, and the quantitative statement is the $2\sigma$ bound
-on $\delta$. Each
-sprinkling is an exact, independent sample of the ensemble, so no
-thermalisation is involved. The statistical error of a variance estimated from
-$M$ sprinklings is ${\rm std}(d^2)/\sqrt M$, with $d=S-\bar S$.
+$p=3/4+\delta/2$ once the correlations dominate. The $4\sigma$ threshold
+serves as a pass/fail criterion that guards against false alarms among many
+comparisons; the quantitative statement is the $2\sigma$ bound on $\delta$.
+Each sprinkling is an exact, independent sample of the ensemble; unlike
+Markov-chain sampling, no thermalisation is needed. The statistical error of a
+variance estimated from $M$ sprinklings is ${\rm std}[(S-\bar S)^2]/\sqrt M$.
+
+\paragraph{Methodological note.} All pass/fail thresholds ($4\sigma$, the
+tolerance of every automated test of this work) were fixed before the
+corresponding runs; for the causal diamond, after a first set of five
+densities and before the larger ones. The points added after independent
+reviews of earlier drafts ($\rhoV=12\,800$ and $25\,600$ in the diamond,
+$6400$ in the FLRW cones, and the tests called additional below) also had
+their criteria fixed in advance. The criteria that failed are reported where
+they arise: the original and the extended criteria for the smeared action
+(section~\ref{sec:smeared}), a bound on the memory of the action
+(section~\ref{sec:lambda}) and the reproduction of a published $\chi^2$
+(section~\ref{sec:data}).
 
 \subsection{Causal diamond}
 
@@ -415,31 +434,36 @@ variance follows the exact $\Jone$ with a constant offset. The local
 exponent of the total variance decreases with $\rhoV$ like that of $\Jone$,
 from $1.24\pm0.04$ at $\rhoV\approx35$ to $0.72\pm0.05$ at $\rhoV\approx4500$;
 between $12\,800$ and $25\,600$ (below) it is $0.71\pm0.07$. The last two
-values lie somewhat below those of $\Jone$ ($0.85$ and $0.81$; $2.6\sigma$ and
-$1.5\sigma$): local exponents from neighbouring densities are noisy, and the
-fit of the remainder below is the more robust statement. On these
+values lie below those of $\Jone$ ($0.85$ and $0.81$; $2.6\sigma$ and
+$1.5\sigma$), which is the direction a slowly decreasing $r$ would produce.
+Local exponents from neighbouring densities are noisy, and the fit of the
+remainder, below, is the more robust statement; its bound on a decreasing $r$
+covers this deviation. On these
 sprinklings alone, $r=0.317\pm0.014$ with slope $+0.006\pm0.009$. As an
-additional test we combined them with the independent sprinklings of the
+additional test (see the methodological note) we combined them with the independent sprinklings of the
 smeared-action runs below (at $\epsilon=1$, $\rhoV=400$--$6400$) and with 500
 new sprinklings at each of $\rhoV=12\,800$ and $25\,600$. The remainder at
 these densities is $r=0.38\pm0.10$ and $0.19\pm0.08$, compatible with the
 earlier mean ($0.6\sigma$ and $-1.7\sigma$), and over the whole range
 $r=0.321\pm0.012$, i.e.\ $(\Delta S)^2\simeq1.32\,\Jone$, with slope
-$+0.002\pm0.007$ ($0.3\sigma$, $\chi^2=16.0$ for 9 degrees of freedom;
-\fref{fig:diamond}(c)). The implied bound on a residual power law is
-$-0.04<\delta<0.05$ at $2\sigma$ ($-0.08<\delta<0.09$ at $4\sigma$), i.e.\
-$p\le0.78$ ($0.80$). Two different but unbiased estimators of ${\rm Var}\,F$
+$+0.002\pm0.007$ ($0.3\sigma$; \fref{fig:diamond}(c)). The fit has
+$\chi^2=16.0$ for 9 degrees of freedom ($p$-value $0.07$): the points scatter
+about $30\%$ more than their formal errors, as is visible between
+$\rhoV=800$ and $6400$ in \fref{fig:diamond}(c). Scaling the slope error by
+$\sqrt{\chi^2/{\rm dof}}$, the bound on a residual power law is
+$-0.05<\delta<0.06$ at $2\sigma$ ($-0.11<\delta<0.12$ at $4\sigma$), i.e.\
+$p\le0.78$ ($0.81$); with the unscaled errors it would be
+$-0.04<\delta<0.05$. Two different but unbiased estimators of ${\rm Var}\,F$
 are combined here: for the first set, the variance of the full action minus
 the exact $N$ contributions; for the others, the variance of $F$ itself.
 Since the per-density errors, ${\rm std}(d^2)/\sqrt M$, could be
 underestimated for a heavy-tailed $d^2$, we checked them a posteriori with a
 bootstrap over sprinklings wherever the individual sprinklings were stored:
 the two errors agree within $3\%$ in all 39 sets (\texttt{figures/goal6\_bootstrap.json}
-in the repository). The bound is also stable
-against the fitted range and the scatter of the points: scaling the slope
-error by $\sqrt{\chi^2/{\rm dof}}$ gives $\delta<0.06$, and restricting the
-fit to $\rhoV\ge400$ gives $\delta<0.04$ ($2\sigma$; $0.09$ with the scaled
-error, $\chi^2=12.6$ for 5 degrees of freedom). An exponent as low as the Poisson value would require
+in the repository), so the excess scatter is not an underestimate of the
+individual errors. The bound is also stable against the fitted range:
+restricting the fit to $\rhoV\ge400$ gives $\delta<0.04$ ($2\sigma$; $0.09$
+with the scaled error, $\chi^2=12.6$ for 5 degrees of freedom). An exponent as low as the Poisson value would require
 $r\to-1$, correlations that cancel $\Jone$; we see no trend in that direction.
 
 \begin{figure}
@@ -447,8 +471,8 @@ $r\to-1$, correlations that cancel $\Jone$; we see no trend in that direction.
 \includegraphics[width=\textwidth]{fig_diamond}
 \caption{Local BD action in a four-dimensional causal diamond. (a) Total
 variance per element from sprinklings (points) and the exact same-pair term
-$\Jone$ (line); the dotted line has the asymptotic slope of $\Jone$, $p=3/4$;
-the squares are the independent sets at $\rhoV=12\,800$ and $25\,600$.
+$\Jone$ (line); the dotted line has the asymptotic slope of $\Jone$, $p=3/4$,
+and the dashed line the Poisson slope, $p=1/2$; the squares are the independent sets at $\rhoV=12\,800$ and $25\,600$.
 (b) Local exponent of $\Delta S\propto(\rhoV)^p$ for $\Jone$ (line, exact)
 and for the total variance between consecutive densities (points, plotted at
 their geometric mean; the squares use the points at $12\,800$ and
@@ -468,8 +492,13 @@ slope of $(\Delta S)^2/\rhoV$ against $\ln\rhoV$ is $24.43\pm0.24$ for the
 local action. Fitting each MYZ term separately over the same range, $\Jone$
 contributes $23.2$, still approaching its asymptotic coefficient
 $\sum_nf(n)^2=24$, and the correlation terms, essentially $J^6_{\rm c}$,
-contribute $1.76\pm0.24$. The asymptotic coefficient is therefore
-$b\approx25.8$, i.e.\ $r_2=0.07\pm0.01$, and not $\sum_nf(n)^2$ alone. For the
+contribute $1.76\pm0.24$. These coefficients are not additive
+($23.2+1.76\ne24.43$) because the exact $\Jone$ and the measured terms are
+fitted with different weights, which emphasise different densities while
+$\Jone$ is still curving towards its limit. Adding the correlation
+coefficient to the asymptotic $\sum_nf(n)^2$ gives the estimate
+$b\approx25.8$, i.e.\ $r_2\approx0.07\pm0.01$, and not $\sum_nf(n)^2$
+alone. For the
 smeared action the correlations are larger, $r_2=0.42\pm0.04$ for
 $\epsilon=0.5$ and $0.60\pm0.06$ for $\epsilon=0.25$, a growth with
 decreasing $\epsilon$ similar to that of $r$ in four dimensions
@@ -499,27 +528,30 @@ w=\frac{6}{\lambda^3}\int_0^\lambda a(\eta_y+s)^4\,s(\lambda-s)\,\rmd s,
 \label{eq:Gflrw}
 \end{equation}
 where $\lambda$ is the conformal extent of a nearly null interval along the
-null ray and $w$ is the average of $a^4$ over it, weighted by the profile
+null ray, $\eta_y=\eta_x-\lambda$ the conformal time of its past endpoint, and
+$w$ is the average of $a^4$ over it, weighted by the profile
 $s(\lambda-s)$ of a thin four-dimensional diamond. For $a=1$ it reduces to the
 Minkowski cone.
 
 \begin{table}
 \caption{\label{tab:regions}Region dependence of the fluctuations of the
 local BD action in four dimensions. $G/V^{3/2}$ is the boost-range
-integral~\eref{eq:asym4}; the asymptotic ratio $\langle N_k\rangle/$(prediction)
-is evaluated at $\rhoV=10^8$ for $k=0,\dots,3$, with exact means (diamond,
+integral~\eref{eq:asym4}. The ratio $\langle N_k\rangle/$\eref{eq:asym4} is
+evaluated at $\rhoV=10^8$ for $k=0,\dots,3$, with exact means (diamond,
 Minkowski cone) or Monte Carlo means with errors below $0.2\%$ (FLRW). The
-remainder $r$ is the weighted mean over the simulated densities, and the slope is that
-of $r$ against $\ln\rhoV$.}
+remainder $r$ is the weighted mean over all simulated densities, including the
+additional points ($\rhoV=12\,800$, $25\,600$ in the diamond; $6400$ in
+FLRW); the slope is that of $r$ against $\ln\rhoV$, with the $\chi^2$ per
+degree of freedom of its fit.}
 \centering
-\begin{tabular}{@{}lccccc}
+\begin{tabular}{@{}lcccccc}
 \hline
-Region & $G/V^{3/2}$ & ratio at $10^8$ & simulated $\rhoV$ & $r$ & slope of $r$\\
+Region & $G/V^{3/2}$ & $\langle N_k\rangle/$\eref{eq:asym4} at $10^8$ & simulated $\rhoV$ & $r$ & slope of $r$ & $\chi^2/{\rm dof}$\\
 \hline
-Diamond & $1.4472\pm0.0005$ & $0.995$--$0.987$ & $25$--$25\,600$ & $0.321\pm0.012$ & $+0.002\pm0.007$\\
-Minkowski cone & $0.8187$ & $0.992$--$0.978$ & $25$--$6400$ & $0.342\pm0.017$ & $-0.001\pm0.011$\\
-FLRW, $\alpha=1$ & $1.3145$ & $0.995$--$0.986$ & $25$--$6400$ & $0.346\pm0.016$ & $+0.002\pm0.010$\\
-FLRW, $\alpha=2$ & $1.4194$ & $0.997$--$0.981$ & $25$--$6400$ & $0.319\pm0.015$ & $-0.004\pm0.010$\\
+Diamond & $1.4472(5)$ & $0.995$--$0.987$ & $25$--$25\,600$ & $0.321\pm0.012$ & $+0.002\pm0.007$ & $1.8$\\
+Minkowski cone & $0.8187$ & $0.992$--$0.978$ & $25$--$6400$ & $0.342\pm0.017$ & $-0.001\pm0.011$ & $1.8$\\
+FLRW, $\alpha=1$ & $1.3145$ & $0.995$--$0.986$ & $25$--$6400$ & $0.346\pm0.016$ & $+0.002\pm0.010$ & $0.8$\\
+FLRW, $\alpha=2$ & $1.4194$ & $0.997$--$0.981$ & $25$--$6400$ & $0.319\pm0.015$ & $-0.004\pm0.010$ & $0.7$\\
 \hline
 \end{tabular}
 \end{table}
@@ -535,7 +567,9 @@ instance, the ratio of $\Jone$ in the cone and in the diamond rises from
 $0.516$ at $\rhoV=1.5\times10^5$ to $0.562$ at $10^8$, towards the predicted
 $0.8187/1.4472=0.566$. The remainder is a constant fraction of $\Jone$ in all four
 regions, with values between $0.32$ and $0.35$; its slope against $\ln\rhoV$
-is compatible with zero in all cases (largest deviation $1.0\sigma$). The
+is compatible with zero in all cases (largest deviation $1.0\sigma$), with
+the same excess scatter ($\chi^2/{\rm dof}\approx1.8$) in the diamond and the
+Minkowski cone. The
 FLRW points at $\rhoV=6400$, an additional test, give $r=0.28\pm0.08$
 ($\alpha=1$) and $0.37\pm0.09$ ($\alpha=2$), within $0.8\sigma$ of the earlier
 means. The two
@@ -571,8 +605,8 @@ Our pre-registered criterion for the smeared action was formulated for the
 remainder \emph{after} subtracting the part of $F$ linear in $N$ (below),
 $r_\perp=r-\rhoV g^2/\Jone$. It was met for $\epsilon=0.5$ (slope
 $0.9\sigma$) but failed for $\epsilon=0.2$ and $0.1$, where $r_\perp$ grows
-with $\ln\rhoV$ at $4.1\sigma$ and $6.7\sigma$. The analysis that follows,
-which explains this failure, was designed after seeing it.
+with $\ln\rhoV$ at $4.1\sigma$ and $6.7\sigma$. The following analysis,
+designed after this failure, explains it.
 
 For $\epsilon\le0.2$ two contributions of different origin compete at these
 densities. The part of $F$ that is linear in $N$, of variance
@@ -596,9 +630,9 @@ $J^6_{\rm c}$ increases; their sum, the remainder $r$ (black), stays
 approximately constant. Since $J^6_{\rm c}$ is obtained by subtraction, the
 error bars of $r$ are those of the total variance. The vertical ranges differ
 between panels: for $\epsilon=0.1$, $J^6_{\rm c}$ changes by $3.6\,\Jone$. The
-figure shows the second of the two independent sets of sprinklings described
-in the text. Points of different terms are shifted horizontally by a few per
-cent for clarity.}
+decomposition into MYZ terms was measured only on the second of the two
+independent sets of sprinklings described in the text ($\rhoV=400$--$6400$).
+Points of different terms are shifted horizontally by a few \% for clarity.}
 \label{fig:smeared}
 \end{figure}
 
@@ -616,11 +650,11 @@ $3\sigma$. The growth of $r_\perp$ that made the pre-registered criterion
 fail is therefore not a growing correlation: it is the approach of $r_\perp$
 to $r$ as the subtracted Poissonian term decays.
 
-Since this explanation was found a posteriori, we tested it as an additional
-pre-registered criterion: the slope of the unprojected $r$, combining both
-sets of sprinklings with 500 new ones at each of $\rhoV=12\,800$ and
-$25\,600$ (which quadruple $\epsilon\rhoV$), must be compatible with zero at
-$4\sigma$, and the new points with the earlier mean. At $\rhoV=25\,600$ we
+We tested this explanation with a new criterion: the slope of the unprojected
+$r$, combining both sets of sprinklings with 500 new ones at each of
+$\rhoV=12\,800$ and $25\,600$ (which extend $\epsilon\rhoV$ to $2560$),
+must be compatible with zero at $4\sigma$, and the new points with the
+earlier mean. At $\rhoV=25\,600$ we
 find $r=1.41\pm0.16$, $3.33\pm0.25$ and $3.99\pm0.32$ for $\epsilon=0.5$,
 $0.2$ and $0.1$, all compatible with the earlier means ($0.5\sigma$,
 $1.7\sigma$, $-1.9\sigma$). The slopes over $\rhoV=400$--$25\,600$ are
@@ -628,7 +662,7 @@ $+0.02\pm0.02$ ($1.0\sigma$), $+0.12\pm0.04$ ($2.9\sigma$) and
 $-0.24\pm0.06$ ($-4.1\sigma$, $\chi^2=9.6$ for 5 degrees of freedom). The
 criterion is therefore met for $\epsilon=0.5$ and $0.2$ but \emph{not} for
 $\epsilon=0.1$, where $r$ decreases. Much of this trend comes from the point
-at $\rhoV=400$, where $\epsilon\rhoV=40$ is clearly pre-asymptotic: for
+at $\rhoV=400$, where $\epsilon\rhoV=40$ is presumably pre-asymptotic: for
 $\rhoV\ge800$ the slopes are $+0.01\pm0.03$, $+0.17\pm0.06$ ($3.0\sigma$) and
 $-0.12\pm0.07$ ($-1.6\sigma$). The implied bounds on a residual power law at
 $2\sigma$ are $-0.02<\delta<0.05$, $0.01<\delta<0.07$ and
@@ -656,7 +690,9 @@ this point in section~\ref{sec:discussion}.
 \subsection{Amplitude}
 
 To connect the action with $\Lambda$ we follow the logic of Everpresent
-$\Lambda$. The BD action approximates the Einstein--Hilbert action,
+$\Lambda$; the relation below is a working hypothesis, not a consequence of a
+causal-set dynamics, and the comparison with Model~1 that follows only checks
+its normalisation. The BD action approximates the Einstein--Hilbert action,
 $S_{\rm EH}/\hbar=\kappa S$ with $\kappa=\ell^2/(8\pi\ell_p^2)$ in our
 normalisation, and the cosmological term is $\Lambda V/(8\pi\ell_p^2)$
 \cite{Das2023}. Reading the action fluctuation in the past of the observer as a
@@ -673,10 +709,8 @@ length is $\ell^2=\ell_p^2/(2\alpha)$ (equations 3.9 and 3.11--3.13
 of~\cite{Das2023}). Then $\kappa=1/(16\pi\alpha)$,
 $\Delta S=8\pi\alpha\sqrt N$, and~\eref{eq:dlambda} gives
 $\delta\Lambda\,\ell^2=8\pi\alpha/\sqrt N$, i.e.\ its
-$\delta\Lambda=8\pi\alpha/\sqrt V$. This only checks the normalisation
-$\kappa$, since Model~1 defines its fluctuating term through the same
-relation; equation~\eref{eq:dlambda} itself is a working hypothesis, not a
-consequence of a causal-set dynamics.
+$\delta\Lambda=8\pi\alpha/\sqrt V$, as it should, since Model~1 defines its
+fluctuating term through the same relation.
 
 A further question concerns boundaries. The mean action of a region with a
 boundary contains boundary and corner
@@ -686,7 +720,7 @@ boundary through $G$: the number of nearly null pairs is set by where the
 past null rays leave the region. One may therefore ask whether it should be
 read as a fluctuation of the bulk cosmological term. The pairs that produce
 it are not concentrated near the boundary: they start at points $x$
-throughout the region, the integrand $\ell(x,\hat{\boldsymbol n})^2$ of $G$ is
+throughout the region, the integrand $T(x,\hat{\boldsymbol n})^2$ of $G$ is
 largest deep inside it, and in the two-dimensional diamond every unit of
 rapidity contributes equally (section~\ref{sec:numerics}). In this sense the
 fluctuation is a bulk effect whose range is set by the region, rather than a
@@ -713,7 +747,7 @@ $\ell=\ell_p$ ($\epsilon\sim10^{-49}$), or $\ell_k\approx1.25\times10^{-22}\,$m
 with $\ell=\ell_{\rm cs}=7.1\,\ell_p$, the discreteness length that corresponds
 to $\alpha=0.01$ in Model~1 ($\ell^2=\ell_p^2/2\alpha$). These values use $r=0.33$; since
 $\ell_k\propto(1+r)^{1/10}$, the larger $r\approx3$--$4.5$ found above for small
-$\epsilon$ raises them by at most $15\%$. This is below the bound
+$\epsilon$ raises them by at most $15\%$. This is consistent with the bound
 $\ell_k\lesssim10^{-19}\,$m on the non-locality scale of relativistic
 non-local field theories derived from $8\,$TeV LHC data~\cite{Biswas2015},
 as quoted in~\cite{Belenchia2016}, and inside the range, from $2\times10^{-22}$ to
@@ -730,8 +764,11 @@ today, whereas for Model~1 $w\approx0$.
 
 \subsection{Temporal correlation along the worldline}
 
-A stochastic $\Lambda(t)$ also requires the correlation of $\Delta S$ between
-the past cones of two instants of the same worldline. These cones are nested,
+$\Delta S$ is a standard deviation over sprinklings, whereas $\Lambda(t)$
+fluctuates in time along a single history. The bridge is the correlation of
+the action between the past cones of two instants of the same worldline: it
+turns the ensemble variance at each volume into the variance of a stochastic
+process along the worldline. These cones are nested,
 and since the region is causally convex every pair of the smaller cone is a
 pair of the larger one with the same cardinality. A single sprinkling of the
 largest cone therefore gives the action of all the nested cones. We measured it
@@ -739,7 +776,7 @@ for the local action in four dimensions, in the Minkowski cone and in the
 matter-dominated FLRW cone (4000 sprinklings each, $\rhoV=200$, $500$, $1250$
 and $3200$). The action is close to a random walk, with a small positive
 memory: the correlation between the action and its increment is
-$\kappa=0.069\pm0.015$ (weighted mean of the six pairs of adjacent cones;
+$\gamma=0.069\pm0.015$ (weighted mean of the six pairs of adjacent cones;
 no individual pair reaches $4\sigma$). We parametrise the correlation between
 the actions $S_i$, $S_j$ of two nested cones, $V_i<V_j$, as
 \begin{equation}
@@ -754,9 +791,9 @@ the action over sprinklings is close to Gaussian at these densities (excess
 kurtosis $0.7$ at $\rhoV=200$, compatible with zero at $3200$; below $0.2$ in
 absolute value for the increments), which supports the Gaussian process
 used below. A pre-registered requirement that
-$|\kappa|<0.2$ for every pair of cones failed for one non-adjacent pair in each geometry
-($\kappa=0.29\pm0.12$ and $0.23\pm0.09$), a criterion that, in retrospect,
-ignored their errors; it does not affect the value of $\beta$.
+$|\gamma|<0.2$ for every pair of cones failed for one non-adjacent pair in
+each geometry ($\gamma=0.29\pm0.12$ and $0.23\pm0.09$, within $1\sigma$ of
+the bound); it does not affect the value of $\beta$.
 
 % ---------------------------------------------------------------------------
 \section{Confronting the data}
@@ -764,16 +801,22 @@ ignored their errors; it does not affect the value of $\beta$.
 
 \subsection{Stochastic model}
 
+Section~\ref{sec:lambda} excludes the local action by its amplitude, so the
+test of this section concerns the strongly smeared action
+($\epsilon\sim10^{-49}$). For it we assume that the exponent $q=1/4$ and the
+memory $\beta$ measured for the local action carry over; neither has been
+measured in that regime (section~\ref{sec:discussion}).
+
 We model the cosmological constant along the observer's worldline as
 \begin{equation}
-\Lambda(t)=\lambda\,V(t)^{-q}\,s(t),
+\Lambda(t)=\Lambda_0\,V(t)^{-q}\,s(t),
 \label{eq:model}
 \end{equation}
 where $V(t)$ is the volume of the causal past and $s$ is an
 Ornstein--Uhlenbeck process~\cite{Uhlenbeck1930} in $\ln V$ with unit
 variance and ${\rm corr}(s_1,s_2)=(V_1/V_2)^c$, i.e.\ with relaxation rate
 $c$ per unit of $\ln V$. Model~1 of
-\cite{Das2023} corresponds to $q=c=1/2$ and $\lambda=8\pi\alpha$. The BD
+\cite{Das2023} corresponds to $q=c=1/2$ and $\Lambda_0=8\pi\alpha$. The BD
 action, with~\eref{eq:dlambda}, corresponds to $q=1/4$ and $c=3\beta/4$, and we
 take $\beta=0.9$ from the measurement above. The background is integrated with
 feedback, $(H/H_{100})^2=\omega_r a^{-4}+\omega_m a^{-3}+\Lambda/3$, with
@@ -790,7 +833,7 @@ fractions are regenerated by the test suite.
 
 We follow the per-seed method of \cite{Das2024}. Each seed fixes the random
 numbers of the process, and for each seed we minimise $\chi^2$ over
-$\omega_m$, the amplitude ($\alpha$ or $\lambda$) and the supernova magnitude
+$\omega_m$, the amplitude ($\alpha$ or $\Lambda_0$) and the supernova magnitude
 $M_B$. The minimisation over $\omega_m$ and the amplitude uses a $10\times10$
 logarithmic grid ($\omega_m=0.02$--$0.8$) with two local refinements, a final
 resolution of about $5\%$ in $\omega_m$; $M_B$ is minimised analytically. We
@@ -830,9 +873,10 @@ values exactly gives the same conclusions. Distance priors assume standard
 early physics. This holds for the BD model, where $\Lambda/3H^2\sim4\times10^{-5}$
 at $z=1100$, but not for Model~1 ($\sim0.5$), which we therefore fit to
 supernovae and BAO only. Its BAO term still uses the sound horizon
-integrated over each history, which stretches the fitting formulae for
-$z_{\rm drag}$; the conclusion does not depend on it, since the supernova
-part of its best seed alone is already $+64$. (With the CMB included anyway,
+integrated over each history, which takes the fitting formula for
+$z_{\rm drag}$~\cite{EisensteinHu1998} outside its range of validity, so
+the BAO exclusion of Model~1 is less robust than that of the BD model, whose
+$\Lambda$ is negligible before recombination. (With the CMB included anyway,
 its minimum is $+359$.)
 
 \subsection{Results}
@@ -845,22 +889,22 @@ the amplitude alone. Both, however, prefer $\Omega_m\approx0.5$.
 
 \begin{table}[htb]
 \caption{\label{tab:data}Fits of stochastic $\Lambda(t)$ histories (10\,000
-seeds per row), after the continuous refinement of the 50 best seeds; the
-grid minimum is given in parentheses. $\Delta\chi^2$ is relative to the
-$\Lambda$CDM fit to the same data ($\chi^2=1488.2$ for SN + BAO, $1504.0$ for
-SN + BAO + CMB). The last column splits the $\Delta\chi^2$ of the best seed by
-probe. Model~1 is shown without the CMB, since the distance priors are not
-applicable to it.}
+seeds per row), after the continuous refinement of the 50 best seeds.
+$\Delta\chi^2$ is relative to the $\Lambda$CDM fit to the same data. The last
+column splits the $\Delta\chi^2$ of the best seed by probe. Model~1 is shown
+without the CMB, since the distance priors are not applicable to it; its BAO
+term relies on the drag-epoch fit outside its range of validity
+(section~\ref{sec:data}).}
 \centering
 \begin{tabular}{@{}lccc}
 \hline
-Model & good seeds & $\Delta\chi^2_{\rm min}$ & best seed: SN / BAO / CMB\\
+Model & good seeds & $\Delta\chi^2_{\rm min}$ refined (grid) & best seed: SN / BAO / CMB\\
 \hline
-\multicolumn{4}{@{}l}{SN + BAO}\\
+\multicolumn{4}{@{}l}{SN + BAO \quad ($\chi^2_{\Lambda{\rm CDM}}=1488.2$)}\\
 Model 1 ($q=c=\frac12$) & 0 & $+84$ ($+87$) & $+64$ / $+20$ / --\\
 BD, $\beta=0.9$ & 0 & $+23$ ($+26$) & $-15$ / $+39$ / --\\
 \hline
-\multicolumn{4}{@{}l}{SN + BAO + CMB}\\
+\multicolumn{4}{@{}l}{SN + BAO + CMB \quad ($\chi^2_{\Lambda{\rm CDM}}=1504.0$)}\\
 BD, $\beta=0.5$ & 1 & $+14$ ($+45$) & $+4$ / $+16$ / $-7$\\
 BD, $\beta=0.88$ & 0 & $+70$ ($+116$) & $+19$ / $+56$ / $-5$\\
 BD, $\beta=0.9$ & 0 & $+74$ ($+124$) & $+20$ / $+59$ / $-5$\\
@@ -882,9 +926,9 @@ shape of the distance--redshift relation required by the supernovae and the
 scale required by the BAO. Adding the CMB, which is applicable to the BD
 model because its $\Lambda$ is negligible at recombination, raises the minimum
 to $+74$ (with $\beta=0.9$), and none of the seeds that were good with
-supernovae alone survives. The margin is not marginal: with a threshold of
-$25$ or even $50$ instead of $14.7$ there are still no good BD seeds for any
-$\beta$ in the measured range. Choosing the best of $10^4$ seeds, each with
+supernovae alone survives. The conclusion does not depend on the threshold:
+with $25$ or even $50$ instead of $14.7$ there are still no good BD seeds for
+any $\beta$ in the measured range. Choosing the best of $10^4$ seeds, each with
 its own fitted $\omega_m$ and amplitude, already favours the stochastic
 models; a comparison marginalised over seeds would penalise them further.
 
@@ -897,13 +941,15 @@ parameter $\beta$ (10\,000 seeds each), on the grid (circles) and after the
 continuous refinement of the 50 best seeds (squares); the orange line is the
 threshold for a good seed and the band marks the measured range of $\beta$.
 Right: refined minimum $\Delta\chi^2$ over the $(q,c)$ family of
-Ornstein--Uhlenbeck dynamics (1000 seeds per cell; indicative), with the
-number of good seeds where there are any; the column $q=1/2$, far above the
-threshold, shows grid values. Model~1 is the cell $q=c=1/2$. The diamond marks
-the BD action ($q=1/4$, $c=3\beta/4$ with $\beta=0.9$) and the bar the
-measured range of $\beta$. With 1000 seeds per cell the minima can differ
-from those with the $10^4$ seeds of the left panel (e.g.\ $+116$ at $c=0.75$
-against $+56$ for $\beta=1$).}
+Ornstein--Uhlenbeck dynamics, with the number of good seeds where there are
+any. Cells marked with an asterisk use $10^4$ seeds (the cell $q=1/4$,
+$c=3/4$ is the BD action with $\beta=1$ of the left panel); the others use
+1000 seeds and are indicative (the 1000-seed minimum at $q=1/4$, $c=3/4$ is
+$+116$). The column $q=1/2$, far above the threshold, shows grid values.
+The colour scale is clipped at $\Delta\chi^2=10$, so cells with smaller or
+negative minima share the lightest colour. Model~1 is the cell $q=c=1/2$. The
+diamond marks the BD action ($q=1/4$, $c=3\beta/4$ with $\beta=0.9$) and the
+bar the measured range of $\beta$.}
 \label{fig:data}
 \end{figure}
 
@@ -914,12 +960,17 @@ $\beta=0.5$, does produce one good seed in $10^4$ ($+14$), so the exclusion
 relies on the measured memory. Over the $(q,c)$ family, good seeds appear only
 in the corner where $\Lambda$ depends weakly or not at all on the volume and
 decorrelates slowly: $q=0$ with $c=1/4$ and $1/2$ (two and one good seeds in
-1000, the best at $-11$) and $q=1/8$, $c=1/4$ (one in 1000; four in $10^4$
-when this cell is extended to $10^4$ seeds, minimum $+5$). The cells with the
-BD exponent $q=1/4$ have no good seeds ($\geq+68$). The data therefore
-tolerate only a $\Lambda$ that is close to a slowly wandering constant, with
-the rare good histories at a rate of order $10^{-3}$--$10^{-4}$; the Model~1
-exponent $q=1/2$ is the worst column of the map ($\Delta\chi^2>1000$).
+1000, the best at $-11$) and $q=1/8$, $c=1/4$ (four in $10^4$, minimum $+5$).
+The cells with the BD exponent $q=1/4$ have no good seeds ($\geq+56$). The
+data therefore tolerate only a $\Lambda$ that is close to a slowly wandering
+constant, with the rare good histories at a rate of order
+$10^{-3}$--$10^{-4}$; the Model~1 exponent $q=1/2$ is the worst column of the
+map ($\Delta\chi^2>1000$). This is distinct from the preference of DESI DR2
+BAO combined with CMB and supernova data for a smoothly evolving dark-energy
+equation of state ($w_0w_a$, at $2.8$--$4.2\sigma$ depending on the supernova
+sample~\cite{DESI2025}): that concerns a smooth drift of the mean, whereas the
+models tested here are stochastic processes whose typical histories wander
+far more than the data allow.
 
 % ---------------------------------------------------------------------------
 \section{Discussion}
@@ -957,7 +1008,8 @@ Our conclusions have the following limitations.
 ($\Jone\propto(\rhoV)^{3/2}$, verified up to $\rhoV=10^8$) and one empirical
 one: that the correlations remain a constant fraction of $\Jone$. We verified
 the latter up to $\rhoV=25\,600$ in the diamond and $6400$ in the past cones,
-with a residual power law bounded by $-0.04<\delta<0.05$ ($2\sigma$). For the
+with a residual power law bounded by $-0.05<\delta<0.06$ ($2\sigma$, errors
+scaled for the excess scatter). For the
 smeared action, up to $\epsilon\rhoV=2560$, the pre-registered test failed
 for $\epsilon=0.1$, where the remainder decreases ($-4.1\sigma$; $-1.6\sigma$
 without the lowest density), and for $\epsilon=0.2$ it grows slightly
@@ -1020,7 +1072,8 @@ $\mathbb{E}[N F]=\rho\int_M\mathbb{E}[F(\eta+\delta_x)]\,\rmd x$, while
 differentiating with respect to the intensity gives
 $\rho\,\rmd\mathbb{E}[F]/\rmd\rho=\rho\int_M\mathbb{E}[F(\eta+\delta_x)-
 F(\eta)]\,\rmd x$. Subtracting $\mathbb{E}[N]\,\mathbb{E}[F]=\rhoV\,
-\mathbb{E}[F]$ from the first expression yields~\eref{eq:covNF}. For the local
+\mathbb{E}[F]$ from the first expression yields~\eref{eq:covNF}, a standard
+identity for Poisson functionals of Margulis--Russo type. For the local
 action, $F=\sum_ka_kN_k$ and $\langle N_k\rangle$ depends on $\rho$ only through
 $\rhoV$, which leads to ${\rm Cov}(N,N_k)=(k+2)L_k-(k+1)L_{k+1}$. We evaluate
 $\rmd\langle F\rangle/\rmd\rho$ with a central difference and checked it
@@ -1054,7 +1107,9 @@ sprinkling by sprinkling,
 and $J^6_{\rm c}$ is obtained by subtracting all of them from $(F-\langle
 F\rangle)^2$. The expectation of each statistic is the corresponding MYZ term,
 so the estimators are unbiased up to $O(1/M)$ from the sample mean. We checked
-the decomposition against an explicit enumeration of pairs of pairs.
+the decomposition against an explicit enumeration of all $43^2$ ordered pairs
+of the 43 related pairs of a sprinkling with 29 elements ($\rhoV=40$,
+$\epsilon=0.3$); the two agree to a relative precision of $10^{-9}$.
 
 \section{The boost-range integral and its leading correction}
 \label{app:boost}
@@ -1066,14 +1121,14 @@ measure is $\rmd V_y=\tau^3\sinh^2\chi\,\rmd\tau\,\rmd\chi\,\rmd\Omega$ and the
 interval has volume $c_4\tau^4$. For $\chi\gg1$ the point $y$ lies at a
 distance $\lambda=\tau\rme^\chi/2$ in time along the past null ray from $x$ in
 the direction $\hat{\boldsymbol n}$, displaced from it by $O(\tau\rme^{-\chi})$,
-so it lies in $M$ if $\lambda<\ell(x,\hat{\boldsymbol n})$ up to corrections
-of relative order $\tau^2/\ell^2$. Then
+so it lies in $M$ if $\lambda<T(x,\hat{\boldsymbol n})$ up to corrections
+of relative order $\tau^2/T^2$. Then
 \begin{equation}
 \int_0^{\chi_{\max}}\sinh^2\chi\,\rmd\chi=\frac{\rme^{2\chi_{\max}}}{8}
 -\frac{\chi_{\max}}{2}+O(1)
-=\frac{\ell^2}{2\tau^2}-\frac12\ln\frac{2\ell}{\tau}+O(1),
+=\frac{T^2}{2\tau^2}-\frac12\ln\frac{2T}{\tau}+O(1),
 \end{equation}
-with $\rme^{\chi_{\max}}=2\ell/\tau$. The pairs with $\rme^\chi=O(1)$
+with $\rme^{\chi_{\max}}=2T/\tau$. The pairs with $\rme^\chi=O(1)$
 contribute only to the $O(1)$ term. With $\mu=\rho c_4\tau^4$,
 $\int_0^\infty\tau\,P_n(\mu)\,\rmd\tau=\frac14(\rho c_4)^{-1/2}\,
 \Gamma(n+\frac12)/n!$ and $\int_0^\infty\tau^3P_n(\mu)\,\rmd\tau=
@@ -1091,7 +1146,7 @@ $\tau$ that contribute, its ratio to the leading term is
 \ln\rhoV+O\big((\rhoV)^{-1/2}\big),
 \end{equation}
 which is~\eref{eq:corr}. The terms of order $(\rhoV)^{-1/2}$ without the
-logarithm depend on $\int\rmd V\rmd\Omega\ln\ell$ and on the shape of the
+logarithm depend on $\int\rmd V\rmd\Omega\ln T$ and on the shape of the
 boundary, and are absorbed in $b_n$. In two dimensions $\int\rmd\chi=
 \chi_{\max}$ and the same steps give the logarithm of section~\ref{sec:boost}.
 
@@ -1111,12 +1166,50 @@ $\tau_c$ is the Minkowski one with $c_4$ replaced by $c_4w$, i.e.\
 $\frac14(\rho c_4w)^{-1/2}\Gamma(n+\frac12)/n!$, so that
 \begin{equation}
 \langle N_n\rangle\simeq\frac{\rho^{3/2}}{8\sqrt{c_4}}\,
-\frac{\Gamma(n+\frac12)}{n!}\int\rmd V_x\int\rmd\Omega\int_0^{\ell}
+\frac{\Gamma(n+\frac12)}{n!}\int\rmd V_x\int\rmd\Omega\int_0^{T}
 \frac{2\lambda\,a(\eta_x-\lambda)^4}{\sqrt w}\,\rmd\lambda,
 \end{equation}
-which is~\eref{eq:asym4} with $G$ given by~\eref{eq:Gflrw} ($\ell=\eta_x$
+which is~\eref{eq:asym4} with $G$ given by~\eref{eq:Gflrw} ($T=\eta_x$
 for the cone that reaches the big bang). For $a=1$, $w=1$ and the
-$\lambda$ integral is $\ell^2$, as in Minkowski spacetime.
+$\lambda$ integral is $T^2$, as in Minkowski spacetime.
+
+\section{Validation of the MYZ integrals}
+\label{app:validation}
+
+\Tref{tab:validation} lists the comparisons between the variance predicted by
+the MYZ integrals, evaluated by Monte Carlo, and the variance measured on
+independent sprinklings of the flat causal diamond, quoted in
+section~\ref{sec:setup}. In four dimensions the intersection volume of two
+intervals is computed by quadrature; at $\rhoV=100$ the Monte Carlo error of
+the prediction is $23\%$, so that point is a weak test.
+
+\begin{table}[htb]
+\caption{\label{tab:validation}Variance of the BD action in the flat causal
+diamond: MYZ prediction against direct sprinklings (4000 per point in two
+dimensions, 6000 in four), with $z$ the difference in units of the combined
+error.}
+\centering
+\begin{tabular}{@{}rcccccc}
+\hline
+ & \multicolumn{3}{c}{$d=2$, local} & \multicolumn{3}{c}{$d=4$, local}\\
+$\rhoV$ & prediction & sprinklings & $z$ & prediction & sprinklings & $z$\\
+\hline
+25 & $638\pm8$ & $651\pm17$ & $0.64$ & $1899\pm82$ & $1840\pm97$ & $-0.46$\\
+50 & $1968\pm24$ & $1971\pm48$ & $0.06$ & $9775\pm332$ & $10\,234\pm249$ & $1.10$\\
+100 & $5401\pm68$ & $5626\pm126$ & $1.56$ & $51\,224\pm12\,003$ & $53\,932\pm1144$ & $0.22$\\
+200 & $14\,099\pm177$ & $14\,029\pm317$ & $-0.19$ & & & \\
+400 & $34\,734\pm468$ & $36\,121\pm830$ & $1.46$ & & & \\
+\hline
+ & \multicolumn{3}{c}{$d=2$, $\epsilon=0.5$} & \multicolumn{3}{c}{$d=2$, $\epsilon=0.25$}\\
+\hline
+25 & $12.59\pm0.27$ & $13.36\pm0.36$ & $1.72$ & $0.576\pm0.015$ & $0.595\pm0.016$ & $0.86$\\
+50 & $39.8\pm0.9$ & $40.5\pm1.0$ & $0.55$ & $2.09\pm0.05$ & $2.10\pm0.05$ & $0.21$\\
+100 & $117.3\pm2.7$ & $113.4\pm2.6$ & $-1.03$ & $6.46\pm0.17$ & $6.24\pm0.15$ & $-0.96$\\
+200 & $295\pm8$ & $299\pm7$ & $0.41$ & $17.7\pm0.5$ & $17.2\pm0.4$ & $-0.74$\\
+400 & $733\pm22$ & $748\pm17$ & $0.56$ & $43.4\pm1.6$ & $45.3\pm1.0$ & $0.98$\\
+\hline
+\end{tabular}
+\end{table}
 
 \bibliographystyle{iopart-num}
 \bibliography{refs}
