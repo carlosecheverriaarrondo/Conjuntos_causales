@@ -89,6 +89,17 @@ full() {
     python scripts/goal6_referee.py snbao model1  #   SN + BAO sin CMB (~35 min)
     python scripts/goal6_referee.py snbao bd
     python scripts/goal6_referee.py fit
+    python scripts/goal7_referee3.py extras       # Goal 7 (tercera revisión; ~1 min)
+    for r in snbao_bd snbao_model1 full_bd full_model1 cell beta0.88 beta0.97 beta0.5 beta1; do
+        python scripts/goal7_referee3.py refine $r   #   reajuste continuo (~20-40 min cada uno)
+    done
+    for q in 0 0.125 0.25 0.375; do for c in 0.25 0.5 0.75 1; do
+        python scripts/goal7_referee3.py refine map_q${q}_c${c}
+    done; done
+    python scripts/goal7_referee3.py bestparts    #   Δχ² por sonda (tabla 2)
+    python scripts/goal7_referee3.py diamond      #   ρV = 25 600 (~15-20 h, 10 bloques)
+    python scripts/goal7_referee3.py pred
+    python scripts/goal7_referee3.py fit
 }
 
 case "${1:-fast}" in

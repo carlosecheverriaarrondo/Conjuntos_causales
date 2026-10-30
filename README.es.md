@@ -1742,6 +1742,72 @@ Cambios en el paper:
   - DESI 2025 y Dowker 2025, correctas.
 - DOI de Zenodo (todas las versiones): 10.5281/zenodo.23413234.
 
+## Goal 7: tercera revisión externa (Fable, 2026-10-23)
+
+Veredicto de la revisión: revisión mayor. Seis puntos mayores, 22 menores.
+Script: `scripts/goal7_referee3.py`. Tests: `tests/test_goal7.py`. Criterios
+prerregistrados (4σ) en el docstring del script.
+
+**Sin cálculo nuevo (`extras`, `figures/goal7_extras.json`):**
+- Corrección de orden (ρV)^(−1/2) ln ρV a ⟨N_k⟩. Derivada analíticamente
+  (apéndice C del paper) y verificada con las medias exactas del cono:
+  coeficiente ajustado frente a predicho dentro del 2 %.
+- 2D: b = (1 + r₂)Σf², con r₂ = 0.073 (local), 0.42 (ε = 0.5) y 0.60
+  (ε = 0.25).
+- Memoria β con errores bootstrap y media GLS: 0.930 ± 0.021 (Minkowski) y
+  0.916 ± 0.021 (FLRW). S es casi gaussiana para ρV ≥ 800.
+
+**R8, reajuste continuo** (`refine RUN`, `figures/goal7_refine_*.json`):
+- Nelder–Mead en (ln ω_m, ln amplitud) sobre las 50 mejores semillas de la
+  rejilla.
+- Con CMB, la rejilla (≈ 5 % en ω_m) era gruesa: los mínimos bajan mucho.
+  - BD, β = 0.9: +124 → +74.
+  - β = 0.88 / 0.97 / 1: +70 / +52 / +56.
+  - Model 1 con CMB: +364 → +359.
+- Sin CMB: BD +26 → +23; Model 1 +87 → +84.
+- En el rango medido de β no hay ninguna semilla buena, ni con margen 25 ni
+  con 50.
+- Pero β = 0.5 tiene 1 semilla buena de 10⁴ (+14).
+- En el mapa (q, c), reajustadas las 16 celdas con q ≤ 3/8 (a posteriori,
+  al ver la celda (1/8, 1/4)):
+  - q = 0, c = 1/4: 2 buenas de 1000 (mínimo −11).
+  - q = 0, c = 1/2: 1 buena (+6).
+  - q = 1/8, c = 1/4: 1 buena de 1000 (+14) y 4 de 10⁴ (+5).
+  - Celdas con q = 1/4 (BD): ≥ +68.
+- Comprobación "safe": en todas las ejecuciones, la semilla 50 de la rejilla
+  menos la mayor mejora sigue por encima del umbral. Es una heurística: una
+  semilla de fuera de las 50 podría mejorar más.
+- Conclusión corregida: BD queda excluida con la memoria medida. Los datos
+  sólo toleran un Λ cercano a una constante que deriva despacio, y las
+  historias buenas aparecen con una frecuencia de 10⁻³–10⁻⁴.
+- Δχ² por sonda de la mejor semilla (`bestparts`):
+  `figures/goal7_refine_parts.json` (tabla 2).
+
+**R6/R7, diamante con ρV = 25 600** (`diamond`, `pred`, `fit`;
+`figures/goal7_results.json`):
+- Simulación: 500 sprinklings en 10 bloques de 50. Se paró a mitad el
+  2026-10-23 y se terminó el 2026-10-30, unas 15 h en total.
+- **R6 (local): sí.**
+  - r(25 600) = 0.19 ± 0.08, a −1.7σ de 0.324.
+  - Combinado 25–25 600: r = 0.321 ± 0.012, pendiente 0.002 ± 0.007
+    (0.3σ, χ² = 16.0 con 9 g.l.).
+  - Cota sobre la ley de potencias residual: −0.04 < δ < 0.05 (2σ).
+  - Exponente local entre 12 800 y 25 600: 0.71 ± 0.07 (J¹: 0.81).
+- **R7 (suavizada), pendiente sobre 400–25 600:**
+
+  | ε | Pendiente | ¿Cumple? |
+  |---|---|---|
+  | 0.5 | +0.02 ± 0.02 (1.0σ) | sí |
+  | 0.2 | +0.12 ± 0.04 (2.9σ) | sí |
+  | 0.1 | −0.24 ± 0.06 (−4.1σ) | **NO** |
+
+  - Con ε = 0.1, quitando ρV = 400, la pendiente queda en −1.6σ.
+  - Con ε = 0.1, r baja: las correlaciones crecen más despacio que J¹.
+  - Con ε = 0.2, la cota a 2σ es 0.01 < δ < 0.07: crece ligeramente.
+- El paper lo dice tal cual. Se rebajan las afirmaciones sobre la acción
+  suavizada (punto mayor 1): con suavizado fuerte, el límite asintótico es
+  una conjetura.
+
 ## Referencias
 
 - Bombelli, Lee, Meyer & Sorkin (1987), Phys. Rev. Lett. 59, 521 — sprinkling de Poisson.

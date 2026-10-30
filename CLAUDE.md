@@ -224,7 +224,18 @@ Segunda revisión de Fable (2026-10-16): revisión menor. Bootstrap a
 posteriori (`goal6_referee.py boot`): los errores de fórmula son correctos
 (0.97–1.03); cotas de δ estables (< 0.08 escalada, < 0.09 con ρV ≥ 400).
 Zenodo: DOI 10.5281/zenodo.23413234 (todas las versiones; v1.0.0 = .23413235).
-Total: 213 tests pasando.
+Total: 213 tests pasando (Goal 6).
+Goal 7 (2026-10-23, tercera revisión de Fable: revisión mayor;
+`scripts/goal7_referee3.py`): corrección (ρV)^(−1/2) ln ρV derivada
+(apéndice C); r₂ en 2D; β con bootstrap (0.93 ± 0.02). R8 (reajuste
+continuo de las 50 mejores semillas): con CMB los mínimos bajan mucho
+(BD β = 0.9: +124 → +74), BD sigue excluida en el β medido, pero β = 0.5 y
+las celdas con q ≤ 1/8, c ≤ 1/2 tienen semillas buenas raras (q = 0,
+c = 1/4: −11). Paper y figura 3 actualizados. Diamante ρV = 25 600 (2026-10-30):
+R6 sí (r combinado 0.321 ± 0.012, pendiente 0.3σ, −0.04 < δ < 0.05);
+R7 sí con ε = 0.5 y 0.2 (2.9σ), NO con ε = 0.1 (−4.1σ, r baja; −1.6σ sin
+ρV = 400). Paper rebajado: exponente 3/4 sólo para la acción local en el
+rango simulado; con suavizado fuerte, conjetura. Total: 221 tests pasando.
 Documentación (2026-10-15): el cuaderno detallado en español pasó a
 README.es.md (los "ver README" de arriba se refieren a él); README.md es el
 resumen en inglés para los lectores del paper. Licencia MIT; CITATION.cff y

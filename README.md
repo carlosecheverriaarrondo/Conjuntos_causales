@@ -16,12 +16,16 @@ supernova, BAO and CMB data.
   noise in the number of nearly null intervals, which grows with the boost
   range of the region: (ΔS)² ∝ (ρV)^(2−2/d). In 4D, ΔS ∝ (ρV)^(3/4) and
   δΛ ∝ V^(−1/4), not the V^(−1/2) of Everpresent Λ.
-- The exponent is the same in causal diamonds, truncated past light cones and
-  FLRW past cones reaching the big bang, for the local and smeared actions.
-- Stochastic Λ(t) histories with this scaling fail Pantheon+SH0ES + DESI DR2
-  BAO + Planck distance priors (0 of 10⁴ histories acceptable,
-  Δχ²_min = +124), robustly in the memory parameter and across a family of
-  Ornstein–Uhlenbeck dynamics.
+- For the local action the exponent is the same in causal diamonds,
+  truncated past light cones and FLRW past cones reaching the big bang,
+  within the simulated range (ρV ≤ 25 600). The smeared action is compatible
+  with it over a smaller range, with weak residual trends; the strong-smearing
+  limit remains open.
+- Stochastic Λ(t) histories with this scaling and the measured memory fail
+  Pantheon+SH0ES + DESI DR2 BAO + Planck distance priors (0 of 10⁴ histories
+  acceptable, Δχ²_min = +74). Within a wider family of Ornstein–Uhlenbeck
+  dynamics, rare acceptable histories appear only when Λ stays close to a
+  slowly wandering constant.
 
 A detailed lab notebook (in Spanish), with every pre-registered criterion,
 intermediate result and deliberate-error check, is in
@@ -35,7 +39,7 @@ Tested with Python 3.12.3 on Linux.
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
-python -m pytest -q          # 213 tests, ~12 min
+python -m pytest -q          # 221 tests, ~13 min
 ```
 
 The observational data are not stored in the repository. Download them (with
@@ -76,6 +80,7 @@ numbers come from fixed seeds.
 | §6, SN + BAO + CMB (table 2) | `scripts/goal4d_combined.py` | `figures/goal4d_*.json` | `test_goal4d.py` |
 | §6, robustness (figure 3) | `scripts/goal4e_robustness.py` | `figures/goal4e_*.json` | `test_goal4e.py` |
 | §4.2–4.4, §6 and figure 1(c), additional tests (ρV = 12 800, FLRW at 6400, SN + BAO without CMB) | `scripts/goal6_referee.py` | `figures/goal6_*.json`, `figures/goal4e_q0.125_c0.25_n10000.json` | `test_goal6.py` |
+| §3, §4.2, §4.4, §5.2, appendix C, table 2, figures 1 and 3 (third review: ρV = 25 600, leading correction, β errors, continuous refinement of the per-seed fits) | `scripts/goal7_referee3.py` | `figures/goal7_*.json` | `test_goal7.py` |
 
 Large intermediate files (interval-cardinality histograms of the 4D
 sprinklings) go to `data/`, which is not versioned; the scripts regenerate
