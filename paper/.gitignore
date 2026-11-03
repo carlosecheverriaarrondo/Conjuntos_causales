@@ -8,3 +8,4 @@
 *.synctex.gz
 build.log
 cover_letter.pdf
+arxiv_*.tar.gz
