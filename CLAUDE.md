@@ -242,6 +242,12 @@ cita a Benincasa-Dowker-Schmitzer 2011 y Schmitzer 2010 (ya vieron crecer las
 fluctuaciones en 2D); cota de δ con error reescalado (−0.05 < δ < 0.06) y
 χ²/dof en la tabla 1; notación (T(x,n̂), γ, Λ₀); nota metodológica; apéndice D
 con las comparaciones MYZ-sprinklings; figura 3 con 10⁴ semillas donde existen.
+Envío (2026-11-03): revisión de estilo por un agente externo sin contexto
+(informe en `paper/revision_estilo_2026-11-03.md`, 38 hallazgos, sólo prosa)
+aplicada entera en `paper/main.tex`; carta de presentación para CQG en
+`paper/cover_letter.tex`. Release v1.1.0 = versión enviada. Pendiente: envío a
+CQG (ScholarOne, revisión simple anónima) y a arXiv (gr-qc; desde el 21-1-2026
+hace falta endorser personal si no hay artículos previos en la categoría).
 Documentación (2026-10-15): el cuaderno detallado en español pasó a
 README.es.md (los "ver README" de arriba se refieren a él); README.md es el
 resumen en inglés para los lectores del paper. Licencia MIT; CITATION.cff y

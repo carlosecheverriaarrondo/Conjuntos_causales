@@ -7,6 +7,8 @@ authors:
     email: "cecharr@idf.upv.es"
     affiliation: "Instituto de Diseño para la Fabricación y Producción Automatizada, MALTA Consolider Team, Universitat Politècnica de València"
 license: MIT
+version: "1.1.0"
+date-released: "2026-11-03"
 doi: "10.5281/zenodo.23413234"
 repository-code: "https://github.com/carlosecheverriaarrondo/Conjuntos_causales"
 keywords:
