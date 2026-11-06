@@ -1,9 +1,9 @@
-"""Punto 1b: fluctuaciones de la acción BD en el cono pasado hasta el big bang
-de un FLRW plano 2D, a(eta) = eta^alpha (``scripts/flrw_fluctuations.py``).
+"""Item 1b: fluctuations of the BD action in the past cone down to the big bang
+of a flat 2D FLRW spacetime, a(eta) = eta^alpha (``scripts/flrw_fluctuations.py``).
 
-Márgenes fijados ANTES de ver los resultados:
-  F1 (volúmenes en forma cerrada frente a integración numérica): relativo 1e-9;
-  F2, F3, F4: 4σ (estándar del proyecto).
+Tolerances fixed BEFORE seeing the results:
+  F1 (closed-form volumes vs. numerical integration): relative 1e-9;
+  F2, F3, F4: 4σ (project standard).
 """
 
 import json
@@ -39,7 +39,7 @@ def test_F1_region_volume_and_overlap(alpha):
     rng = np.random.default_rng(5)
     pts = sprinkle(g.region, 40 / g.volume, rng)
     y1, x1, y2, x2 = pts[0:1], pts[-1:], pts[1:2], pts[-2:-1]
-    # la intersección de un intervalo consigo mismo es él mismo
+    # the intersection of an interval with itself is the interval
     assert g.overlap_volume(y1, x1, y1, x1) == pytest.approx(g.interval_volume(y1, x1), rel=1e-12)
     assert g.overlap_volume(y1, x1, y2, x2) == pytest.approx(g.overlap_volume(y2, x2, y1, x1), rel=1e-12)
 
@@ -63,13 +63,13 @@ def test_sprinkling_density(alpha):
     assert abs(np.mean(counts) - lam) < K_SIGMA * np.sqrt(lam / n)
 
 
-# --- resultados guardados por scripts/flrw_fluctuations.py (fallan si faltan) ---
+# --- results saved by scripts/flrw_fluctuations.py (fail if missing) ---
 
 
 @pytest.fixture(scope="module")
 def results():
     path = FIG / "flrw_results.json"
-    assert path.exists(), "ejecuta scripts/flrw_fluctuations.py sim, pred y fit"
+    assert path.exists(), "run scripts/flrw_fluctuations.py sim, pred and fit"
     return json.loads(path.read_text())
 
 

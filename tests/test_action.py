@@ -1,10 +1,10 @@
-"""Tests del Goal 2: intervalos, operador y acción de Benincasa-Dowker.
+"""Goal 2 tests: intervals, Benincasa-Dowker operator and action.
 
-Tolerancias:
-- Comparaciones simulación vs. valor esperado exacto: |media - esperado| < 4 SEM
-  (probabilidad de fallo espurio ~6e-5 por comparación; semillas fijas).
-- Identidades algebraicas y límites analíticos: tolerancias numéricas
-  indicadas en cada test.
+Tolerances:
+- Simulation vs. exact expected value: |mean - expected| < 4 SEM
+  (spurious-failure probability ~6e-5 per comparison; fixed seeds).
+- Algebraic identities and analytic limits: numerical tolerances stated in
+  each test.
 """
 
 import numpy as np
@@ -42,10 +42,10 @@ def _within(samples, expected, k=K_SIGMA):
     samples = np.asarray(samples, dtype=float)
     mean = samples.mean()
     sem = samples.std(ddof=1) / np.sqrt(len(samples))
-    return abs(mean - expected) < k * sem, f"media={mean:.5g} ± {sem:.3g}, esperado={expected:.5g}"
+    return abs(mean - expected) < k * sem, f"mean={mean:.5g} ± {sem:.3g}, expected={expected:.5g}"
 
 
-# ---------------------------------------------------------------- intervalos
+# ----------------------------------------------------------------- intervals
 
 
 def test_interval_cardinalities_brute_force():
@@ -57,7 +57,7 @@ def test_interval_cardinalities_brute_force():
 
 
 def test_interval_abundances_chain():
-    """Cadena de 5 elementos: N_k = 5 - 1 - k pares con k elementos entre ellos."""
+    """Chain of 5 elements: N_k = 5 - 1 - k pairs with k elements between them."""
     chain = np.triu(np.ones((5, 5), dtype=bool), k=1)
     np.testing.assert_array_equal(interval_abundances(chain), [4, 3, 2, 1])
 
@@ -67,7 +67,7 @@ def test_future_counts_matches_matrix():
     np.testing.assert_array_equal(minkowski_future_counts(pts), minkowski_causal_matrix(pts).sum(axis=1))
 
 
-# ------------------------------------------------------ coeficientes y acción
+# ---------------------------------------------------- coefficients and action
 
 
 @pytest.mark.parametrize("dim", [2, 4])
@@ -111,7 +111,7 @@ def test_action_is_sum_of_operator(dim, eps):
     assert bd_action(C, dim, eps) == pytest.approx(expected, rel=1e-9)
 
 
-# ------------------------------------------------- resultados analíticos exactos
+# -------------------------------------------------------- exact analytic results
 
 
 @pytest.mark.parametrize("dim", [2, 4])
@@ -123,14 +123,14 @@ def test_past_weight_of_one_is_volume(dim, lam):
 @pytest.mark.parametrize("dim", [2, 4])
 @pytest.mark.parametrize("eps", [1.0, 0.1])
 def test_expected_operator_vanishes_in_flat_limit(dim, eps):
-    """E[l^2 B 1] -> 0 (R = 0) cuando eps rho V -> infinito: los términos en
-    ln(Lambda) y sqrt(Lambda) se cancelan por la elección de los C_k."""
+    """E[l^2 B 1] -> 0 (R = 0) as eps rho V -> infinity: the ln(Lambda) and
+    sqrt(Lambda) terms cancel by the choice of the C_k."""
     for lam_eps in (100.0, 1e3, 1e5):
         assert abs(expected_bd_bracket_at_top(dim, lam_eps / eps, eps)) < 1e-6
 
 
 def test_expected_abundances_2d_independent_derivation():
-    """En 2D (coordenadas de cono de luz) E[N_k] = L^2 int int (1-s)(1-w) p_k(L s w)."""
+    """In 2D (light-cone coordinates) E[N_k] = L^2 int int (1-s)(1-w) p_k(L s w)."""
     from scipy.integrate import dblquad
 
     lam = 30.0
@@ -140,14 +140,14 @@ def test_expected_abundances_2d_independent_derivation():
 
 
 def test_expected_2d_action_of_diamond_tends_to_one():
-    """Benincasa, Dowker & Schmitzer (2011): <S> -> V - E + F del teselado nulo;
-    un diamante tiene 4 vértices, 4 aristas y 1 cara: <S> -> 1."""
+    """Benincasa, Dowker & Schmitzer (2011): <S> -> V - E + F of the null
+    tessellation; a diamond has 4 vertices, 4 edges and 1 face: <S> -> 1."""
     for lam in (100.0, 1000.0, 5000.0):
         assert expected_bd_action_diamond(2, lam) == pytest.approx(1.0, abs=1e-6)
     assert expected_bd_action_diamond(2, 1000.0, eps=0.2) == pytest.approx(1.0, abs=1e-6)
 
 
-# ------------------------------------------- simulación vs. valores esperados
+# ------------------------------------------------ simulation vs. expectations
 
 
 @pytest.mark.parametrize("dim", [2, 4])
@@ -170,7 +170,7 @@ def test_sprinkled_abundances_and_action_match_expectation(dim):
 
 
 def test_sprinkled_2d_action_mean_is_one():
-    """Media de la acción 2D de un diamante con rho V = 1000, frente a 1."""
+    """Mean 2D action of a diamond with rho V = 1000, compared with 1."""
     region = CausalDiamond(2)
     rho = 1000.0 / region.volume
     rng = np.random.default_rng(40)
@@ -181,8 +181,8 @@ def test_sprinkled_2d_action_mean_is_one():
 
 @pytest.mark.parametrize("dim, lam, eps", [(2, 300.0, 1.0), (2, 1000.0, 0.1), (4, 300.0, 1.0), (4, 1000.0, 0.1)])
 def test_operator_at_top_vertex_matches_expectation(dim, lam, eps):
-    """(B_eps 1) en el vértice superior de un diamante plano (pasado completo
-    sprinkleado): la media simulada coincide con la exacta, que es ~0 (R = 0)."""
+    """(B_eps 1) at the top vertex of a flat diamond (its whole past
+    sprinkled): the simulated mean matches the exact one, which is ~0 (R = 0)."""
     region = CausalDiamond(dim)
     rho = lam / region.volume
     rng = np.random.default_rng(50 + dim)

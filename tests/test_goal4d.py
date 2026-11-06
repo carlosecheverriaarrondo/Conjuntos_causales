@@ -1,9 +1,9 @@
-"""Goal 4d: BAO de DESI DR2 y priors de distancia del CMB (``causets/cmb_bao.py``).
+"""Goal 4d: DESI DR2 BAO and CMB distance priors (``causets/cmb_bao.py``).
 
-Tolerancias fijadas antes de ejecutar estos tests. W1 y W2 (criterios del
-script) se evalúan en ``scripts/goal4d_combined.py validate``; aquí se
-comprueban las piezas. Necesita los datos (``scripts/get_pantheon.sh``); si
-faltan, se salta lo que los usa.
+Tolerances fixed before running these tests. W1 and W2 (the script's
+criteria) are evaluated in ``scripts/goal4d_combined.py validate``; here the
+building blocks are checked. Requires the data (``scripts/get_pantheon.sh``);
+whatever uses them is skipped if they are missing.
 """
 
 import numpy as np
@@ -28,7 +28,7 @@ def test_sound_horizon_without_baryons_is_eta_over_sqrt3():
 
 
 def test_sound_horizon_matches_direct_integral():
-    """r_s(z*) por la historia de evolve frente a Chen et al. ec. 3 con quad: 1e-4."""
+    """r_s(z*) from the evolve history vs. Chen et al. eq. 3 with quad: 1e-4."""
     om, h, ob = 0.1433, 0.6727, cb.OMEGA_B
     real = _lcdm(om, h)
     r_star = cb.early_quantities(real, om)[0][0]
@@ -50,18 +50,18 @@ def test_z_star_and_z_drag_anchored_to_planck():
 
 def test_cmb_conditional_gaussian():
     cmb = cb.CMBPriors()
-    assert cmb.chi2(*cb.CMB_MEAN[:2]) == pytest.approx(0, abs=1e-12)  # omega_b fijado en su media
-    # sólo R desplazado: varianza condicionada a omega_b y minimizada en l_A = sigma_R² (1 - rho²_R,ob) ...
-    # comprobación directa: χ² de un desplazamiento en R con l_A en su media condicional óptima
+    assert cmb.chi2(*cb.CMB_MEAN[:2]) == pytest.approx(0, abs=1e-12)  # omega_b fixed at its mean
+    # only R shifted: variance conditioned on omega_b and minimised over l_A = sigma_R² (1 - rho²_R,ob) ...
+    # direct check: χ² of a shift in R with l_A at its optimal conditional mean
     c = np.linalg.inv(cmb.cinv)
     assert c[0, 0] == pytest.approx(cb.CMB_SIG[0] ** 2 * (1 - 0.66**2), rel=1e-12)
 
 
-@pytest.mark.skipif(not HAVE_DESI, reason="faltan los datos de DESI DR2")
+@pytest.mark.skipif(not HAVE_DESI, reason="DESI DR2 data missing")
 def test_bao_chi2_zero_at_data_and_size():
     bao = cb.DESIDR2()
     assert len(bao.value) == 13 and len(bao.z_unique) == 7
-    # construir (dm, dh, r_d) que reproducen exactamente los datos
+    # build (dm, dh, r_d) that reproduce the data exactly
     r_d = np.array([1.0])
     dm = np.zeros((1, 7))
     dh = np.zeros((1, 7))

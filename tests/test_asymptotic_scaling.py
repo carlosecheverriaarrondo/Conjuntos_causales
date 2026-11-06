@@ -1,14 +1,14 @@
-"""Goal 3c: fluctuaciones de la acción BD suavizada en el régimen eps rho V > 100
-(Minkowski 2D).
+"""Goal 3c: fluctuations of the smeared BD action in the regime eps rho V > 100
+(2D Minkowski).
 
-Márgenes fijados ANTES de ver los resultados (mismo criterio que en el Goal 3):
-  |simulación - predicción| < 4 sigma_combinada, punto a punto;
-  |p_sim - p_pred| < 4 sigma_combinada para el exponente ΔS ∝ (rho V)^p.
+Tolerances fixed BEFORE seeing the results (same criterion as in Goal 3):
+  |simulation - prediction| < 4 sigma_combined, point by point;
+  |p_sim - p_pred| < 4 sigma_combined for the exponent ΔS ∝ (rho V)^p.
 
-``test_asymptotic_point`` se calcula en el propio test (semillas fijas).
-``test_long_run_*`` comprueban los resultados guardados por
-``scripts/goal3c_asymptotic.py`` (rho V = 800..3200, demasiado caro para la
-suite): fallan si el fichero no existe, en vez de saltarse.
+``test_asymptotic_point`` is computed within the test itself (fixed seeds).
+``test_long_run_*`` check the results saved by
+``scripts/goal3c_asymptotic.py`` (rho V = 800..3200, too expensive for the
+suite): they fail if the file does not exist, rather than being skipped.
 """
 
 import json
@@ -38,7 +38,7 @@ def test_asymptotic_point():
 
 @pytest.fixture(scope="module")
 def long_run():
-    assert RESULTS.exists(), f"falta {RESULTS}: ejecuta scripts/goal3c_asymptotic.py (sim, pred, fit)"
+    assert RESULTS.exists(), f"missing {RESULTS}: run scripts/goal3c_asymptotic.py (sim, pred, fit)"
     return json.loads(RESULTS.read_text())
 
 

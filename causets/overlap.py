@@ -1,34 +1,34 @@
-"""Volumen de la intersección de dos intervalos causales en Minkowski 4D,
-|I(y1, x1) ∩ I(y2, x2)|, por cuadratura determinista.
+"""Volume of the intersection of two causal intervals in 4D Minkowski,
+|I(y1, x1) ∩ I(y2, x2)|, by deterministic quadrature.
 
-No hay forma cerrada (MYZ, arXiv:2407.03395, sólo parametrizan J⁻(x1)∩J⁻(x2)
-en 2D, apéndice C.1). Aquí se reduce a una integral doble:
+There is no closed form (MYZ, arXiv:2407.03395, only parametrise J⁻(x1)∩J⁻(x2)
+in 2D, appendix C.1). Here it is reduced to a double integral:
 
     I(y1,x1) ∩ I(y2,x2) = J⁺(y1) ∩ J⁺(y2) ∩ J⁻(x1) ∩ J⁻(x2).
 
-A tiempo fijo t cada cono es una bola de R³ (centro la parte espacial del
-vértice, radio |t - t_vértice|), y a (t, z) fijos cada bola es un disco del
-plano (x, y). El área de la intersección de los cuatro discos se calcula
-EXACTAMENTE con el teorema de Green: la frontera de una intersección de
-discos está formada por arcos de sus circunferencias; para la circunferencia
-i (centro c, radio r) se cortan los arcos por sus intersecciones con las
-demás, se conservan los sub-arcos cuyo punto medio está dentro de todos los
-otros discos, y cada sub-arco [θ1, θ2] aporta
+At fixed time t each cone is a ball of R³ (centre the spatial part of the
+vertex, radius |t - t_vertex|), and at fixed (t, z) each ball is a disc of the
+(x, y) plane. The area of the intersection of the four discs is computed
+EXACTLY with Green's theorem: the boundary of an intersection of discs is
+made up of arcs of their circles; for circle i (centre c, radius r) the arcs
+are cut at its intersections with the others, the sub-arcs whose midpoint
+lies inside all the other discs are kept, and each sub-arc [θ1, θ2]
+contributes
 
     ½ ∮ (x dy - y dx) = ½ [r² (θ2 - θ1) + c_x r (sin θ2 - sin θ1) - c_y r (cos θ2 - cos θ1)].
 
-El volumen es  ∫ dt ∫ dz Área(t, z),  con Gauss-Legendre en t y en z sobre
-los intervalos donde todas las bolas/discos existen. El integrando tiene
-singularidades de tipo raíz en los extremos; el cambio de variable
-s -> (3s - s³)/2 (derivada nula en s = ±1) las suaviza.
+The volume is  ∫ dt ∫ dz Area(t, z),  with Gauss-Legendre in t and in z over
+the intervals where all the balls/discs exist. The integrand has square-root
+singularities at the endpoints; the change of variable s -> (3s - s³)/2
+(vanishing derivative at s = ±1) smooths them out.
 
-El volumen del corte V3(t) tiene "codos" donde dos esferas pasan a ser
-tangentes (una bola entra en otra o deja de cortarla). Para cada par de conos
-la condición |Δc| = R_i ± R_j es LINEAL en t (los radios son |t - t_vértice|),
-así que esos instantes se calculan exactamente y el rango de t se parte en
-paneles con ellos. Quedan codos en z (y los de tangencias triples), por lo
-que la convergencia en z es algebraica: la precisión se comprueba en los tests
-contra casos exactos y contra Monte Carlo de alta estadística.
+The volume of the slice V3(t) has "kinks" where two spheres become tangent
+(one ball enters another or stops intersecting it). For each pair of cones
+the condition |Δc| = R_i ± R_j is LINEAR in t (the radii are |t - t_vertex|),
+so those instants are computed exactly and the t range is split into panels
+at them. Kinks in z remain (and those of triple tangencies), so the
+convergence in z is algebraic: the accuracy is checked in the tests against
+exact cases and against high-statistics Monte Carlo.
 """
 
 from __future__ import annotations
@@ -39,14 +39,14 @@ _TWO_PI = 2.0 * np.pi
 
 
 def _nodes(n: int) -> tuple[np.ndarray, np.ndarray]:
-    """Nodos y pesos en [-1, 1] de Gauss-Legendre tras s -> (3s - s³)/2."""
+    """Gauss-Legendre nodes and weights on [-1, 1] after s -> (3s - s³)/2."""
     s, w = np.polynomial.legendre.leggauss(n)
     return (3 * s - s**3) / 2, w * 1.5 * (1 - s**2)
 
 
 def disk_intersection_area(c: np.ndarray, r: np.ndarray) -> np.ndarray:
-    """Área exacta de la intersección de k discos. ``c``: (..., k, 2), ``r``:
-    (..., k). Un radio <= 0 (disco vacío) da área 0."""
+    """Exact area of the intersection of k discs. ``c``: (..., k, 2), ``r``:
+    (..., k). A radius <= 0 (empty disc) gives area 0."""
     c = np.asarray(c, float)
     r = np.asarray(r, float)
     k = r.shape[-1]
@@ -63,15 +63,15 @@ def disk_intersection_area(c: np.ndarray, r: np.ndarray) -> np.ndarray:
     alpha = np.arccos(np.clip(np.where(cross, cosa, 1.0), -1, 1))
     ang = np.concatenate([phi - alpha, phi + alpha], axis=-1) % _TWO_PI  # (..., k, 2k)
     ok = np.concatenate([cross, cross], axis=-1)
-    # ángulos sin corte -> se repite el máximo válido (arcos de longitud 0);
-    # sin ningún corte, todos 0 y el arco cíclico es la circunferencia entera
+    # angles without an intersection -> the largest valid one is repeated (arcs of
+    # length 0); with no intersection at all, all 0 and the cyclic arc is the whole circle
     vmax = np.max(np.where(ok, ang, -np.inf), axis=-1, keepdims=True)
     vmax = np.where(np.isfinite(vmax), vmax, 0.0)
     ang = np.sort(np.where(ok, ang, vmax), axis=-1)
     start = ang
     stop = np.concatenate([ang[..., 1:], ang[..., :1] + _TWO_PI], axis=-1)
     mid = (start + stop) / 2
-    # punto medio de cada sub-arco de la circunferencia i: (..., k, 2k, 2)
+    # midpoint of each sub-arc of circle i: (..., k, 2k, 2)
     ri_ = r[..., :, None]
     px = c[..., :, None, 0] + ri_ * np.cos(mid)
     py = c[..., :, None, 1] + ri_ * np.sin(mid)
@@ -80,10 +80,10 @@ def disk_intersection_area(c: np.ndarray, r: np.ndarray) -> np.ndarray:
         dx = px - c[..., j, None, None, 0]
         dy = py - c[..., j, None, None, 1]
         in_j = dx * dx + dy * dy <= r[..., j, None, None] ** 2 * (1 + 1e-12)
-        own = (np.arange(k) == j)[:, None]  # la propia circunferencia no se comprueba
+        own = (np.arange(k) == j)[:, None]  # the circle itself is not checked
         inside &= in_j | own
-    # circunferencias coincidentes (vértice compartido, p. ej. J2/J3): sólo
-    # cuenta la de menor índice
+    # coincident circles (shared vertex, e.g. J2/J3): only the one with the
+    # lowest index counts
     same = (d <= 1e-12 * ri) & (np.abs(ri - rj) <= 1e-12 * ri) & np.tri(k, k, -1, dtype=bool)
     inside &= ~np.any(same, axis=-1)[..., None]
     cx, cy = c[..., :, None, 0], c[..., :, None, 1]
@@ -93,9 +93,9 @@ def disk_intersection_area(c: np.ndarray, r: np.ndarray) -> np.ndarray:
 
 
 def interval_intersection_volume_4d(y1, x1, y2, x2, n_t: int = 6, n_z: int = 32, chunk: int = 128) -> np.ndarray:
-    """|I(y1,x1) ∩ I(y2,x2)| en Minkowski 4D (fila a fila; 0 si alguno de los
-    intervalos es vacío o no se cortan). ``n_t``: nodos por panel en t (hay 11
-    paneles, ver docstring del módulo); ``n_z``: nodos en z."""
+    """|I(y1,x1) ∩ I(y2,x2)| in 4D Minkowski (row by row; 0 if either interval
+    is empty or they do not intersect). ``n_t``: nodes per panel in t (there are
+    11 panels, see the module docstring); ``n_z``: nodes in z."""
     pts = [np.atleast_2d(np.asarray(p, float)) for p in (y1, x1, y2, x2)]
     m = len(pts[0])
     out = np.zeros(m)
@@ -114,7 +114,7 @@ def _volume_chunk(y1, x1, y2, x2, st, wt, sz, wz):
     t_hi = tops[:, :, 0].min(axis=1)
     valid = t_hi > t_lo
     t_hi = np.where(valid, t_hi, t_lo + 1.0)
-    # instantes de tangencia de cada par de conos (lineales en t)
+    # tangency instants of each pair of cones (linear in t)
     ev = []
     for i in range(2):
         for j in range(2):
@@ -124,7 +124,7 @@ def _volume_chunk(y1, x1, y2, x2, st, wt, sz, wz):
     ev.append((tops[:, 0, 0] + tops[:, 1, 0] - np.linalg.norm(tops[:, 0, 1:] - tops[:, 1, 1:], axis=1)) / 2)
     ev.append((bots[:, 0, 0] + bots[:, 1, 0] + np.linalg.norm(bots[:, 0, 1:] - bots[:, 1, 1:], axis=1)) / 2)
     edges = np.sort(np.clip(np.column_stack([t_lo, *ev, t_hi]), t_lo[:, None], t_hi[:, None]), axis=1)
-    a, b = edges[:, :-1, None], edges[:, 1:, None]  # (m, paneles, 1)
+    a, b = edges[:, :-1, None], edges[:, 1:, None]  # (m, panels, 1)
     t = ((a + b) / 2 + (b - a) / 2 * st).reshape(len(a), -1)  # (m, nt)
     wt_full = ((b - a) / 2 * wt).reshape(len(a), -1)
     centers = np.concatenate([tops, bots], axis=1)[:, None, :, 1:]  # (m, 1, 4, 3)
@@ -140,5 +140,5 @@ def _volume_chunk(y1, x1, y2, x2, st, wt, sz, wz):
     r = np.sqrt(np.maximum(r2, 0.0)) * (r2 > 0)
     c2 = np.broadcast_to(centers[:, :, None, :, :2], r.shape + (2,))
     area = disk_intersection_area(c2, r)  # (m, nt, nz)
-    slab = np.sum(area * wz, axis=-1) * hz * ok_t  # volumen 3D de cada corte
+    slab = np.sum(area * wz, axis=-1) * hz * ok_t  # 3D volume of each slice
     return np.where(valid, np.sum(slab * wt_full, axis=-1), 0.0)

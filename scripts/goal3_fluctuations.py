@@ -1,15 +1,15 @@
-"""Goal 3: fluctuaciones (Delta S)^2 de la acción BD LOCAL, simulación frente al
-formalismo de Moradi-Yazdi-Zilhão (arXiv:2407.03395).
+"""Goal 3: fluctuations (Delta S)^2 of the LOCAL BD action, simulation versus the
+formalism of Moradi-Yazdi-Zilhão (arXiv:2407.03395).
 
-Fase "run" (lenta, guarda figures/goal3_results.json):
-  - Minkowski 2D: predicción exacta (|A∩B| en forma cerrada) vs simulación,
-    para varios rho V.
-  - Minkowski 4D (preliminar): predicción "plugin" (|A∩B| estimado con K
-    puntos) para K = 256 y 1024, vs simulación.
-  - de Sitter 2D (exploratorio): predicción plugin vs simulación.
-Fase "plot": figura figures/goal3_fluctuations.png a partir del JSON.
+"run" phase (slow, saves figures/goal3_results.json):
+  - 2D Minkowski: exact prediction (|A∩B| in closed form) vs simulation,
+    for several rho V.
+  - 4D Minkowski (preliminary): "plugin" prediction (|A∩B| estimated with K
+    points) for K = 256 and 1024, vs simulation.
+  - 2D de Sitter (exploratory): plugin prediction vs simulation.
+"plot" phase: figure figures/goal3_fluctuations.png from the JSON file.
 
-Uso:  python scripts/goal3_fluctuations.py run   |   python scripts/goal3_fluctuations.py plot
+Usage:  python scripts/goal3_fluctuations.py run   |   python scripts/goal3_fluctuations.py plot
 """
 
 from __future__ import annotations
@@ -50,7 +50,7 @@ def _row(label, lam, P, E, t_pred, t_sim, **extra):
 def run(only_curved: bool = False):
     rows = json.loads(RESULTS.read_text()) if only_curved else []
     rows = [r for r in rows if r["label"] == "2D"]
-    # --- Minkowski 2D, exacto --------------------------------------------
+    # --- 2D Minkowski, exact ---------------------------------------------
     g = MinkowskiDiamondGeometry(2)
     for lam in (() if only_curved else (25, 50, 100, 200, 400)):
         rho = lam / g.volume
@@ -62,7 +62,7 @@ def run(only_curved: bool = False):
         rows.append(_row("2D", lam, P, E, t1 - t0, time.time() - t1, overlap="exact"))
         RESULTS.write_text(json.dumps(rows, indent=1))
 
-    # --- de Sitter 2D, plugin (exploratorio) ------------------------------
+    # --- 2D de Sitter, plugin (exploratory) -------------------------------
     gd = DeSitterGeometry(2, -4.0, -0.3)
     for lam in (50, 100):
         rho = lam / gd.volume
@@ -74,7 +74,7 @@ def run(only_curved: bool = False):
         rows.append(_row("dS2D", lam, P, E, t1 - t0, time.time() - t1, overlap="plugin", K=256))
         RESULTS.write_text(json.dumps(rows, indent=1))
 
-    # --- Minkowski 4D, plugin (preliminar) --------------------------------
+    # --- 4D Minkowski, plugin (preliminary) -------------------------------
     g4 = MinkowskiDiamondGeometry(4)
     lam = 50
     rho = lam / g4.volume
@@ -104,18 +104,18 @@ def plot():
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 4.4), constrained_layout=True)
 
     ax1.errorbar(lam, [r["pred"] for r in two], yerr=[r["pred_se"] for r in two], fmt="-", color=COLORS["2D"],
-                 linewidth=2, capsize=3, label="predicción MYZ (exacta en 2D)")
+                 linewidth=2, capsize=3, label="MYZ prediction (exact in 2D)")
     ax1.errorbar(lam, [r["sim"] for r in two], yerr=[r["sim_se"] for r in two], fmt="o", color=COLORS["2D"],
-                 markerfacecolor="white", markersize=6, capsize=3, label="simulación (4000 sprinklings)")
-    ax1.plot(lam, lam, color=INK_MUTED, linestyle="--", linewidth=1, label="ρV (sólo el término de Poisson de N)")
+                 markerfacecolor="white", markersize=6, capsize=3, label="simulation (4000 sprinklings)")
+    ax1.plot(lam, lam, color=INK_MUTED, linestyle="--", linewidth=1, label="ρV (Poisson term of N only)")
     ax1.set_xscale("log")
     ax1.set_yscale("log")
     ax1.set_xticks(lam, [str(int(v)) for v in lam])
     ax1.xaxis.set_minor_locator(matplotlib.ticker.NullLocator())
     _style(ax1)
-    ax1.set_xlabel("ρV (número medio de elementos)", color=INK)
+    ax1.set_xlabel("ρV (mean number of elements)", color=INK)
     ax1.set_ylabel("(ΔS)²", color=INK)
-    ax1.set_title("Acción BD local, diamante de Minkowski 2D", color=INK, fontsize=11)
+    ax1.set_title("Local BD action, 2D Minkowski diamond", color=INK, fontsize=11)
     ax1.legend(frameon=False, labelcolor=INK)
 
     labels, zs, cols = [], [], []
@@ -130,12 +130,12 @@ def plot():
     ax2.scatter(zs, y, color=cols, s=40, zorder=3)
     ax2.set_yticks(y, labels)
     _style(ax2)
-    ax2.set_xlabel("z = (sim − pred) / σ_combinada   (banda: |z| < 4)", color=INK)
-    ax2.set_title("Acuerdo simulación–predicción", color=INK, fontsize=11)
+    ax2.set_xlabel("z = (sim − pred) / σ_combined   (band: |z| < 4)", color=INK)
+    ax2.set_title("Simulation–prediction agreement", color=INK, fontsize=11)
 
     path = ROOT / "figures" / "goal3_fluctuations.png"
     fig.savefig(path, dpi=150, facecolor="#fcfcfb")
-    print(f"figura guardada en {path}")
+    print(f"figure saved to {path}")
 
 
 if __name__ == "__main__":

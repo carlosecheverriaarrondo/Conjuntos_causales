@@ -1,9 +1,8 @@
-"""Tests de la región (diamante causal) y del sprinkling de Poisson.
+"""Tests of the region (causal diamond) and of the Poisson sprinkling.
 
-Tolerancia estadística: las comprobaciones Monte Carlo exigen que la
-desviación respecto al valor esperado sea < 4 errores estándar (probabilidad de
-fallo espurio ~6e-5 si el código es correcto). Las semillas son fijas, así que
-los tests son deterministas.
+Statistical tolerance: the Monte Carlo checks require the deviation from the
+expected value to be < 4 standard errors (spurious-failure probability ~6e-5
+if the code is correct). The seeds are fixed, so the tests are deterministic.
 """
 
 import numpy as np
@@ -17,9 +16,9 @@ K_SIGMA = 4.0
 @pytest.mark.parametrize(
     "dim, h, expected",
     [
-        (2, 1.0, 2.0),  # cuadrado girado de diagonal 2h: 2h^2
+        (2, 1.0, 2.0),  # rotated square with diagonal 2h: 2h^2
         (2, 0.5, 0.5),
-        (3, 1.0, 2 * np.pi / 3),  # dos conos de radio y altura h
+        (3, 1.0, 2 * np.pi / 3),  # two cones of radius and height h
         (4, 1.0, 2 * np.pi / 3),  # 2 * (h/4) * (4/3 pi h^3)
         (4, 2.0, 2 * np.pi / 3 * 16),
     ],
@@ -30,7 +29,7 @@ def test_diamond_volume_closed_form(dim, h, expected):
 
 @pytest.mark.parametrize("dim", [2, 3, 4])
 def test_diamond_volume_monte_carlo(dim):
-    """La fracción de la caja envolvente dentro del diamante reproduce V."""
+    """The fraction of the bounding box inside the diamond reproduces V."""
     region = CausalDiamond(dim)
     rng = np.random.default_rng(1)
     lo, hi = region.bounding_box()
@@ -46,16 +45,16 @@ def test_sample_uniform_basic_properties(dim):
     pts = sample_uniform(region, 3000, np.random.default_rng(2))
     assert pts.shape == (3000, dim)
     assert region.contains(pts).all()
-    assert np.all(np.diff(pts[:, 0]) >= 0), "los puntos deben ir ordenados por t"
+    assert np.all(np.diff(pts[:, 0]) >= 0), "points must be sorted by t"
 
 
 @pytest.mark.parametrize("dim", [2, 4])
 def test_sample_uniform_is_uniform(dim):
-    """Momentos de la distribución uniforme en el diamante.
+    """Moments of the uniform distribution on the diamond.
 
-    Por simetría E[t] = E[x_k] = 0. Además, P(|t| < h/2) = 1 - (1/2)^d,
-    porque la región {|t| >= h/2} está formada por dos conos semejantes a los
-    del diamante con razón 1/2 (volumen escalado por (1/2)^d).
+    By symmetry E[t] = E[x_k] = 0. Moreover, P(|t| < h/2) = 1 - (1/2)^d,
+    because the region {|t| >= h/2} consists of two cones similar to those of
+    the diamond with ratio 1/2 (volume scaled by (1/2)^d).
     """
     region = CausalDiamond(dim)
     n = 20_000
@@ -71,7 +70,7 @@ def test_sample_uniform_is_uniform(dim):
 
 
 def test_sprinkle_poisson_statistics():
-    """N ~ Poisson(rho V): media y varianza iguales a rho V."""
+    """N ~ Poisson(rho V): mean and variance both equal to rho V."""
     region = CausalDiamond(4)
     rho = 200.0
     lam = rho * region.volume
@@ -79,7 +78,7 @@ def test_sprinkle_poisson_statistics():
     counts = np.array([len(sprinkle(region, rho, rng)) for _ in range(400)])
     m = len(counts)
     assert abs(counts.mean() - lam) < K_SIGMA * np.sqrt(lam / m)
-    # Var de la varianza muestral de una Poisson ~ (lam + 2 lam^2) / m
+    # Var of the sample variance of a Poisson ~ (lam + 2 lam^2) / m
     assert abs(counts.var(ddof=1) - lam) < K_SIGMA * np.sqrt((lam + 2 * lam**2) / m)
 
 

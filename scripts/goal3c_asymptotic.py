@@ -1,23 +1,23 @@
-"""Goal 3c: escalado de (Delta S)^2 de la acción BD suavizada en el régimen
-eps rho V > 100 (Minkowski 2D), simulación frente al formalismo MYZ con
-abundancias adelgazadas (``causets/fluctuations.py``).
+"""Goal 3c: scaling of (Delta S)^2 of the smeared BD action in the regime
+eps rho V > 100 (2D Minkowski), simulation versus the MYZ formalism with
+thinned abundances (``causets/fluctuations.py``).
 
-Fases (cada una guarda su JSON en figures/; "sim" y "pred" se pueden lanzar
-en paralelo):
-  sim   rho V = 800, 1600, 3200; 2000 sprinklings por densidad. Las mismas
-        configuraciones sirven para eps = 1, 0.5 y 0.25 (sólo cambia el
-        adelgazamiento de las abundancias).
-  pred  predicción MYZ para las mismas (eps, rho V).
-  fit   z de cada punto, exponentes p (Delta S ∝ (rho V)^p) en el régimen
-        bajo (rho V = 25..400, Goal 3 y su ampliación) y alto (800..3200), y
-        figura figures/goal3c_asymptotic.png.
+Phases (each saves its JSON in figures/; "sim" and "pred" can be run
+in parallel):
+  sim   rho V = 800, 1600, 3200; 2000 sprinklings per density. The same
+        configurations serve for eps = 1, 0.5 and 0.25 (only the thinning
+        of the abundances changes).
+  pred  MYZ prediction for the same (eps, rho V).
+  fit   z of each point, exponents p (Delta S ∝ (rho V)^p) in the low
+        regime (rho V = 25..400, Goal 3 and its extension) and the high one
+        (800..3200), and the figure figures/goal3c_asymptotic.png.
 
-Reglas de decisión fijadas ANTES de ver los resultados:
-  acuerdo sim-pred: |z| < 4 (sigma combinada);
-  p compatible con 0.5: |p - 0.5| < 4 sigma_p;
-  p estable entre regímenes: |p_alto - p_bajo| < 4 sigma combinada.
+Decision rules fixed BEFORE looking at the results:
+  sim-pred agreement: |z| < 4 (combined sigma);
+  p compatible with 0.5: |p - 0.5| < 4 sigma_p;
+  p stable across regimes: |p_high - p_low| < 4 combined sigma.
 
-Uso:  python scripts/goal3c_asymptotic.py sim | pred | fit
+Usage:  python scripts/goal3c_asymptotic.py sim | pred | fit
 """
 
 from __future__ import annotations
@@ -97,14 +97,14 @@ def pred():
 
 
 def fit_exponent(lam, var, se):
-    """Ajuste ponderado log(var) = 2p log(rho V) + c: devuelve (p, se_p)."""
+    """Weighted fit log(var) = 2p log(rho V) + c: returns (p, se_p)."""
     x, y, w = np.log(lam), np.log(var), var / se
     (slope, _), cov = np.polyfit(x, y, 1, w=w, cov="unscaled")
     return float(slope / 2), float(np.sqrt(cov[0, 0]) / 2)
 
 
 def low_regime_rows():
-    """Resultados previos rho V = 25..400 (Goal 3 y su ampliación)."""
+    """Earlier results for rho V = 25..400 (Goal 3 and its extension)."""
     rows = [dict(r, eps=1.0) for r in json.loads((ROOT / "figures" / "goal3_results.json").read_text()) if r["label"] == "2D"]
     return rows + json.loads((ROOT / "figures" / "smeared_results_2d.json").read_text())
 
@@ -173,13 +173,13 @@ def _plot(low, high, summary):
             lab += f" → {ex['alto_sim']['p']:.2f}±{ex['alto_sim']['se']:.2f} (ρV ≥ 800)"
         ax1.plot([], [], "-o", color=c, label=lab)
     lam_ref = np.array([25, 3200.0])
-    ax1.plot(lam_ref, 0.6 * lam_ref, ":", color=INK_MUTED, linewidth=1.2, label="pendiente de Poisson (p = 0.5)")
+    ax1.plot(lam_ref, 0.6 * lam_ref, ":", color=INK_MUTED, linewidth=1.2, label="Poisson slope (p = 0.5)")
     ax1.set_xscale("log")
     ax1.set_yscale("log")
     _style(ax1)
     ax1.set_xlabel("ρV", color=INK)
     ax1.set_ylabel("(ΔS)²", color=INK)
-    ax1.set_title("Minkowski 2D: abiertos ρV ≤ 400, rellenos ρV ≥ 800; líneas: MYZ", color=INK, fontsize=10)
+    ax1.set_title("2D Minkowski: open ρV ≤ 400, filled ρV ≥ 800; lines: MYZ", color=INK, fontsize=10)
     ax1.legend(frameon=False, labelcolor=INK, fontsize=8)
 
     y = np.arange(len(EPS))
@@ -194,11 +194,11 @@ def _plot(low, high, summary):
     ax2.set_yticks(y, [f"ε = {e:g}" for e in EPS])
     ax2.set_ylim(-0.6, len(EPS) - 0.4)
     _style(ax2)
-    ax2.set_xlabel("p en ΔS ∝ (ρV)^p   (barras: ±4σ; círculo: ρV ≤ 400, cuadrado: ρV ≥ 800)", color=INK)
-    ax2.set_title("Exponente de escalado por régimen", color=INK, fontsize=10)
+    ax2.set_xlabel("p in ΔS ∝ (ρV)^p   (bars: ±4σ; circle: ρV ≤ 400, square: ρV ≥ 800)", color=INK)
+    ax2.set_title("Scaling exponent by regime", color=INK, fontsize=10)
     path = ROOT / "figures" / "goal3c_asymptotic.png"
     fig.savefig(path, dpi=150, facecolor="#fcfcfb")
-    print(f"figura guardada en {path}")
+    print(f"figure saved to {path}")
 
 
 if __name__ == "__main__":

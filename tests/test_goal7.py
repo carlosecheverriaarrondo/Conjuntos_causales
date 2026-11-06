@@ -1,12 +1,12 @@
-"""Goal 7: cálculos pedidos por la tercera revisión externa (``scripts/goal7_referee3.py``).
+"""Goal 7: computations requested by the third external review (``scripts/goal7_referee3.py``).
 
-Tolerancia estadística: 4σ combinada, la del proyecto. Los criterios R6-R8 se
-fijaron antes de calcular (docstring del script). Los tests recalculan de forma
-independiente (np.polyfit, np.corrcoef) lo que afirman los JSON. La tolerancia
-del 3 % sobre el coeficiente del logaritmo de la corrección (determinista, sin
-error estadístico; el resto es de orden superior) se fijó después de ver el
-1.9 % del peor caso: es una comprobación de regresión, no un criterio.
-Si faltan resultados o datos, se saltan.
+Statistical tolerance: 4σ combined, the project standard. Criteria R6-R8 were
+fixed before computing (script docstring). The tests independently recompute
+(np.polyfit, np.corrcoef) what the JSON files claim. The 3 % tolerance on the
+logarithm coefficient of the correction (deterministic, no statistical error;
+the remainder is of higher order) was fixed after seeing the 1.9 % of the
+worst case: it is a regression check, not a criterion.
+Skipped if results or data are missing.
 """
 
 import importlib.util
@@ -47,11 +47,11 @@ def test_histogram_tri_matches_full_product(block):
     x = sprinkle(g.region, 800 / g.volume, np.random.default_rng(7))
     x = x[np.argsort(x[:, 0])]
     C = minkowski_causal_matrix(x)
-    assert not np.tril(C).any()  # ordenados por t: triangular superior estricta
+    assert not np.tril(C).any()  # sorted by t: strictly upper triangular
     np.testing.assert_array_equal(g7.histogram_tri(C, block=block), g5.histogram(C))
 
 
-@pytest.mark.skipif(not (FIG / "goal7_extras.json").exists(), reason="falta goal7_extras.json")
+@pytest.mark.skipif(not (FIG / "goal7_extras.json").exists(), reason="goal7_extras.json missing")
 def test_extras_beta_correction_r2():
     e = json.loads((FIG / "goal7_extras.json").read_text())
     for g in ("mink4", "flrw4"):
@@ -67,7 +67,7 @@ def test_extras_beta_correction_r2():
     assert e["r2_2d"]["1.0"]["r2"] == pytest.approx(d2["1.0"]["no_J1"]["b"] / 24.0, rel=1e-10)
 
 
-@pytest.mark.skipif(not (FIG / "goal7_results.json").exists(), reason="falta goal7_results.json")
+@pytest.mark.skipif(not (FIG / "goal7_results.json").exists(), reason="goal7_results.json missing")
 def test_R6_R7_slopes_recomputed():
     r = json.loads((FIG / "goal7_results.json").read_text())
     R6 = r["R6"]
@@ -83,14 +83,14 @@ def test_R6_R7_slopes_recomputed():
         b, b_se = _slope(np.log([p["rhoV"] for p in pts]), [p["r"] for p in pts], [p["se"] for p in pts])
         assert b == pytest.approx(v["slope"]["slope"], rel=1e-8)
         assert v["passed"] == bool(abs(v["z_new"]) < K and abs(b / b_se) < K)
-        # el error bootstrap del punto nuevo confirma el de la fórmula (no es criterio: sólo |ratio - 1| < 25 %)
+        # the bootstrap error of the new point confirms the formula error (not a criterion: only |ratio - 1| < 25 %)
         assert abs(v["r_new_se_boot"] / v["r_new_se"] - 1) < 0.25
 
 
 REFINE = sorted(p for p in FIG.glob("goal7_refine_*.json") if p.stem != "goal7_refine_parts")
 
 
-@pytest.mark.skipif(not REFINE, reason="faltan goal7_refine_*.json")
+@pytest.mark.skipif(not REFINE, reason="goal7_refine_*.json missing")
 def test_R8_refined_fits_consistent():
     for p in REFINE:
         d = json.loads(p.read_text())
@@ -101,10 +101,10 @@ def test_R8_refined_fits_consistent():
         assert np.all(chi <= grid + 1e-9)
         assert s["dchi2_min_refined"] == pytest.approx(chi.min() - s["ref"], rel=1e-12)
         assert s["n_good"]["14.7"] == int(np.sum(chi - s["ref"] < 14.7))
-        assert s["safe"], p.name  # la semilla 50 menos la mayor mejora sigue por encima del umbral
+        assert s["safe"], p.name  # the 50th seed minus the largest improvement stays above the threshold
 
 
-@pytest.mark.skipif(not (REFINE and (ROOT / "data" / "desi_dr2").exists()), reason="faltan datos")
+@pytest.mark.skipif(not (REFINE and (ROOT / "data" / "desi_dr2").exists()), reason="data missing")
 def test_R8_refined_best_seed_reproduced():
     g7 = _load("goal7_referee3")
     d = json.loads(REFINE[0].read_text())
@@ -119,9 +119,9 @@ def test_R8_refined_best_seed_reproduced():
 PARTS = FIG / "goal7_refine_parts.json"
 
 
-@pytest.mark.skipif(not (PARTS.exists() and REFINE), reason="falta goal7_refine_parts.json")
+@pytest.mark.skipif(not (PARTS.exists() and REFINE), reason="goal7_refine_parts.json missing")
 def test_R8_parts_add_up_to_refined_minimum():
-    # tabla 2 del paper: el Δχ² de la mejor semilla reajustada, separado por sonda, suma el mínimo reajustado
+    # table 2 of the paper: the Δχ² of the best refitted seed, split by probe, adds up to the refitted minimum
     parts = json.loads(PARTS.read_text())
     assert set(parts) == {p.stem.removeprefix("goal7_refine_") for p in REFINE}
     for p in REFINE:

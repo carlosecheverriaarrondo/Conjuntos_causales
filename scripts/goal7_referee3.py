@@ -1,54 +1,54 @@
-"""Goal 7: cálculos pedidos por la tercera revisión externa (2026-10-23).
+"""Goal 7: calculations requested by the third external review (2026-10-23).
 
-El árbitro (lectura nueva, recomendación "major revision") pide, entre otras
-cosas, un punto de la acción suavizada con ερV mayor que 1280, p. ej.
-ε = 0.5 con ρV = 25 600, porque la constancia de r = (Var F − J¹)/J¹ con
-suavizado sólo se ha visto en 1.2 décadas. Los mismos sprinklings sirven
-para todos los ε.
+The referee (fresh reading, recommendation "major revision") asks, among other
+things, for a point of the smeared action with ερV larger than 1280, e.g.
+ε = 0.5 with ρV = 25 600, because the constancy of r = (Var F − J¹)/J¹ with
+smearing has only been seen over 1.2 decades. The same sprinklings serve
+for all ε.
 
-Cálculos (salidas nuevas; los JSON anteriores no se tocan):
-  diamond   diamante de Minkowski 4D, ρV = 25 600, 500 sprinklings;
-            histograma completo de cardinalidades por sprinkling (data/goal5/,
-            mismo formato que el Goal 5; semillas [95_000, ρV, bloque]).
-            Los puntos se ordenan por t y el producto C·C se hace por bloques
-            triangulares (``histogram_tri``): mismo resultado que
-            ``goal5_smeared4d.histogram`` (comprobado en los tests), ~6 veces
-            menos operaciones y ~3 GB de memoria.
-  pred      J¹_ε, E[F], g exactos con ρV = 25 600 -> figures/goal7_pred.json
-  fit       criterios -> figures/goal7_results.json
+Calculations (new outputs; the earlier JSON files are untouched):
+  diamond   4D Minkowski diamond, ρV = 25 600, 500 sprinklings;
+            full histogram of cardinalities per sprinkling (data/goal5/,
+            same format as Goal 5; seeds [95_000, ρV, block]).
+            The points are sorted by t and the product C·C is done by
+            triangular blocks (``histogram_tri``): same result as
+            ``goal5_smeared4d.histogram`` (checked in the tests), ~6 times
+            fewer operations and ~3 GB of memory.
+  pred      exact J¹_ε, E[F], g with ρV = 25 600 -> figures/goal7_pred.json
+  fit       criteria -> figures/goal7_results.json
 
-CRITERIOS PRERREGISTRADOS (2026-10-23, antes de calcular; 4σ combinada):
-  R6 (acción local, ε = 1). (i) r con ρV = 25 600 compatible con la media
-     ponderada del Goal 6 sobre 25-12 800 (0.324 ± 0.012); (ii) la pendiente
-     de r frente a ln ρV sobre 25-25 600 (puntos del Goal 6 más el nuevo) es
-     compatible con 0. Se reporta la cota sobre δ a 2σ y 4σ.
-  R7 (acción suavizada, ε = 0.5, 0.2, 0.1; ερV = 12 800, 5120, 2560). (i) La
-     pendiente de r frente a ln ρV sobre 400-25 600 (puntos del Goal 6 más el
-     nuevo) es compatible con 0; (ii) r con ρV = 25 600 es compatible con la
-     media ponderada de los puntos 400-12 800 del mismo ε. Se reportan además
-     (descriptivo) la pendiente con ρV ≥ 800 y la cota superior de δ a 2σ.
-  Si R6 o R7 fallan, el paper lo dice y la afirmación sobre el exponente con
-  suavizado se rebaja en consecuencia.
-  R8 (ajuste por semilla, pedido por el árbitro: la rejilla del Goal 4c tiene
-     una resolución final de 1/8 de paso, ~5 % en ω_m). Para cada conjunto de
-     10⁴ semillas de la tabla 2 y de la celda (1/8, 1/4), las 50 semillas con
-     menor χ² de rejilla se reajustan con Nelder-Mead en (ln ω_m, ln amp),
-     partiendo del mejor punto de la rejilla. Se reportan el Δχ² mínimo
-     reajustado, la mayor mejora ΔΔχ² y el número de semillas buenas
-     (Δχ² < 14.7). Si alguna pasa a ser buena, el paper lo dice y la frase
-     "ninguna semilla es buena" se corrige. Se comprueba además que la semilla
-     50 de la rejilla menos la mayor mejora sigue por encima del umbral (si
-     no, se reajustan más semillas). Se reportan también (descriptivo) los
-     recuentos con márgenes 25 y 50.
+PREREGISTERED CRITERIA (2026-10-23, before computing; 4σ combined):
+  R6 (local action, ε = 1). (i) r at ρV = 25 600 compatible with the weighted
+     mean of Goal 6 over 25-12 800 (0.324 ± 0.012); (ii) the slope of r
+     versus ln ρV over 25-25 600 (points of Goal 6 plus the new one) is
+     compatible with 0. The bound on δ at 2σ and 4σ is reported.
+  R7 (smeared action, ε = 0.5, 0.2, 0.1; ερV = 12 800, 5120, 2560). (i) The
+     slope of r versus ln ρV over 400-25 600 (points of Goal 6 plus the new
+     one) is compatible with 0; (ii) r at ρV = 25 600 is compatible with the
+     weighted mean of the 400-12 800 points of the same ε. The slope with
+     ρV ≥ 800 and the 2σ upper bound on δ are also reported (descriptive).
+  If R6 or R7 fail, the paper says so and the claim about the exponent with
+  smearing is weakened accordingly.
+  R8 (fit per seed, requested by the referee: the grid of Goal 4c has a
+     final resolution of 1/8 of a step, ~5 % in ω_m). For each set of
+     10⁴ seeds of table 2 and of the cell (1/8, 1/4), the 50 seeds with the
+     lowest grid χ² are refitted with Nelder-Mead in (ln ω_m, ln amp),
+     starting from the best grid point. The refitted minimum Δχ², the largest
+     improvement ΔΔχ² and the number of good seeds (Δχ² < 14.7) are reported.
+     If any becomes good, the paper says so and the sentence "no seed is
+     good" is corrected. It is also checked that the 50th grid seed minus the
+     largest improvement stays above the threshold (otherwise more seeds are
+     refitted). The counts with margins 25 and 50 are also reported
+     (descriptive).
 
-  extras    (a posteriori, sin simulaciones) β con errores, corrección
-            (ρV)^(-1/2) ln ρV de las medias, r₂ en 2D -> figures/goal7_extras.json
+  extras    (a posteriori, no simulations) β with errors, correction
+            (ρV)^(-1/2) ln ρV of the means, r₂ in 2D -> figures/goal7_extras.json
 
-Uso:  python scripts/goal7_referee3.py diamond | pred | fit | extras | refine RUN | bestparts
-      (RUN: snbao_bd, snbao_model1, full_bd, cell, beta0.88, beta0.97, beta0.5, beta1;
-       full_model1 añadido a posteriori, al ver la mejora de full_bd;
-       map_q{q}_c{c} (celdas del mapa con q <= 3/8, 1000 semillas) añadido a
-       posteriori, al ver que la celda (1/8, 1/4) reajustada tiene semillas buenas)
+Usage:  python scripts/goal7_referee3.py diamond | pred | fit | extras | refine RUN | bestparts
+        (RUN: snbao_bd, snbao_model1, full_bd, cell, beta0.88, beta0.97, beta0.5, beta1;
+         full_model1 added a posteriori, after seeing the improvement of full_bd;
+         map_q{q}_c{c} (map cells with q <= 3/8, 1000 seeds) added a
+         posteriori, after seeing that the refitted cell (1/8, 1/4) has good seeds)
 """
 
 from __future__ import annotations
@@ -82,9 +82,9 @@ K = 4.0
 
 
 def histogram_tri(C: np.ndarray, block: int = 2048) -> np.ndarray:
-    """Como ``goal5_smeared4d.histogram``, para C estrictamente triangular superior
-    (puntos ordenados por t): (C·C)[i, j] sólo recibe k con i < k < j, así que
-    el bloque (I, J) sólo necesita los bloques K = I..J."""
+    """As ``goal5_smeared4d.histogram``, for strictly upper-triangular C
+    (points sorted by t): (C·C)[i, j] only receives k with i < k < j, so
+    block (I, J) only needs blocks K = I..J."""
     n = len(C)
     Cf = C.astype(np.float32)
     edges = list(range(0, n, block)) + [n]
@@ -128,7 +128,7 @@ def diamond():
         for i, h in enumerate(H):
             hist[i, : len(h)] = h
         np.savez_compressed(path, N=np.array(N), hist=hist)
-        print(f"ρV={LAM} bloque {c} {time.time() - t0:.0f}s", flush=True)
+        print(f"ρV={LAM} block {c} {time.time() - t0:.0f}s", flush=True)
 
 
 def pred():
@@ -164,7 +164,7 @@ def fit():
     P = json.loads(PRED.read_text())
     r6 = json.loads(g6.OUT.read_text())
     res = {}
-    # --- R6: acción local
+    # --- R6: local action
     r, se, sb, m = _rest_new(1.0, P)
     rows = r6["R1"]["points"] + [dict(rhoV=LAM, r=r, se=se, n_sets=1)]
     sl = g6._slope(np.log([p["rhoV"] for p in rows]), [p["r"] for p in rows], [p["se"] for p in rows])
@@ -173,7 +173,7 @@ def fit():
     res["R6"] = dict(points=rows, r_new=r, r_new_se=se, r_new_se_boot=sb, M=m, z_new=float(z), slope=sl,
                      mean=mean, mean_se=mean_se, **_delta(sl, mean),
                      passed=bool(abs(z) < K and abs(sl["z"]) < K))
-    # --- R7: acción suavizada
+    # --- R7: smeared action
     res["R7"] = {}
     for eps in (0.5, 0.2, 0.1):
         r, se, sb, _ = _rest_new(eps, P)
@@ -189,7 +189,7 @@ def fit():
                                    mean_old_se=m_old_se, z_new=float(z), slope=sl, slope_ge800=sl800,
                                    mean=mean, **_delta(sl, mean),
                                    passed=bool(abs(z) < K and abs(sl["z"]) < K))
-    # Var S total (figura 1)
+    # total Var S (figure 1)
     N, h = g5.load(LAM)
     res["varS_new"] = g5._var_se(g5.action_coefficients(4, 1.0)[0] * N + h @ pair_weight(4, np.arange(h.shape[1]), 1.0))
     OUT.write_text(json.dumps(res, indent=1))
@@ -201,15 +201,15 @@ EXTRAS = ROOT / "figures" / "goal7_extras.json"
 
 
 def extras():
-    """A POSTERIORI (tercera revisión), sin simulaciones nuevas:
-    (a) memoria β de los conos anidados del Goal 4b: β por par de conos,
-        errores bootstrap (2000 réplicas, semilla 171_024) y media GLS con la
-        covarianza bootstrap; asimetría y curtosis de S y de sus incrementos.
-    (b) corrección de orden (ρV)^(-1/2) ln ρV a ⟨N_k⟩ ≈ asintótico (apéndice C
-        del paper): coeficiente del logaritmo ajustado a las medias exactas del
-        cono de Minkowski (10⁶, 10⁷, 10⁸) frente a la predicción
+    """A POSTERIORI (third review), no new simulations:
+    (a) memory β of the nested cones of Goal 4b: β per pair of cones,
+        bootstrap errors (2000 replicas, seed 171_024) and GLS mean with the
+        bootstrap covariance; skewness and kurtosis of S and of its increments.
+    (b) correction of order (ρV)^(-1/2) ln ρV to ⟨N_k⟩ ≈ asymptotic (appendix C
+        of the paper): coefficient of the logarithm fitted to the exact means of
+        the Minkowski cone (10⁶, 10⁷, 10⁸) versus the prediction
         a_k = π k! / (√c₄ (G/V^1.5) Γ(k+½)).
-    (c) r₂ en 2D: b(resto)/Σf² a partir de figures/goal3d_results.json.
+    (c) r₂ in 2D: b(rest)/Σf² from figures/goal3d_results.json.
     """
     from scipy.special import gamma
     from scipy.stats import kurtosis, skew
@@ -254,7 +254,7 @@ MARGINS = (14.7, 25.0, 50.0)
 
 
 def _run_setup(run):
-    """(filas, χ² ΛCDM de referencia, evaluador(noise, om, amp) -> χ², clave del modelo)."""
+    """(rows, reference ΛCDM χ², evaluator(noise, om, amp) -> χ², model key)."""
     import goal4c_sn_fit as g4c
     import goal4d_combined as g4d
     import goal4e_robustness as g4e
@@ -272,9 +272,9 @@ def _run_setup(run):
         c = g4d.Combined()
         rows = json.loads((fig / f"goal4d_seeds_{model}.json").read_text())["rows"]
         return rows, ref, (lambda nz, om, amp: c.evaluator(model, nz, om, amp)[0]), model, g4c
-    # goal4e carga su propia copia de goal4c (vía goal4d): las variantes se dan de alta en ella
+    # goal4e loads its own copy of goal4c (via goal4d): the variants are registered there
     v = g4e.Variant()
-    if run.startswith("map_"):  # celda del mapa (q, c) con 1000 semillas, p. ej. map_q0.125_c0.5
+    if run.startswith("map_"):  # map cell (q, c) with 1000 seeds, e.g. map_q0.125_c0.5
         k = g4e.register(*g4e.parse(run[4:]))
         rows = json.loads(g4e.path_for(k, g4e.MAP_SEEDS).read_text())["rows"]
         return rows, ref, (lambda nz, om, amp: v.evaluator(k, nz, om, amp)[0]), k, g4e.g4c
@@ -322,9 +322,9 @@ def refine(run):
 
 
 def bestparts():
-    """Δχ² por sonda (SN / BAO / CMB) de la mejor semilla reajustada de cada
-    goal7_refine_*.json, respecto a las partes del ΛCDM de referencia
-    (figures/goal7_refine_parts.json; para la tabla 2 del paper)."""
+    """Δχ² per probe (SN / BAO / CMB) of the best refitted seed of each
+    goal7_refine_*.json, relative to the parts of the reference ΛCDM
+    (figures/goal7_refine_parts.json; for table 2 of the paper)."""
     fig = ROOT / "figures"
     out = {}
     for path in sorted(fig.glob("goal7_refine_*.json")):

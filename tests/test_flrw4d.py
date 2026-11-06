@@ -1,10 +1,10 @@
-"""Punto 1d: escalado de (Delta S)^2 en el cono pasado hasta el big bang de un
-FLRW plano 4D (``scripts/flrw4d_scaling.py``).
+"""Item 1d: scaling of (Delta S)^2 in the past cone down to the big bang of a
+flat 4D FLRW spacetime (``scripts/flrw4d_scaling.py``).
 
-Márgenes fijados ANTES de ver los resultados:
-  K1: volúmenes frente a Monte Carlo (4σ), alpha = 0 frente a Minkowski
-      (relativo 1e-12), g_flrw(0) = g_cone (relativo 1e-10);
-  K2, K4: 4σ; K3: < 3 % con rho V = 1e8 y más cerca de 1 que con 1e6.
+Tolerances fixed BEFORE seeing the results:
+  K1: volumes vs. Monte Carlo (4σ), alpha = 0 vs. Minkowski
+      (relative 1e-12), g_flrw(0) = g_cone (relative 1e-10);
+  K2, K4: 4σ; K3: < 3 % at rho V = 1e8 and closer to 1 than at 1e6.
 """
 
 import json
@@ -58,7 +58,7 @@ def test_K1_flrw_prefactor_reduces_to_minkowski():
 
 @pytest.mark.parametrize("alpha", [1, 2])
 def test_region_volume(alpha):
-    """V = 4π ∫ eta^(4 alpha) (h - eta)³/3 deta = 4π B(4 alpha + 1, 4) / 3 · 6 / ... (cerrada)."""
+    """V = 4π ∫ eta^(4 alpha) (h - eta)³/3 deta = 4π B(4 alpha + 1, 4) / 3 · 6 / ... (closed form)."""
     from scipy.special import beta
 
     g = FLRWConeGeometry(alpha, 1.0, 4)
@@ -67,8 +67,9 @@ def test_region_volume(alpha):
 
 @pytest.mark.parametrize("alpha", [1, 2])
 def test_exact_sampler_matches_rejection(alpha):
-    """sample_M (eta ~ h Beta(4 alpha + 1, 4), bola de radio h - eta) frente al
-    rechazo genérico: KS en eta, r y x_1 con nivel 1e-3 (fijado antes)."""
+    """sample_M (eta ~ h Beta(4 alpha + 1, 4), ball of radius h - eta) vs. the
+    generic rejection sampler: KS in eta, r and x_1 at level 1e-3 (fixed
+    beforehand)."""
     from scipy.stats import ks_2samp
 
     from causets.sprinkling import sample_uniform
@@ -81,13 +82,13 @@ def test_exact_sampler_matches_rejection(alpha):
         assert ks_2samp(f(a), f(b)).pvalue > 1e-3
 
 
-# --- resultados guardados por scripts/flrw4d_scaling.py (fallan si faltan) ---
+# --- results saved by scripts/flrw4d_scaling.py (fail if missing) ---
 
 
 @pytest.fixture(scope="module")
 def results():
     path = ROOT / "figures" / "flrw4d_results.json"
-    assert path.exists(), "ejecuta scripts/flrw4d_scaling.py sim/means (alpha = 1, 2) y fit"
+    assert path.exists(), "run scripts/flrw4d_scaling.py sim/means (alpha = 1, 2) and fit"
     return json.loads(path.read_text())
 
 

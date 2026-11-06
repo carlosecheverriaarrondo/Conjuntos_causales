@@ -1,9 +1,9 @@
-"""Cardinalidades de intervalos y abundancias de intervalos.
+"""Interval cardinalities and interval abundances.
 
-Para un par relacionado y ≺ x, n(y, x) = |{z : y ≺ z ≺ x}| es el número de
-elementos estrictamente entre ambos. La abundancia N_k es el número de pares
-relacionados con n(y, x) = k (N_0 = número de links). Son la materia prima de
-la acción de Benincasa-Dowker (ver ``action.py``).
+For a related pair y ≺ x, n(y, x) = |{z : y ≺ z ≺ x}| is the number of
+elements strictly between the two. The abundance N_k is the number of related
+pairs with n(y, x) = k (N_0 = number of links). They are the raw material of
+the Benincasa-Dowker action (see ``action.py``).
 """
 
 from __future__ import annotations
@@ -12,9 +12,9 @@ import numpy as np
 
 
 def interval_cardinalities(C: np.ndarray) -> np.ndarray:
-    """Matriz entera ``n[i, j]`` = |{z : i ≺ z ≺ j}| (sólo con sentido donde C[i, j]).
+    """Integer matrix ``n[i, j]`` = |{z : i ≺ z ≺ j}| (only meaningful where C[i, j]).
 
-    Se calcula como (C @ C)[i, j]. En float32 el producto es exacto mientras
+    Computed as (C @ C)[i, j]. In float32 the product is exact as long as
     N < 2^24.
     """
     Cf = np.asarray(C, dtype=np.float32)
@@ -22,9 +22,9 @@ def interval_cardinalities(C: np.ndarray) -> np.ndarray:
 
 
 def interval_abundances(C: np.ndarray, kmax: int | None = None) -> np.ndarray:
-    """Array ``N`` con N[k] = número de pares relacionados con k elementos entre ellos.
+    """Array ``N`` with N[k] = number of related pairs with k elements between them.
 
-    Si ``kmax`` es None se devuelven todas las k hasta la máxima observada.
+    If ``kmax`` is None, all k up to the largest observed one are returned.
     """
     C = np.asarray(C, dtype=bool)
     n = interval_cardinalities(C)[C]

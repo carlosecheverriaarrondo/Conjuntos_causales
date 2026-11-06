@@ -1,9 +1,9 @@
-"""Tests de la cuadratura determinista de |I(y1,x1) ∩ I(y2,x2)| en Minkowski 4D
-(``causets/overlap.py``).
+"""Tests of the deterministic quadrature of |I(y1,x1) ∩ I(y2,x2)| in 4D
+Minkowski (``causets/overlap.py``).
 
-Márgenes fijados a priori: casos exactos con tolerancia relativa 1e-3 (error
-de cuadratura); comparación con Monte Carlo con
-|cuadratura - MC| < 4 sigma_MC + 1e-3 |A|.
+Tolerances fixed a priori: exact cases with relative tolerance 1e-3
+(quadrature error); comparison with Monte Carlo with
+|quadrature - MC| < 4 sigma_MC + 1e-3 |A|.
 """
 
 import numpy as np
@@ -17,14 +17,14 @@ QUAD_TOL = 1e-3
 
 
 def test_disk_lens_area():
-    # dos discos unidad a distancia 1: lente de área 2 arccos(1/2) - sqrt(3)/2
+    # two unit discs at distance 1: lens of area 2 arccos(1/2) - sqrt(3)/2
     area = disk_intersection_area(np.array([[[0.0, 0.0], [1.0, 0.0]]]), np.array([[1.0, 1.0]]))
     assert area[0] == pytest.approx(2 * np.arccos(0.5) - np.sqrt(3) / 2, rel=1e-12)
 
 
 def test_disk_intersection_special_cases():
     c = np.array([[[0.0, 0.0], [0.2, 0.1], [5.0, 0.0], [0.0, 0.0]]])
-    # disco contenido en otro; disco disjunto; disco duplicado; disco vacío
+    # disc contained in another; disjoint disc; duplicated disc; empty disc
     assert disk_intersection_area(c[:, :2], np.array([[1.0, 0.3]]))[0] == pytest.approx(np.pi * 0.09, rel=1e-12)
     assert disk_intersection_area(c[:, [0, 2]], np.array([[1.0, 1.0]]))[0] == 0.0
     assert disk_intersection_area(c[:, [0, 3]], np.array([[1.0, 1.0]]))[0] == pytest.approx(np.pi, rel=1e-12)
@@ -39,8 +39,8 @@ def test_exact_cases():
     assert interval_intersection_volume_4d(y, x, y, x)[0] == pytest.approx(VA, rel=QUAD_TOL)  # A = A
     assert interval_intersection_volume_4d(y, x, yb, xb)[0] == pytest.approx(VB, rel=QUAD_TOL)  # B ⊂ A
     far = np.array([[0.0, 3.0, 0.0, 0.0]])
-    assert interval_intersection_volume_4d(y, x, y + far, x + far)[0] == 0.0  # disjuntos
-    assert g.overlap_volume(y, x, yb, xb)[0] == pytest.approx(VB, rel=QUAD_TOL)  # cableado en la geometría
+    assert interval_intersection_volume_4d(y, x, y + far, x + far)[0] == 0.0  # disjoint
+    assert g.overlap_volume(y, x, yb, xb)[0] == pytest.approx(VB, rel=QUAD_TOL)  # wired into the geometry
 
 
 def _random_configs(rng, m):
@@ -49,7 +49,7 @@ def _random_configs(rng, m):
     x1 = y1 + np.column_stack([np.full(m, 0.9), rng.normal(0, 0.15, (m, 3))])
     y2 = y1 + np.column_stack([rng.uniform(-0.1, 0.3, m), rng.normal(0, 0.15, (m, 3))])
     x2 = y2 + np.column_stack([np.full(m, 0.8), rng.normal(0, 0.15, (m, 3))])
-    # dos con vértice compartido (como en J2 y J3, conos coincidentes)
+    # two with a shared vertex (as in J2 and J3, coincident cones)
     y2[0] = y1[0]
     x2[1] = x1[1]
     return y1, x1, y2, x2

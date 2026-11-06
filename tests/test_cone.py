@@ -1,10 +1,10 @@
-"""Punto 1a: fluctuaciones de la acción BD en el cono de luz pasado truncado
-de Minkowski 2D (``scripts/cone_fluctuations.py``).
+"""Item 1a: fluctuations of the BD action in the truncated past light cone
+of 2D Minkowski (``scripts/cone_fluctuations.py``).
 
-Márgenes fijados ANTES de ver los resultados:
-  fórmula exacta de los pares frente a integración directa: relativo 1e-8;
-  coeficiente del logaritmo (C2): relativo 1e-3 entre rho V = 1e5 y 1e6;
-  C1, C3, C4: 4σ (estándar del proyecto).
+Tolerances fixed BEFORE seeing the results:
+  exact pair formula vs. direct integration: relative 1e-8;
+  logarithm coefficient (C2): relative 1e-3 between rho V = 1e5 and 1e6;
+  C1, C3, C4: 4σ (project standard).
 """
 
 import json
@@ -29,7 +29,7 @@ FIG = Path(__file__).resolve().parents[1] / "figures"
 
 @pytest.mark.parametrize("dim", [2, 4])
 def test_cone_volume_by_sampling(dim):
-    """Volumen analítico frente a la fracción de puntos de la caja dentro (4σ)."""
+    """Analytic volume vs. the fraction of bounding-box points inside (4σ)."""
     cone = TruncatedPastCone(dim, 1.3)
     lo, hi = cone.bounding_box()
     rng = np.random.default_rng(3)
@@ -40,7 +40,7 @@ def test_cone_volume_by_sampling(dim):
 
 
 def test_cone_is_causally_convex():
-    """Todo punto de I(y, x) con y, x en el cono está en el cono."""
+    """Every point of I(y, x) with y, x in the cone lies in the cone."""
     g = MinkowskiConeGeometry(2)
     rng = np.random.default_rng(4)
     pts = sprinkle(g.region, 300, rng)
@@ -62,28 +62,28 @@ def test_cone_pair_formula_against_direct_integral(k):
 
 @pytest.mark.parametrize("k", [0, 1, 2])
 def test_cone_abundances_grow_as_rhoV_log_rhoV(k):
-    """<N_k> = rho V ln(rho V) + c_k rho V + o(rho V) también en el cono."""
+    """<N_k> = rho V ln(rho V) + c_k rho V + o(rho V) also in the cone."""
     r = [expected_abundance_cone(lam, k) / lam - np.log(lam) for lam in (1e5, 1e6)]
     assert abs(r[1] - r[0]) < 1e-3, r
 
 
 @pytest.mark.parametrize("eps", [1.0, 0.5])
 def test_C2_cone_same_pair_log_coefficient(eps):
-    """C2: <sum_pares f_eps(n)²>/rho V crece como b(eps) ln(rho V) en el cono,
-    con el mismo b(eps) = sum f_eps² que en el diamante (integral exacta)."""
+    """C2: <sum_pairs f_eps(n)²>/rho V grows as b(eps) ln(rho V) in the cone,
+    with the same b(eps) = sum f_eps² as in the diamond (exact integral)."""
     n = np.arange(3000)
     f2 = pair_weight(2, n, eps) ** 2
     y = [cone_pair_integral_2d(lambda z: float(np.sum(poisson.pmf(n, z) * f2)), lam) / lam for lam in (1e5, 1e6)]
     assert (y[1] - y[0]) / np.log(10) == pytest.approx(same_pair_log_coefficient(eps), rel=1e-3)
 
 
-# --- resultados guardados por scripts/cone_fluctuations.py (fallan si faltan) ---
+# --- results saved by scripts/cone_fluctuations.py (fail if missing) ---
 
 
 @pytest.fixture(scope="module")
 def results():
     path = FIG / "cone_results.json"
-    assert path.exists(), "ejecuta scripts/cone_fluctuations.py sim, pred y fit"
+    assert path.exists(), "run scripts/cone_fluctuations.py sim, pred and fit"
     return json.loads(path.read_text())
 
 

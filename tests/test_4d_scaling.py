@@ -1,10 +1,10 @@
-"""Paso 2: escalado de (Delta S)^2 de la acción BD local en Minkowski 4D.
+"""Step 2: scaling of (Delta S)^2 for the local BD action in 4D Minkowski.
 
-Predicción (README, "Paso 2"): <N_k> ∝ (rho V)^1.5 Γ(k+½)/k!, el término
-"mismo par" J¹ = sum a_k² <N_k> da p -> 0.75 y el cruzado con N no crece.
-Cálculos deterministas (integrales exactas). Márgenes fijados antes de
-escribir los tests, aunque los valores se habían visto en una exploración
-previa: son holgados y comprueban la estructura (convergencia monótona).
+Prediction (README, "Step 2"): <N_k> ∝ (rho V)^1.5 Γ(k+½)/k!, the "same pair"
+term J¹ = sum a_k² <N_k> gives p -> 0.75, and the cross term with N does not
+grow. Deterministic computations (exact integrals). Tolerances fixed before
+writing the tests, although the values had been seen in a previous
+exploration: they are loose and check the structure (monotonic convergence).
 """
 
 import numpy as np
@@ -42,17 +42,17 @@ def test_same_pair_exponent_approaches_three_quarters():
     assert p[0] > p[1] and 0.75 < p[1] < 0.80, p
 
 
-# --- resultados guardados por scripts/step2_4d_scaling.py (fallan si faltan) ---
-# Regla fijada antes de la segunda tanda de simulaciones: si las correlaciones
-# crecen como J¹, la pendiente de (total - J¹ - NN - Nk)/J¹ frente a ln(rho V)
-# es compatible con 0 a 4 sigma.
+# --- results saved by scripts/step2_4d_scaling.py (fail if missing) ---
+# Rule fixed before the second batch of simulations: if the correlations grow
+# like J¹, the slope of (total - J¹ - NN - Nk)/J¹ against ln(rho V) is
+# compatible with 0 at 4 sigma.
 
 def test_correlations_scale_like_same_pair():
     import json
     from pathlib import Path
 
     path = Path(__file__).resolve().parents[1] / "figures" / "step2_4d_results.json"
-    assert path.exists(), "ejecuta scripts/step2_4d_scaling.py sim, extra y fit"
+    assert path.exists(), "run scripts/step2_4d_scaling.py sim, extra and fit"
     pts = json.loads(path.read_text())["points"]
     assert max(p["rhoV"] for p in pts) >= 6400
     lam = np.array([p["rhoV"] for p in pts], float)

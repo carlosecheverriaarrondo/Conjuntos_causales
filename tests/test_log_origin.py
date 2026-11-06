@@ -1,9 +1,9 @@
-"""Goal 3d: origen del término rho V ln(rho V) en (Delta S)^2 (Minkowski 2D).
+"""Goal 3d: origin of the rho V ln(rho V) term in (Delta S)^2 (2D Minkowski).
 
-Márgenes fijados ANTES de ver los resultados:
-  convergencia de <N_k>/rho V - ln(rho V): |Δ| < 1e-3 entre rho V = 1e5 y 1e6
-  (cálculo determinista);
-  identidades de pair_weight: tolerancia de redondeo (1e-10).
+Tolerances fixed BEFORE seeing the results:
+  convergence of <N_k>/rho V - ln(rho V): |Δ| < 1e-3 between rho V = 1e5 and
+  1e6 (deterministic computation);
+  pair_weight identities: round-off tolerance (1e-10).
 """
 
 import numpy as np
@@ -15,7 +15,7 @@ from causets.fluctuations import local_action_coefficients, pair_weight, same_pa
 
 @pytest.mark.parametrize("k", [0, 1, 2])
 def test_abundances_grow_as_rhoV_log_rhoV(k):
-    """<N_k> = rho V ln(rho V) + c_k rho V + o(rho V): coeficiente 1 del log."""
+    """<N_k> = rho V ln(rho V) + c_k rho V + o(rho V): unit log coefficient."""
     r = [expected_abundance(2, lam, k) / lam - np.log(lam) for lam in (1e5, 1e6)]
     assert abs(r[1] - r[0]) < 1e-3, r
 
@@ -28,14 +28,14 @@ def test_local_log_coefficient_is_sum_of_squares():
 
 @pytest.mark.parametrize("eps", [1.0, 0.5, 0.25, 0.1])
 def test_cross_term_has_no_log(eps):
-    """sum_n f_eps(n) = 0: el término cruzado con N no aporta rho V ln(rho V)."""
+    """sum_n f_eps(n) = 0: the cross term with N contributes no rho V ln(rho V)."""
     f = pair_weight(2, np.arange(20_000), eps)
     assert abs(np.sum(f)) < 1e-10 * np.sum(np.abs(f))
 
 
 def test_smeared_same_pair_log_coefficient_exact():
-    """<sum_pares f_eps(n)^2>/rho V crece como b(eps) ln(rho V): integral exacta
-    sobre el diamante (sin Monte Carlo), tolerancia relativa 1e-3."""
+    """<sum_pairs f_eps(n)^2>/rho V grows as b(eps) ln(rho V): exact integral
+    over the diamond (no Monte Carlo), relative tolerance 1e-3."""
     from scipy.stats import poisson
 
     from causets.continuum import _diamond_pair_integral
@@ -46,7 +46,7 @@ def test_smeared_same_pair_log_coefficient_exact():
     assert (y[1] - y[0]) / np.log(10) == pytest.approx(same_pair_log_coefficient(eps), rel=1e-3)
 
 
-# --- resultados guardados por scripts/goal3d_log_origin.py (fallan si faltan) ---
+# --- results saved by scripts/goal3d_log_origin.py (fail if missing) ---
 
 RESULTS = __import__("pathlib").Path(__file__).resolve().parents[1] / "figures"
 K_SIGMA = 4.0
@@ -57,7 +57,7 @@ def long_run():
     import json
 
     terms, fit = RESULTS / "goal3d_terms.json", RESULTS / "goal3d_results.json"
-    assert terms.exists() and fit.exists(), "ejecuta scripts/goal3d_log_origin.py terms y fit"
+    assert terms.exists() and fit.exists(), "run scripts/goal3d_log_origin.py terms and fit"
     return json.loads(terms.read_text()), json.loads(fit.read_text())
 
 
@@ -67,14 +67,14 @@ def test_decomposition_closes(long_run):
 
 
 def test_local_total_log_coefficient(long_run):
-    """Acción local: b del total (ρV = 50..12800) compatible con sum a_k^2 = 24."""
+    """Local action: b of the total (ρV = 50..12800) compatible with sum a_k^2 = 24."""
     tot = long_run[1]["1.0"]["total"]
     assert abs(tot["b"] - 24.0) < K_SIGMA * tot["se"], tot
 
 
 @pytest.mark.parametrize("eps", [0.5, 0.25])
 def test_smeared_same_pair_increment(long_run, eps):
-    """Último incremento de J¹/ρV (ρV 3200 -> 12800) frente a b(eps) ln 4."""
+    """Last increment of J¹/ρV (ρV 3200 -> 12800) vs. b(eps) ln 4."""
     rows = {r["rhoV"]: r["parts"]["J1"] for r in long_run[0] if r["eps"] == eps}
     a, b = rows[3200], rows[12800]
     inc = b["value"] / 12800 - a["value"] / 3200

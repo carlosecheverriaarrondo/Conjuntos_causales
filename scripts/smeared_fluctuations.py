@@ -1,17 +1,17 @@
-"""Fluctuaciones (Delta S)^2 de la acción BD SUAVIZADA (eps < 1) y de la
-acción local en 4D con |A∩B| exacto (cuadratura de ``causets/overlap.py``):
-simulación frente al formalismo de Moradi-Yazdi-Zilhão (arXiv:2407.03395)
-extendido a abundancias adelgazadas (``causets/fluctuations.py``).
+"""Fluctuations (Delta S)^2 of the SMEARED BD action (eps < 1) and of the
+local action in 4D with exact |A∩B| (quadrature of ``causets/overlap.py``):
+simulation versus the formalism of Moradi-Yazdi-Zilhão (arXiv:2407.03395)
+extended to thinned abundances (``causets/fluctuations.py``).
 
-Fases (cada una guarda su propio JSON en figures/, se pueden lanzar en
-paralelo):
-  run2d  Minkowski 2D, eps = 0.5 y 0.25, rho V = 25..400 (|A∩B| exacto).
-         Los valores con eps = 1 se toman de figures/goal3_results.json.
-  run4d  Minkowski 4D, acción local, rho V = 25, 50, 100 con la cuadratura
-         exacta de |A∩B| (sustituye a la predicción "plugin" del Goal 3).
-  plot   figura figures/smeared_fluctuations.png a partir de los JSON.
+Phases (each saves its own JSON in figures/; they can be run in
+parallel):
+  run2d  2D Minkowski, eps = 0.5 and 0.25, rho V = 25..400 (exact |A∩B|).
+         The values with eps = 1 are taken from figures/goal3_results.json.
+  run4d  4D Minkowski, local action, rho V = 25, 50, 100 with the exact
+         quadrature of |A∩B| (replaces the "plugin" prediction of Goal 3).
+  plot   figure figures/smeared_fluctuations.png from the JSON files.
 
-Uso:  python scripts/smeared_fluctuations.py run2d | run4d | plot
+Usage:  python scripts/smeared_fluctuations.py run2d | run4d | plot
 """
 
 from __future__ import annotations
@@ -39,7 +39,7 @@ RESULTS_2D = ROOT / "figures" / "smeared_results_2d.json"
 RESULTS_4D = ROOT / "figures" / "smeared_results_4d.json"
 GOAL3 = ROOT / "figures" / "goal3_results.json"
 LAMS_2D = (25, 50, 100, 200, 400)
-EPS_2D = {0.5: 4_000_000, 0.25: 10_000_000}  # eps -> muestras MC por término
+EPS_2D = {0.5: 4_000_000, 0.25: 10_000_000}  # eps -> MC samples per term
 LAMS_4D = {50: 1_000_000, 25: 500_000, 100: 500_000}
 COLORS = {1.0: "#2a78d6", 0.5: "#eb6834", 0.25: "#1baf7a", "4D": "#8a4fd6"}
 INK, INK_MUTED, GRID = "#0b0b0b", "#52514e", "#e4e3df"
@@ -94,7 +94,7 @@ def _style(ax):
 
 
 def _fit_exponent(lam, var, se):
-    """Ajuste ponderado log(var) = 2 p log(lam) + c; devuelve (p, se_p) con
+    """Weighted fit log(var) = 2 p log(lam) + c; returns (p, se_p) with
     ΔS ∝ (rho V)^p."""
     x, y, w = np.log(lam), np.log(var), (var / se) ** 2
     (slope, _), cov = np.polyfit(x, y, 1, w=np.sqrt(w), cov="unscaled")
@@ -117,16 +117,16 @@ def plot():
         fits[eps] = (p, p_se)
         c = COLORS[eps]
         ax1.errorbar(lam, [r["pred"] for r in sel], yerr=[r["pred_se"] for r in sel], fmt="-", color=c, linewidth=2,
-                     capsize=3, label=f"ε = {eps:g}: predicción  (ΔS ∝ (ρV)^{p:.2f}±{p_se:.2f})")
+                     capsize=3, label=f"ε = {eps:g}: prediction  (ΔS ∝ (ρV)^{p:.2f}±{p_se:.2f})")
         ax1.errorbar(lam, sim, yerr=sim_se, fmt="o", color=c, markerfacecolor="white", markersize=6, capsize=3)
     ax1.set_xscale("log")
     ax1.set_yscale("log")
     ax1.set_xticks(LAMS_2D, [str(v) for v in LAMS_2D])
     ax1.xaxis.set_minor_locator(matplotlib.ticker.NullLocator())
     _style(ax1)
-    ax1.set_xlabel("ρV (número medio de elementos)", color=INK)
+    ax1.set_xlabel("ρV (mean number of elements)", color=INK)
     ax1.set_ylabel("(ΔS)²", color=INK)
-    ax1.set_title("Acción BD suavizada, Minkowski 2D (líneas: MYZ; círculos: simulación)", color=INK, fontsize=10)
+    ax1.set_title("Smeared BD action, 2D Minkowski (lines: MYZ; circles: simulation)", color=INK, fontsize=10)
     ax1.legend(frameon=False, labelcolor=INK, fontsize=8)
 
     allrows = rows + rows4
@@ -138,12 +138,12 @@ def plot():
                 s=40, zorder=3)
     ax2.set_yticks(y, labels, fontsize=8)
     _style(ax2)
-    ax2.set_xlabel("z = (sim − pred) / σ_combinada   (banda: |z| < 4)", color=INK)
-    ax2.set_title("Acuerdo simulación–predicción (4D: |A∩B| por cuadratura)", color=INK, fontsize=10)
+    ax2.set_xlabel("z = (sim − pred) / σ_combined   (band: |z| < 4)", color=INK)
+    ax2.set_title("Simulation–prediction agreement (4D: |A∩B| by quadrature)", color=INK, fontsize=10)
 
     path = ROOT / "figures" / "smeared_fluctuations.png"
     fig.savefig(path, dpi=150, facecolor="#fcfcfb")
-    print(f"figura guardada en {path}")
+    print(f"figure saved to {path}")
     for eps, (p, p_se) in fits.items():
         print(f"eps={eps:g}: ΔS ∝ (rho V)^{p:.3f} ± {p_se:.3f}")
 

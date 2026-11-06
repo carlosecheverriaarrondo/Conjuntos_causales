@@ -1,9 +1,9 @@
-"""Goal 2: acción de Benincasa-Dowker en Minkowski 2D y curvatura de de Sitter.
+"""Goal 2: Benincasa-Dowker action in 2D Minkowski and de Sitter curvature.
 
-Genera ``figures/goal2_bd_action.png``:
-  (a) <S> de un diamante 2D frente a rho V: simulación y valor exacto (-> 1).
-  (b) E[B 1] / (-R/2) en de Sitter frente a l H (valor exacto, 2D y 4D) -> 1.
-Uso:  python scripts/goal2_bd_action.py [--samples M]
+Produces ``figures/goal2_bd_action.png``:
+  (a) <S> of a 2D diamond versus rho V: simulation and exact value (-> 1).
+  (b) E[B 1] / (-R/2) in de Sitter versus l H (exact value, 2D and 4D) -> 1.
+Usage:  python scripts/goal2_bd_action.py [--samples M]
 """
 
 from __future__ import annotations
@@ -51,7 +51,7 @@ def action_2d(samples: int, rng):
         s = np.array([bd_action(minkowski_causal_matrix(sprinkle(region, rho, rng)), 2) for _ in range(samples)])
         exact = expected_bd_action_diamond(2, lam)
         rows.append((lam, s.mean(), s.std(ddof=1) / np.sqrt(samples), exact))
-        print(f"2D diamante  rho V={lam:5d}  <S>={s.mean():8.3f} ± {rows[-1][2]:.3f}   exacto={exact:.5f}")
+        print(f"2D diamond  rho V={lam:5d}  <S>={s.mean():8.3f} ± {rows[-1][2]:.3f}   exact={exact:.5f}")
     return np.array(rows)
 
 
@@ -72,15 +72,15 @@ def plot(rows, l_h, ratios, path: Path):
 
     lam, mean, sem, exact = rows.T
     ax1.axhline(1.0, color=INK_MUTED, linestyle="--", linewidth=1)
-    ax1.plot(lam, exact, color=COLORS[2], linewidth=2, label="valor esperado exacto")
+    ax1.plot(lam, exact, color=COLORS[2], linewidth=2, label="exact expected value")
     ax1.errorbar(lam, mean, yerr=sem, fmt="o", color=COLORS[2], markersize=5, capsize=3,
-                 markerfacecolor="white", label="simulación (media ± SEM)")
+                 markerfacecolor="white", label="simulation (mean ± SEM)")
     ax1.set_xscale("log", base=2)
     ax1.set_xticks(lam, [str(int(v)) for v in lam])
     _style(ax1)
-    ax1.set_xlabel("ρV (número medio de elementos)", color=INK)
+    ax1.set_xlabel("ρV (mean number of elements)", color=INK)
     ax1.set_ylabel("⟨S⟩", color=INK)
-    ax1.set_title("Acción BD local de un diamante en Minkowski 2D (⟨S⟩ → 1;\nla dispersión crece con ρV)", color=INK, fontsize=11)
+    ax1.set_title("Local BD action of a 2D Minkowski diamond (⟨S⟩ → 1;\nthe spread grows with ρV)", color=INK, fontsize=11)
     ax1.legend(frameon=False, labelcolor=INK)
 
     ax2.axhline(1.0, color=INK_MUTED, linestyle="--", linewidth=1)
@@ -91,14 +91,14 @@ def plot(rows, l_h, ratios, path: Path):
     ax2.set_xticks(l_h, [f"{v:g}" for v in l_h])
     ax2.xaxis.set_minor_locator(matplotlib.ticker.NullLocator())
     _style(ax2)
-    ax2.set_xlabel("ℓH (escala de discreción × H) → 0", color=INK)
+    ax2.set_xlabel("ℓH (discreteness scale × H) → 0", color=INK)
     ax2.set_ylabel("E[B·1] / (−R/2)", color=INK)
-    ax2.set_title("de Sitter: el operador BD recupera R = d(d−1)H²", color=INK, fontsize=11)
+    ax2.set_title("de Sitter: the BD operator recovers R = d(d−1)H²", color=INK, fontsize=11)
     ax2.legend(frameon=False, labelcolor=INK, loc="lower right")
 
     path.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(path, dpi=150, facecolor="#fcfcfb")
-    print(f"figura guardada en {path}")
+    print(f"figure saved to {path}")
 
 
 def main():

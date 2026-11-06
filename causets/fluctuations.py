@@ -1,83 +1,84 @@
-"""Fluctuaciones de la acción de Benincasa-Dowker (BD): formalismo de
+"""Fluctuations of the Benincasa-Dowker (BD) action: formalism of
 Moradi, Yazdi & Zilhão (MYZ), "Fluctuations and Correlations in Causal Set
 Theory", Class. Quantum Grav. 42 (2025) 045017, arXiv:2407.03395
-(referencias a ecuaciones: versión v2 del arXiv).
+(equation references: arXiv version v2).
 
-QUÉ ACCIÓN
-----------
-Todo este módulo trata la acción BD **LOCAL** (eps = 1): la que MYZ escriben
-en (4.1)-(4.4) y cuya varianza descomponen en la sec. 5. La acción es una
-combinación lineal finita de abundancias,
+WHICH ACTION
+------------
+The module was written for the **LOCAL** BD action (eps = 1): the one MYZ
+write in (4.1)-(4.4) and whose variance they decompose in sec. 5. The action
+is a finite linear combination of abundances,
 
     S = a_N N + sum_{k=0}^{n_d - 1} a_k N_k,
 
-donde N_k es el número de pares y ≺ x con k elementos entre ellos
-(MYZ: N_k = sum_x sum_{y in ◇_{k+1}(x)} 1) y N ≡ N_{-1} el número de elementos.
-Con la normalización del Goal 2 (``action.py``):
+where N_k is the number of pairs y ≺ x with k elements between them
+(MYZ: N_k = sum_x sum_{y in ◇_{k+1}(x)} 1) and N ≡ N_{-1} the number of elements.
+With the normalisation of Goal 2 (``action.py``):
     2D:  a = (1, -2, 4, -2)                  [S = N - 2N_0 + 4N_1 - 2N_2]
     4D:  a = (4/sqrt6) (1, -1, 9, -16, 8)    [S = (4/sqrt6)(N - N_0 + 9N_1 - 16N_2 + 8N_3)]
-MYZ normalizan S = -(2/alpha_d) sum_i C_i N_{i-1} (5.4); p. ej. en 4D su S es
--(sqrt6/2) veces la nuestra, así que su varianza es 3/2 la nuestra. La
-descomposición no depende de esa constante: (Delta S)^2 = a^T M a (MYZ 5.9).
-La acción suavizada (eps < 1) involucra todas las N_n y queda como trabajo
-futuro (ver README).
+MYZ normalise S = -(2/alpha_d) sum_i C_i N_{i-1} (5.4); e.g. in 4D their S is
+-(sqrt6/2) times ours, so their variance is 3/2 ours. The decomposition does
+not depend on that constant: (Delta S)^2 = a^T M a (MYZ 5.9).
+The smeared action (eps < 1) involves all the N_n; it is handled with
+thinned abundances (``eps`` argument, ``thinned_joint_probability``), see
+the paper, appendix B.
 
-FORMALISMO
-----------
-- Indicador de cardinalidad zeta_i(x, y) (MYZ 3.2, 3.4): 1 si y ≺ x y hay
-  exactamente i elementos en I(y, x). ``cardinality_indicator``.
-- Indicador de ocupación chi(R) (MYZ 3.16): 1 si la región R contiene algún
-  elemento. ``occupation_indicator``.
-- Matriz de correlación M_ij = K_ij - L_i L_j = Cov(N_i, N_j),
-  i, j = -1, ..., n_d - 1 (MYZ 5.7, 5.10), con L_i = <N_i> (5.5, 5.15).
-- Componentes:
+FORMALISM
+---------
+- Cardinality indicator zeta_i(x, y) (MYZ 3.2, 3.4): 1 if y ≺ x and there are
+  exactly i elements in I(y, x). ``cardinality_indicator``.
+- Occupation indicator chi(R) (MYZ 3.16): 1 if the region R contains some
+  element. ``occupation_indicator``.
+- Correlation matrix M_ij = K_ij - L_i L_j = Cov(N_i, N_j),
+  i, j = -1, ..., n_d - 1 (MYZ 5.7, 5.10), with L_i = <N_i> (5.5, 5.15).
+- Components:
     M_{-1,-1} = rho V_M                                            (MYZ 5.20)
     M_{-1,j}  = K_{-1,j} - rho V_M L_j                              (MYZ 5.26-5.27)
-              = (j + 2) L_j - (j + 1) L_{j+1}   [integrando 5.26 con
-                z P_{j-1}(z) = j P_j(z); identidad exacta en cualquier M]
-    K_ij = J1 + ... + J6 (MYZ 5.29-5.36), según qué puntos coinciden:
+              = (j + 2) L_j - (j + 1) L_{j+1}   [integrating 5.26 with
+                z P_{j-1}(z) = j P_j(z); exact identity in any M]
+    K_ij = J1 + ... + J6 (MYZ 5.29-5.36), according to which points coincide:
       J1: x1 = x2, y1 = y2   ->  delta_ij L_i                        (5.47)
       J2: y1 = y2 (x1 != x2)     J3: x1 = x2 (y1 != y2)
       J4: x1 = y2                J5: x2 = y1   (J4_ij = J5_ji, 5.37)
-      J6: los cuatro distintos
-  Cada integrando se evalúa con las reglas de la sec. 3.3: chi^n = chi
-  (3.30); cada punto de la configuración contenido en el intervalo de la
-  otra zeta reduce en 1 el número de elementos requerido (3.31); y las zetas
-  de regiones solapadas se descomponen en regiones disjuntas (3.15, 3.28):
+      J6: all four distinct
+  Each integrand is evaluated with the rules of sec. 3.3: chi^n = chi
+  (3.30); each point of the configuration contained in the interval of the
+  other zeta lowers the required number of elements by 1 (3.31); and the
+  zetas of overlapping regions are decomposed into disjoint regions (3.15, 3.28):
 
     <zeta_a(A) zeta_b(B)> = sum_beta P_{a-beta}(rho V_{A\\B}) P_beta(rho V_{A∩B}) P_{b-beta}(rho V_{B\\A}).
 
-  Las 11 subregiones de D_6 (5.44) y las de D_2, D_3 (5.40-5.43) son
-  exactamente los patrones "qué puntos caen en qué intervalo", que aquí se
-  detectan configuración a configuración en lugar de enumerarse a mano.
+  The 11 subregions of D_6 (5.44) and those of D_2, D_3 (5.40-5.43) are
+  exactly the patterns "which points fall in which interval", which here are
+  detected configuration by configuration instead of being enumerated by hand.
 
-- Parte conexa: en J6 se resta L_i L_j dentro del integrando,
+- Connected part: in J6, L_i L_j is subtracted inside the integrand,
       J6c_ij = rho^4 ∫ [<zeta_i zeta_j chi..chi> / rho^4 - P_i(rho V_A) P_j(rho V_B)],
-  que sólo es distinto de 0 cuando I(y1,x1) ∩ I(y2,x2) ≠ ∅. Así
+  which is non-zero only when I(y1,x1) ∩ I(y2,x2) ≠ ∅. Thus
       M_ij = delta_ij L_i + J2 + J3 + J4 + J5 + J6c   (i, j >= 0)
-  sin cancelaciones entre números enormes.
+  without cancellations between huge numbers.
 
-EVALUACIÓN NUMÉRICA DE LAS INTEGRALES (lo que MYZ dejan como trabajo futuro)
-----------------------------------------------------------------------------
-Integración Monte Carlo con muestreo de importancia: los intervalos se
-generan alrededor de un punto con desplazamientos temporales
-y = x - tau (cosh chi, sinh chi n), muestreados según la propia medida de
-volumen (ver ``_Proposal``), de modo que los intervalos pequeños y casi
-nulos (los que dominan N_0..N_3) están bien muestreados y los pesos no tienen
-colas pesadas. J6 se parte en patrones (``term_J6_connected``): si un
-extremo de un intervalo cae dentro del otro, ese punto se muestrea dentro del
-intervalo; si sólo hay solapamiento, se integra sobre w ∈ A ∩ B con peso
-1/|A ∩ B| (identidad ∫ dB f = ∫_A dw ∫_{B ∋ w} dB f / |A ∩ B|), donde el
-integrando conexo se anula de forma suave cuando |A ∩ B| -> 0.
+NUMERICAL EVALUATION OF THE INTEGRALS (what MYZ leave as future work)
+---------------------------------------------------------------------
+Monte Carlo integration with importance sampling: the intervals are
+generated around a point with timelike displacements
+y = x - tau (cosh chi, sinh chi n), sampled according to the volume measure
+itself (see ``_Proposal``), so that the small and nearly null intervals
+(those that dominate N_0..N_3) are well sampled and the weights have no
+heavy tails. J6 is split into patterns (``term_J6_connected``): if an
+endpoint of one interval falls inside the other, that point is sampled
+inside the interval; if there is only an overlap, one integrates over
+w ∈ A ∩ B with weight 1/|A ∩ B| (identity ∫ dB f = ∫_A dw ∫_{B ∋ w} dB f / |A ∩ B|),
+where the connected integrand vanishes smoothly as |A ∩ B| -> 0.
 
-- Minkowski 2D: |A ∩ B| tiene forma cerrada (intervalos = rectángulos en
-  coordenadas de cono de luz), y los integrandos se evalúan EXACTAMENTE.
-  Único error: el estadístico de la integración MC, que se reporta.
-- 4D y de Sitter: |A ∩ B| no tiene forma cerrada. Se usan estimadores
-  INSESGADOS: <zeta_a(A) zeta_b(B)> se estima con una realización de Poisson
-  local en A ∪ B (indicador de que los recuentos coinciden), y 1/|A ∩ B|
-  con ensayos geométricos (E[K] = |A| / |A ∩ B|). Sin sesgo, pero con más
-  varianza; el error estadístico reportado lo incluye.
+- 2D Minkowski: |A ∩ B| has a closed form (intervals = rectangles in
+  light-cone coordinates), and the integrands are evaluated EXACTLY.
+  Only error: the statistical one of the MC integration, which is reported.
+- 4D and de Sitter: |A ∩ B| has no closed form. UNBIASED estimators are
+  used: <zeta_a(A) zeta_b(B)> is estimated with a local Poisson realisation
+  in A ∪ B (indicator that the counts match), and 1/|A ∩ B| with geometric
+  trials (E[K] = |A| / |A ∩ B|). No bias, but more variance; the reported
+  statistical error includes it.
 """
 
 from __future__ import annotations
@@ -91,7 +92,7 @@ from .intervals import interval_cardinalities
 from .regions import unit_sphere_area
 
 # ---------------------------------------------------------------------------
-# Coeficientes de la acción local
+# Coefficients of the local action
 # ---------------------------------------------------------------------------
 
 LOCAL_ACTION_COEFFICIENTS = {
@@ -101,16 +102,16 @@ LOCAL_ACTION_COEFFICIENTS = {
 
 
 def local_action_coefficients(dim: int) -> np.ndarray:
-    """a = (a_N, a_0, ..., a_{n_d - 1}) de la acción BD local (normalización Goal 2)."""
+    """a = (a_N, a_0, ..., a_{n_d - 1}) of the local BD action (Goal 2 normalisation)."""
     return LOCAL_ACTION_COEFFICIENTS[dim].copy()
 
 
 def smeared_action_coefficients(dim: int, eps: float) -> np.ndarray:
-    """a = (a_N, a_0, ..., a_{n_d - 1}) de la acción suavizada escrita con
-    abundancias adelgazadas (ver ``thinned_abundance_vector``):
-    S_eps = a_N N + sum_k a_k Ñ_k, con a_N = -s_d alpha beta eps^(2/d) y
+    """a = (a_N, a_0, ..., a_{n_d - 1}) of the smeared action written in terms
+    of thinned abundances (see ``thinned_abundance_vector``):
+    S_eps = a_N N + sum_k a_k Ñ_k, with a_N = -s_d alpha beta eps^(2/d) and
     a_k = -s_d alpha eps^(1+2/d) C_k (``action.bd_action_from_pairs``).
-    Con eps = 1 coincide con ``local_action_coefficients``."""
+    With eps = 1 it agrees with ``local_action_coefficients``."""
     from .action import coefficients
 
     c = coefficients(dim)
@@ -123,24 +124,24 @@ def action_coefficients(dim: int, eps: float = 1.0) -> np.ndarray:
 
 
 # ---------------------------------------------------------------------------
-# Indicadores de MYZ sobre un conjunto causal concreto
+# MYZ indicators on a concrete causal set
 # ---------------------------------------------------------------------------
 
 
 def cardinality_indicator(C: np.ndarray, i: int) -> np.ndarray:
-    """zeta_i (MYZ 3.4): Z[y, x] = 1 si y ≺ x con exactamente i elementos entre ellos."""
+    """zeta_i (MYZ 3.4): Z[y, x] = 1 if y ≺ x with exactly i elements between them."""
     C = np.asarray(C, dtype=bool)
     return C & (interval_cardinalities(C) == i)
 
 
 def occupation_indicator(points: np.ndarray, contains) -> bool:
-    """chi(R) (MYZ 3.16): True si algún elemento cae en la región R
-    (``contains`` es la función de pertenencia de R)."""
+    """chi(R) (MYZ 3.16): True if some element falls in the region R
+    (``contains`` is the membership function of R)."""
     return bool(np.any(contains(np.atleast_2d(points)))) if len(points) else False
 
 
 def abundance_vector(C: np.ndarray, n_max: int) -> np.ndarray:
-    """(N, N_0, ..., N_{n_max - 1}) de un conjunto causal."""
+    """(N, N_0, ..., N_{n_max - 1}) of a causal set."""
     C = np.asarray(C, dtype=bool)
     n = interval_cardinalities(C)[C]
     counts = np.bincount(n, minlength=n_max)[:n_max]
@@ -148,11 +149,11 @@ def abundance_vector(C: np.ndarray, n_max: int) -> np.ndarray:
 
 
 def thinned_abundance_vector(C: np.ndarray, n_max: int, eps: float) -> np.ndarray:
-    """(N, Ñ_0, ..., Ñ_{n_max - 1}) con Ñ_k = sum_{y ≺ x} B_k(n(y,x), eps),
-    B_k(n, eps) = binom(n, k) eps^k (1-eps)^(n-k): número esperado de pares
-    con k elementos entre ellos tras adelgazar el intervalo con probabilidad
-    de retención eps. f_d(n, eps) = sum_k C_k B_k(n, eps) (``action.py``), así
-    que S_eps = a · Ñ con ``smeared_action_coefficients``. Con eps = 1, Ñ_k = N_k."""
+    """(N, Ñ_0, ..., Ñ_{n_max - 1}) with Ñ_k = sum_{y ≺ x} B_k(n(y,x), eps),
+    B_k(n, eps) = binom(n, k) eps^k (1-eps)^(n-k): expected number of pairs
+    with k elements between them after thinning the interval with retention
+    probability eps. f_d(n, eps) = sum_k C_k B_k(n, eps) (``action.py``), so
+    that S_eps = a · Ñ with ``smeared_action_coefficients``. With eps = 1, Ñ_k = N_k."""
     from scipy.stats import binom
 
     if eps == 1:
@@ -165,15 +166,15 @@ def thinned_abundance_vector(C: np.ndarray, n_max: int, eps: float) -> np.ndarra
 
 
 # ---------------------------------------------------------------------------
-# Lado numérico: varianza sobre un conjunto de sprinklings
+# Numerical side: variance over an ensemble of sprinklings
 # ---------------------------------------------------------------------------
 
 
 @dataclass
 class EnsembleFluctuations:
-    """Varianza de la acción y covarianza de abundancias sobre M sprinklings."""
+    """Variance of the action and covariance of abundances over M sprinklings."""
 
-    abundances: np.ndarray  # (M, n_max + 1): columnas N, N_0, ...
+    abundances: np.ndarray  # (M, n_max + 1): columns N, N_0, ...
     coefficients: np.ndarray
 
     @property
@@ -186,7 +187,7 @@ class EnsembleFluctuations:
 
     @property
     def variance_se(self) -> float:
-        """Error estándar de la varianza muestral: std(d^2) / sqrt(M), d = S - <S>."""
+        """Standard error of the sample variance: std(d^2) / sqrt(M), d = S - <S>."""
         d = self.actions - self.actions.mean()
         return float(np.std(d * d, ddof=1) / np.sqrt(len(d)))
 
@@ -202,8 +203,8 @@ class EnsembleFluctuations:
 
 
 def ensemble_fluctuations(geometry, density: float, n_samples: int, rng, coefficients=None, eps: float = 1.0) -> EnsembleFluctuations:
-    """Sprinklings de Poisson independientes de ``geometry`` (sin cadena de
-    Markov: no hay termalización) y sus abundancias (adelgazadas si eps < 1)."""
+    """Independent Poisson sprinklings of ``geometry`` (no Markov chain: no
+    thermalisation) and their abundances (thinned if eps < 1)."""
     from .causal import minkowski_causal_matrix
     from .sprinkling import sprinkle
 
@@ -217,12 +218,12 @@ def ensemble_fluctuations(geometry, density: float, n_samples: int, rng, coeffic
 
 
 # ---------------------------------------------------------------------------
-# Lado analítico (formalismo MYZ)
+# Analytic side (MYZ formalism)
 # ---------------------------------------------------------------------------
 
 
 def _pmf_table(z: np.ndarray, n: int) -> np.ndarray:
-    """P_k(z) para k = 0..n-1, forma (len(z), n)."""
+    """P_k(z) for k = 0..n-1, shape (len(z), n)."""
     z = np.asarray(z, dtype=float)[:, None]
     k = np.arange(n)[None, :]
     with np.errstate(divide="ignore", invalid="ignore"):
@@ -232,7 +233,7 @@ def _pmf_table(z: np.ndarray, n: int) -> np.ndarray:
 
 
 def _shifted(P: np.ndarray, sa: np.ndarray, sb: np.ndarray) -> np.ndarray:
-    """G[m, i, j] = P[m, i - sa[m], j - sb[m]] (0 si algún índice es negativo)."""
+    """G[m, i, j] = P[m, i - sa[m], j - sb[m]] (0 if either index is negative)."""
     m, n, _ = P.shape
     i = np.arange(n)[None, :, None] - sa[:, None, None]
     j = np.arange(n)[None, None, :] - sb[:, None, None]
@@ -242,9 +243,9 @@ def _shifted(P: np.ndarray, sa: np.ndarray, sb: np.ndarray) -> np.ndarray:
 
 
 def joint_cardinality_probability(za, zb, zc, n: int) -> np.ndarray:
-    """<zeta_a(A) zeta_b(B)> para a, b = 0..n-1 (MYZ 3.15, 3.28, 3.34):
-    sum_beta P_{a-beta}(za) P_beta(zb) P_{b-beta}(zc), con za = rho|A\\B|,
-    zb = rho|A∩B|, zc = rho|B\\A|. Forma (m, n, n)."""
+    """<zeta_a(A) zeta_b(B)> for a, b = 0..n-1 (MYZ 3.15, 3.28, 3.34):
+    sum_beta P_{a-beta}(za) P_beta(zb) P_{b-beta}(zc), with za = rho|A\\B|,
+    zb = rho|A∩B|, zc = rho|B\\A|. Shape (m, n, n)."""
     pa, pb, pc = _pmf_table(za, n), _pmf_table(zb, n), _pmf_table(zc, n)
     out = np.zeros((len(pa), n, n))
     for beta in range(n):
@@ -254,18 +255,18 @@ def joint_cardinality_probability(za, zb, zc, n: int) -> np.ndarray:
 
 
 def thinned_joint_probability(zA, zB, zAB, sA, sB, n: int, eps: float = 1.0) -> np.ndarray:
-    """<zeta_{i-sA}(A) zeta_{j-sB}(B)> para i, j = 0..n-1 tras adelgazar A y B
-    de forma independiente con probabilidad de retención eps, forma (m, n, n).
-    zA = rho|A|, zB = rho|B|, zAB = rho|A∩B|; sA (sB) es el número de puntos de
-    la configuración contenidos en A (B).
+    """<zeta_{i-sA}(A) zeta_{j-sB}(B)> for i, j = 0..n-1 after thinning A and B
+    independently with retention probability eps, shape (m, n, n).
+    zA = rho|A|, zB = rho|B|, zAB = rho|A∩B|; sA (sB) is the number of points
+    of the configuration contained in A (B).
 
-    Con eps = 1 es MYZ (3.15, 3.31). Para eps < 1: los elementos de A∩B se
-    reparten (adelgazamiento de un proceso de Poisson) en procesos de Poisson
-    independientes retenidos por ambos (eps^2), sólo por A o sólo por B
-    (eps(1-eps) cada uno), así que la estructura de (3.15) se mantiene con
+    With eps = 1 this is MYZ (3.15, 3.31). For eps < 1: the elements of A∩B
+    are split (thinning of a Poisson process) into independent Poisson
+    processes retained by both (eps^2), only by A or only by B
+    (eps(1-eps) each), so the structure of (3.15) is preserved with
         zA' = eps zA - eps^2 zAB,  zAB' = eps^2 zAB,  zB' = eps zB - eps^2 zAB,
-    y cada punto fijo contenido se retiene con probabilidad eps:
-    el desplazamiento sA pasa a ser Binomial(sA, eps)."""
+    and each fixed contained point is retained with probability eps:
+    the shift sA becomes Binomial(sA, eps)."""
     zA, zB, zAB = (np.asarray(v, float) for v in (zA, zB, zAB))
     sA, sB = np.asarray(sA, int), np.asarray(sB, int)
     if eps == 1:
@@ -293,40 +294,40 @@ def _sinh_power_integral(d: int, X):
         return np.cosh(X) - 1.0
     if d == 4:
         return np.sinh(2 * X) / 4 - X / 2
-    raise ValueError("propuesta implementada para d = 2, 3, 4")
+    raise ValueError("proposal implemented for d = 2, 3, 4")
 
 
 @dataclass
 class _Proposal:
-    """Desplazamientos temporales futuros o = tau (cosh chi, sinh chi n).
+    """Future timelike displacements o = tau (cosh chi, sinh chi n).
 
-    Se muestrea z = rho_c c_d tau^d (el "volumen coordenado en unidades de
-    elementos") con z ~ Gamma(2/d, z0), chi con densidad sinh^{d-2}(chi) en
-    [0, ln(4 L / tau)] y n uniforme en S^{d-2}. Como la medida de volumen en
-    estas variables es d^d o = dz sinh^{d-2}chi dchi dOmega / (d rho_c c_d),
-    los pesos 1/q son suaves (e^{z/z0} z^{1-2/d} S_d(chi_max)): no hay colas
-    pesadas. ``density`` devuelve q(o) en medida coordenada.
+    One samples z = rho_c c_d tau^d (the "coordinate volume in units of
+    elements") with z ~ Gamma(2/d, z0), chi with density sinh^{d-2}(chi) on
+    [0, ln(4 L / tau)] and n uniform on S^{d-2}. Since the volume measure in
+    these variables is d^d o = dz sinh^{d-2}chi dchi dOmega / (d rho_c c_d),
+    the weights 1/q are smooth (e^{z/z0} z^{1-2/d} S_d(chi_max)): there are no
+    heavy tails. ``density`` returns q(o) in coordinate measure.
 
-    ``z0`` puede ser una tupla de escalas: entonces z se muestrea de la mezcla
-    equiponderada de las Gammas ("defensive importance sampling", Hesterberg,
-    Technometrics 37 (1995) 185), y el peso queda acotado por el de la mejor
-    componente. Se usa con la acción suavizada, donde los intervalos
-    relevantes tienen rho V ~ 1/eps además de los pequeños."""
+    ``z0`` may be a tuple of scales: then z is sampled from the equally
+    weighted mixture of the Gammas ("defensive importance sampling", Hesterberg,
+    Technometrics 37 (1995) 185), and the weight is bounded by that of the best
+    component. Used with the smeared action, where the relevant intervals
+    have rho V ~ 1/eps in addition to the small ones."""
 
     dim: int
     extent: float
-    rho_c: float  # densidad en medida coordenada (rho en Minkowski)
+    rho_c: float  # density in coordinate measure (rho in Minkowski)
     z0: float | tuple = 3.0
 
     def sample(self, m: int, rng, budget, local=1.0) -> tuple[np.ndarray, np.ndarray]:
-        """``budget``: tiempo coordenado disponible desde cada punto base hasta
-        el borde temporal de M; se impone tau cosh(chi) <= budget, i.e.
-        chi <= arccosh(budget / tau) (condición necesaria para seguir en M).
-        Si tau >= budget la muestra es inválida (q = inf, peso 0).
-        ``local``: factor (por punto base) que multiplica rho_c, para adaptar
-        la escala de los intervalos a la densidad física local (FLRW). Si es
-        una tupla de factores, cada muestra usa uno al azar y q es la densidad
-        de la mezcla equiponderada (como con ``z0``)."""
+        """``budget``: coordinate time available from each base point to the
+        time boundary of M; tau cosh(chi) <= budget is imposed, i.e.
+        chi <= arccosh(budget / tau) (necessary condition to remain in M).
+        If tau >= budget the sample is invalid (q = inf, weight 0).
+        ``local``: factor (per base point) multiplying rho_c, to adapt the
+        scale of the intervals to the local physical density (FLRW). If it is
+        a tuple of factors, each sample uses one at random and q is the density
+        of the equally weighted mixture (as with ``z0``)."""
         from scipy.special import gamma as gamma_fn
 
         d = self.dim
@@ -340,11 +341,11 @@ class _Proposal:
             tau = (z / (rho_c * c)) ** (1.0 / d)
 
             def q_z(rc):
-                """Densidad de la mezcla de Gammas en z' = rc c tau^d, por rc."""
+                """Density of the Gamma mixture at z' = rc c tau^d, times rc."""
                 zz = rc * c * tau**d
                 return rc * np.mean([zz ** (shape - 1) * np.exp(-zz / s) / (gamma_fn(shape) * s**shape) for s in scales], axis=0)
 
-            p_z = np.mean([q_z(rc) for rc in comps], axis=0)  # incluye el factor rho_c
+            p_z = np.mean([q_z(rc) for rc in comps], axis=0)  # includes the rho_c factor
             rho_q = 1.0
         else:
             rho_c = self.rho_c * np.broadcast_to(np.asarray(local, dtype=float), (m,))
@@ -355,9 +356,9 @@ class _Proposal:
         valid = tau < budget
         X = np.where(valid, np.arccosh(np.maximum(budget / tau, 1.0)), 1e-12)
         X = np.maximum(X, 1e-12)
-        # chi ~ sinh^{d-2}: propuesta e^{(d-2) chi} en [0, X] y aceptación (1 - e^{-2 chi})^{d-2}
+        # chi ~ sinh^{d-2}: proposal e^{(d-2) chi} on [0, X] and acceptance (1 - e^{-2 chi})^{d-2}
         chi = np.zeros(m)
-        todo = np.nonzero(valid)[0]  # las inválidas no necesitan chi
+        todo = np.nonzero(valid)[0]  # the invalid ones do not need chi
         while len(todo):
             u = rng.random(len(todo))
             Xt = X[todo]
@@ -378,7 +379,7 @@ class _Proposal:
 
 
 def diamond_volume_unit(d: int) -> float:
-    """Volumen de un intervalo plano de tiempo propio 1."""
+    """Volume of a flat interval of unit proper time."""
     from .regions import diamond_volume
 
     return diamond_volume(d, 0.5)
@@ -386,7 +387,7 @@ def diamond_volume_unit(d: int) -> float:
 
 @dataclass
 class TermEstimate:
-    """Estimación MC de un término matricial T_ij y de su contracción a^T T a."""
+    """MC estimate of a matrix term T_ij and of its contraction a^T T a."""
 
     matrix: np.ndarray
     contraction: float
@@ -396,11 +397,11 @@ class TermEstimate:
 
 @dataclass
 class FluctuationPrediction:
-    """Predicción MYZ de Cov(N_i, N_j) y de (Delta S)^2 para la acción local."""
+    """MYZ prediction of Cov(N_i, N_j) and of (Delta S)^2 for the local action."""
 
     density: float
     coefficients: np.ndarray
-    abundance_means: np.ndarray  # L_{-1}, L_0, ..., L_{n-1} (y L_n para M_{-1,n-1})
+    abundance_means: np.ndarray  # L_{-1}, L_0, ..., L_{n-1} (and L_n for M_{-1,n-1})
     covariance: np.ndarray  # M_ij, i, j = -1..n-1
     variance: float
     variance_se: float
@@ -408,22 +409,22 @@ class FluctuationPrediction:
 
 
 class FluctuationKernel:
-    """Evalúa el formalismo MYZ sobre una geometría (ver ``geometry.py``)."""
+    """Evaluate the MYZ formalism on a geometry (see ``geometry.py``)."""
 
     def __init__(self, geometry, density: float, n_max: int, rng, z0=None,
                  overlap: str = "auto", overlap_points: int = 1024, eps: float = 1.0):
-        """``eps``: suavizado de la acción (1 = acción local). Con eps < 1 las
-        matrices son las de las abundancias adelgazadas Ñ_k
+        """``eps``: smearing of the action (1 = local action). With eps < 1 the
+        matrices are those of the thinned abundances Ñ_k
         (``thinned_abundance_vector``).
 
-        ``overlap``: cómo obtener |A ∩ B|.
-          "exact"      determinista, de la geometría: forma cerrada en 2D
-                       Minkowski, cuadratura (``overlap.py``) en 4D Minkowski
-          "plugin"     estimación MC con ``overlap_points`` puntos en A y fórmula
-                       exacta de <zeta zeta> (sesgo O(1/overlap_points))
-          "stochastic" estimadores insesgados (realización de Poisson local y
-                       ensayos geométricos); mucha más varianza
-          "auto"       "exact" si existe, si no "plugin"."""
+        ``overlap``: how to obtain |A ∩ B|.
+          "exact"      deterministic, from the geometry: closed form in 2D
+                       Minkowski, quadrature (``overlap.py``) in 4D Minkowski
+          "plugin"     MC estimate with ``overlap_points`` points in A and the
+                       exact formula for <zeta zeta> (bias O(1/overlap_points))
+          "stochastic" unbiased estimators (local Poisson realisation and
+                       geometric trials); much more variance
+          "auto"       "exact" if available, otherwise "plugin"."""
         self.g = geometry
         self.rho = density
         self.n = n_max
@@ -431,7 +432,7 @@ class FluctuationKernel:
         lo, hi = geometry.region.bounding_box()
         extent = float(hi[0] - lo[0])
         rho_c = density * geometry.volume / geometry.coordinate_volume
-        if z0 is None:  # escala(s) de la propuesta (ver ``_Proposal``)
+        if z0 is None:  # proposal scale(s) (see ``_Proposal``)
             z0 = 3.0 if eps == 1 else (3.0, 3.0 / eps)
         self.prop = _Proposal(geometry.dim, extent, rho_c, z0)
         self._t_min, self._t_max = float(lo[0]), float(hi[0])
@@ -439,31 +440,32 @@ class FluctuationKernel:
         if overlap == "auto":
             overlap = "exact" if has_exact else "plugin"
         if overlap == "exact" and not has_exact:
-            raise ValueError("esta geometría no tiene |A ∩ B| en forma cerrada")
+            raise ValueError("this geometry has no closed form for |A ∩ B|")
         if overlap == "stochastic" and eps != 1:
-            raise ValueError("el modo estocástico sólo está implementado para eps = 1")
+            raise ValueError("the stochastic mode is only implemented for eps = 1")
         if not 0 < eps <= 1:
-            raise ValueError("eps debe estar en (0, 1]")
+            raise ValueError("eps must lie in (0, 1]")
         self.eps = float(eps)
         self.overlap_mode = overlap
         self.overlap_points = overlap_points
         self.exact_overlap = overlap == "exact"
 
-    # -- utilidades -----------------------------------------------------
+    # -- utilities ------------------------------------------------------
 
     def _local(self, base, mixture=False):
-        """Factor de densidad local de la propuesta: 1, salvo en geometrías con
-        ``local_proposal`` (FLRW): la densidad física relativa en el punto base,
-        acotada por debajo. Hacia el futuro (``mixture``) el punto base es el
-        vértice inferior, que infravalora la densidad del intervalo: se mezcla
-        con la global. El soporte de la propuesta no cambia."""
+        """Local density factor of the proposal: 1, except in geometries with
+        ``local_proposal`` (FLRW): the relative physical density at the base
+        point, bounded from below. Towards the future (``mixture``) the base
+        point is the bottom vertex, which underestimates the density of the
+        interval: it is mixed with the global one. The support of the proposal
+        does not change."""
         if not getattr(self.g, "local_proposal", False):
             return 1.0
         rel = np.maximum(self.g.weight(base) * self.g.coordinate_volume / self.g.volume, 0.02)
         return (rel, 1.0) if mixture else rel
 
     def _past(self, base):
-        """y = base - o con o del futuro; devuelve (y, q)."""
+        """y = base - o with o a future displacement; returns (y, q)."""
         o, q = self.prop.sample(len(base), self.rng, base[:, 0] - self._t_min, self._local(base))
         return base - o, q
 
@@ -475,7 +477,7 @@ class FluctuationKernel:
         return self.g.precedes(y, z) & self.g.precedes(z, x)
 
     def _overlap(self, yA, xA, yB, xB, VA):
-        """|A ∩ B|: exacto o estimado con ``overlap_points`` puntos en A."""
+        """|A ∩ B|: exact or estimated with ``overlap_points`` points in A."""
         if self.exact_overlap:
             return self.g.overlap_volume(yA, xA, yB, xB)
         K = self.overlap_points
@@ -491,9 +493,9 @@ class FluctuationKernel:
         return VA * hits / K
 
     def _joint(self, yA, xA, yB, xB, VA, VB, sA, sB, Vb=None):
-        """<zeta_{i-sA}(A) zeta_{j-sB}(B)> para i, j = 0..n-1, forma (m, n, n).
-        Exacto si hay |A∩B| cerrado; si no, indicador de una realización de
-        Poisson local (estimador insesgado)."""
+        """<zeta_{i-sA}(A) zeta_{j-sB}(B)> for i, j = 0..n-1, shape (m, n, n).
+        Exact if |A∩B| has a closed form; otherwise, indicator of a local
+        Poisson realisation (unbiased estimator)."""
         rho, n = self.rho, self.n
         m = len(VA)
         if self.overlap_mode in ("exact", "plugin"):
@@ -502,7 +504,7 @@ class FluctuationKernel:
             return thinned_joint_probability(rho * VA, rho * VB, rho * Vb, sA, sB, n, self.eps)
         rng = self.rng
         nA = rng.poisson(rho * VA)
-        active = nA <= n  # si nA > n - 1 + sA no contribuye a ningún i < n
+        active = nA <= n  # if nA > n - 1 + sA it contributes to no i < n
         n_ab = np.zeros(m, dtype=int)
         idx = np.nonzero(active & (nA > 0))[0]
         if len(idx):
@@ -516,14 +518,14 @@ class FluctuationKernel:
             pts, owner = self.g.sample_in_intervals(yB[idx], xB[idx], nB[idx], rng)
             outA = ~self._inside(yA[idx][owner], pts, xA[idx][owner])
             m_c[idx] = np.bincount(owner, weights=outA, minlength=len(idx)).astype(int)
-        cA, cB = nA + sA, n_ab + m_c + sB  # índices i, j a los que contribuye
+        cA, cB = nA + sA, n_ab + m_c + sB  # indices i, j it contributes to
         out = np.zeros((m, n, n))
         ok = active & (cA < n) & (cB < n)
         out[np.nonzero(ok)[0], cA[ok], cB[ok]] = 1.0
         return out
 
     def _inverse_overlap(self, yA, xA, yB, xB, VA):
-        """Estimador insesgado de 1/|A∩B|: K/|A| con K ~ Geométrica(|A∩B|/|A|)."""
+        """Unbiased estimator of 1/|A∩B|: K/|A| with K ~ Geometric(|A∩B|/|A|)."""
         m = len(VA)
         K = np.zeros(m)
         pending = np.arange(m)
@@ -531,7 +533,7 @@ class FluctuationKernel:
         while len(pending):
             pts, owner = self.g.sample_in_intervals(yA[pending], xA[pending], np.full(len(pending), 32), rng)
             hit = self._inside(yB[pending][owner], pts, xB[pending][owner])
-            # posición (1..32) del primer acierto en cada intervalo
+            # position (1..32) of the first hit in each interval
             pos = np.full(len(pending), 33)
             order = np.arange(len(owner)) - np.searchsorted(owner, owner) + 1
             np.minimum.at(pos, owner[hit], order[hit])
@@ -550,11 +552,11 @@ class FluctuationKernel:
             ok &= self.g.contains(p)
         return ok
 
-    # -- términos ---------------------------------------------------------
+    # -- terms ------------------------------------------------------------
 
     def abundance_means(self, m: int, n_levels: int) -> tuple[np.ndarray, np.ndarray]:
-        """L_k = <N_k> (MYZ 5.15), k = 0..n_levels-1, por MC (con eps < 1,
-        <Ñ_k> = rho^2 ∫∫ P_k(eps rho V)). Devuelve (L, se)."""
+        """L_k = <N_k> (MYZ 5.15), k = 0..n_levels-1, by MC (with eps < 1,
+        <Ñ_k> = rho^2 ∫∫ P_k(eps rho V)). Returns (L, se)."""
         x = self.g.sample_M(m, self.rng)
         y, q = self._past(x)
         ok = self._points_in_M(y)
@@ -564,9 +566,9 @@ class FluctuationKernel:
         return vals.mean(axis=0), vals.std(axis=0, ddof=1) / np.sqrt(m)
 
     def term_J1(self, m: int, a: np.ndarray) -> TermEstimate:
-        """J1_ij (MYZ 5.47): x1 = x2, y1 = y2. Con eps = 1 es delta_ij L_i; con
-        eps < 1 los dos factores Ñ_i, Ñ_j del mismo par son adelgazamientos
-        independientes del mismo intervalo: <..> = thinned_joint con A = B."""
+        """J1_ij (MYZ 5.47): x1 = x2, y1 = y2. With eps = 1 it is delta_ij L_i; with
+        eps < 1 the two factors Ñ_i, Ñ_j of the same pair are independent
+        thinnings of the same interval: <..> = thinned_joint with A = B."""
         y, x, w = self._sample_pair(m)
         w = np.where(self._points_in_M(y), w, 0.0)
         V = self.g.interval_volume(y, x)
@@ -575,7 +577,7 @@ class FluctuationKernel:
         return self._contract(w[:, None, None] * G, a)
 
     def term_J4(self, m: int, a: np.ndarray) -> TermEstimate:
-        """J4_ij (MYZ 5.48): cadena y1 ≺ x1 = y2 ≺ x2; intervalos disjuntos."""
+        """J4_ij (MYZ 5.48): chain y1 ≺ x1 = y2 ≺ x2; disjoint intervals."""
         x1 = self.g.sample_M(m, self.rng)
         y1, q1 = self._past(x1)
         x2, q2 = self._future(x1)
@@ -587,7 +589,7 @@ class FluctuationKernel:
         return self._contract(w[:, None, None] * Pi[:, :, None] * Pj[:, None, :], a)
 
     def term_J2(self, m: int, a: np.ndarray) -> TermEstimate:
-        """J2_ij (MYZ 5.52-5.56): vértice inferior común y, A = I(y,x1), B = I(y,x2)."""
+        """J2_ij (MYZ 5.52-5.56): common bottom vertex y, A = I(y,x1), B = I(y,x2)."""
         y = self.g.sample_M(m, self.rng)
         x1, q1 = self._future(y)
         x2, q2 = self._future(y)
@@ -603,7 +605,7 @@ class FluctuationKernel:
         return self._contract(w[:, None, None] * G, a)
 
     def term_J3(self, m: int, a: np.ndarray) -> TermEstimate:
-        """J3_ij (MYZ 5.33): vértice superior común x, A = I(y1,x), B = I(y2,x)."""
+        """J3_ij (MYZ 5.33): common top vertex x, A = I(y1,x), B = I(y2,x)."""
         x = self.g.sample_M(m, self.rng)
         y1, q1 = self._past(x)
         y2, q2 = self._past(x)
@@ -619,7 +621,7 @@ class FluctuationKernel:
         return self._contract(w[:, None, None] * G, a)
 
     def _j6_integrand(self, y1, x1, y2, x2, base, use_inverse_overlap):
-        """(G - P_i P_j) * base [* 1/|A∩B|] para configuraciones con base != 0."""
+        """(G - P_i P_j) * base [* 1/|A∩B|] for configurations with base != 0."""
         g, rho, n = self.g, self.rho, self.n
         m = len(base)
         out = np.zeros((m, n, n))
@@ -639,27 +641,27 @@ class FluctuationKernel:
             if Vb is None:
                 inv = self._inverse_overlap(y1, x1, y2, x2, VA)
             else:
-                # plugin: si ningún punto cae en A ∩ B (solapamiento < |A|/K), se
-                # acota con medio punto; el sesgo se controla variando K
+                # plugin: if no point falls in A ∩ B (overlap < |A|/K), it is
+                # bounded by half a point; the bias is controlled by varying K
                 inv = 1.0 / np.maximum(Vb, VA * 0.5 / self.overlap_points)
             f = f * inv
         out[sel] = f[:, None, None] * (G - PP)
         return out
 
     def _sample_pair(self, m):
-        """Par (y, x) con x uniforme en M e y = x - o. Devuelve y, x, peso
-        rho^2 V_M w(y) / q (sin comprobar que y esté en M)."""
+        """Pair (y, x) with x uniform in M and y = x - o. Returns y, x, weight
+        rho^2 V_M w(y) / q (without checking that y is in M)."""
         x = self.g.sample_M(m, self.rng)
         y, q = self._past(x)
         return y, x, self.rho**2 * self.g.volume * self.g.weight(y) / q
 
     def _anchor_in(self, y, x, m):
-        """Un punto uniforme (dV físico) en cada I(y[k], x[k]); peso rho |I|.
-        Si y está fuera de M, la configuración tiene peso 0 (todos los usos
-        exigen y en M) y se devuelve x sin muestrear: en FLRW un intervalo que
-        cruza eta = 0 haría el rechazo arbitrariamente lento. (Sólo con
-        ``local_proposal``, para no cambiar la secuencia aleatoria de los
-        cálculos ya guardados en Minkowski y de Sitter.)"""
+        """One uniform point (physical dV) in each I(y[k], x[k]); weight rho |I|.
+        If y is outside M, the configuration has weight 0 (all uses require
+        y in M) and x is returned without sampling: in FLRW an interval that
+        crosses eta = 0 would make the rejection arbitrarily slow. (Only with
+        ``local_proposal``, so as not to change the random sequence of the
+        calculations already stored for Minkowski and de Sitter.)"""
         if not getattr(self.g, "local_proposal", False):
             pts, _ = self.g.sample_in_intervals(y, x, np.ones(m, dtype=int), self.rng)
             return pts, self.rho * self.g.interval_volume(y, x)
@@ -670,23 +672,23 @@ class FluctuationKernel:
         return pts, self.rho * self.g.interval_volume(y, x)
 
     def term_J6_connected(self, m: int, a: np.ndarray) -> TermEstimate:
-        """J6_ij - L_i L_j (MYZ 5.57-5.60 menos 5.10). Partición del dominio
-        (equivalente a las subregiones de D_6, MYZ 5.44), sin solapamientos:
+        """J6_ij - L_i L_j (MYZ 5.57-5.60 minus 5.10). Partition of the domain
+        (equivalent to the subregions of D_6, MYZ 5.44), without overlaps:
           c1: x2 ∈ A
           c2: y2 ∈ A, x2 ∉ A
           c3: x1 ∈ B, x2, y2 ∉ A
           c4: y1 ∈ B, x2, y2 ∉ A, x1 ∉ B
-          c0: A ∩ B ≠ ∅ sin ningún extremo dentro del otro intervalo
-        (fuera de estos casos A y B son disjuntos y el integrando conexo es 0).
-        En c1-c4 el punto contenido se muestrea dentro del intervalo; en c0 se
-        integra sobre w ∈ A ∩ B con peso 1/|A ∩ B|."""
+          c0: A ∩ B ≠ ∅ with no endpoint inside the other interval
+        (outside these cases A and B are disjoint and the connected integrand is 0).
+        In c1-c4 the contained point is sampled inside the interval; in c0 one
+        integrates over w ∈ A ∩ B with weight 1/|A ∩ B|."""
         return self._contract(sum(self._j6_patterns(m)), a)
 
     def _j6_patterns(self, m):
         rng, g, rho = self.rng, self.g, self.rho
         inside = self._inside
         out = []
-        # c1, c2: se muestrea A y un punto de B dentro de A
+        # c1, c2: sample A and a point of B inside A
         for pattern in ("c1", "c2"):
             y1, x1, wA = self._sample_pair(m)
             z, wz = self._anchor_in(y1, x1, m)
@@ -703,7 +705,7 @@ class FluctuationKernel:
             ok = self._points_in_M(y1, y2, x2) & ~excl
             base = np.where(ok, wA * wz * rho * w_other / q, 0.0)
             out.append(self._j6_integrand(y1, x1, y2, x2, base, False))
-        # c3, c4: se muestrea B y un punto de A dentro de B
+        # c3, c4: sample B and a point of A inside B
         for pattern in ("c3", "c4"):
             y2, x2, wB = self._sample_pair(m)
             z, wz = self._anchor_in(y2, x2, m)
@@ -721,29 +723,29 @@ class FluctuationKernel:
             ok = self._points_in_M(y1, x1, y2) & ~excl
             base = np.where(ok, wB * wz * rho * w_other / q, 0.0)
             out.append(self._j6_integrand(y1, x1, y2, x2, base, False))
-        # c0: A como par; w uniforme en A; B ∋ w con dos desplazamientos;
-        # peso 1/|A ∩ B|. Sin extremos dentro del otro intervalo.
+        # c0: A as a pair; w uniform in A; B ∋ w with two displacements;
+        # weight 1/|A ∩ B|. No endpoints inside the other interval.
         y1, x1, wA = self._sample_pair(m)
         w, ww = self._anchor_in(y1, x1, m)
         x2, q2 = self._future(w)
         y2, q3 = self._past(w)
         excl = inside(y1, x2, x1) | inside(y1, y2, x1) | inside(y2, x1, x2) | inside(y2, y1, x2)
         ok = self._points_in_M(y1, x2, y2) & ~excl
-        # ww = rho |A|: se usa |A| (densidad 1/|A| de w) y rho^2 para x2, y2
+        # ww = rho |A|: |A| is used (density 1/|A| of w) and rho^2 for x2, y2
         base = np.where(ok, wA * (ww / rho) * rho**2 * g.weight(x2) * g.weight(y2) / (q2 * q3), 0.0)
         out.append(self._j6_integrand(y1, x1, y2, x2, base, True))
         return out
 
-    # -- ensamblado ---------------------------------------------------------
+    # -- assembly -----------------------------------------------------------
 
     def predict(self, coefficients=None, m_terms: int = 200_000, m_means: int = 400_000, exact_means=None, batch: int = 50_000) -> FluctuationPrediction:
-        """(Delta S)^2 = a^T M a. ``exact_means``: L_0..L_n exactos si se conocen
-        (Minkowski: ``expected_thinned_abundance``); si no, MC.
+        """(Delta S)^2 = a^T M a. ``exact_means``: exact L_0..L_n if known
+        (Minkowski: ``expected_thinned_abundance``); otherwise MC.
 
-        Con eps < 1, M es la covarianza de (N, Ñ_0, ...); la fila M_{-1,k}
-        conserva la forma (k+2) L_k - (k+1) L_{k+1} con L_k = <Ñ_k>: por la
-        fórmula de Mecke, Cov(N, sum_pares h(n)) = rho^2 ∫∫ E[(2 + n - rho V) h(n)],
-        y para h(n) = B_k(n, eps) se separa n = (retenidos) + (no retenidos)."""
+        With eps < 1, M is the covariance of (N, Ñ_0, ...); the row M_{-1,k}
+        keeps the form (k+2) L_k - (k+1) L_{k+1} with L_k = <Ñ_k>: by the
+        Mecke formula, Cov(N, sum_pairs h(n)) = rho^2 ∫∫ E[(2 + n - rho V) h(n)],
+        and for h(n) = B_k(n, eps) one splits n = (retained) + (not retained)."""
         a = action_coefficients(self.g.dim, self.eps) if coefficients is None else np.asarray(coefficients, float)
         n = self.n
         assert len(a) == n + 1
@@ -774,7 +776,7 @@ class FluctuationKernel:
         cov[1:, 1:] = Mkk
 
         var = float(a @ cov @ a)
-        # error: términos MC independientes + error de L (lineal en L)
+        # error: independent MC terms + error of L (linear in L)
         se2 = sum(t.contraction_se**2 for name, t in terms.items() if name != "J4") + 4 * terms["J4"].contraction_se**2
         dvar_dL = np.zeros(n + 1)
         dvar_dL[:n] += (ak**2 if self.eps == 1 else 0.0) + 2 * aN * ak * (j + 2)
@@ -787,7 +789,7 @@ class FluctuationKernel:
         tot = sum(p.n_samples for p in parts)
         mat = sum(p.matrix * p.n_samples for p in parts) / tot
         mean = sum(p.contraction * p.n_samples for p in parts) / tot
-        # combinar varianzas por lote (mismo estimador): se^2 = sum (n_b^2 se_b^2) / N^2
+        # combine per-batch variances (same estimator): se^2 = sum (n_b^2 se_b^2) / N^2
         se = np.sqrt(sum((p.n_samples * p.contraction_se) ** 2 for p in parts)) / tot
         return TermEstimate(mat, mean, float(se), tot)
 
@@ -804,17 +806,17 @@ class FluctuationKernel:
 
 
 def expected_thinned_abundance(dim: int, lam: float, k: int, eps: float = 1.0) -> float:
-    """<Ñ_k> exacto en un diamante plano con rho V = lam:
-    rho^2 ∫∫ P_k(eps rho V) = L_k(eps lam) / eps^2 (cambio rho -> eps rho)."""
+    """Exact <Ñ_k> in a flat diamond with rho V = lam:
+    rho^2 ∫∫ P_k(eps rho V) = L_k(eps lam) / eps^2 (substitution rho -> eps rho)."""
     from .continuum import expected_abundance
 
     return expected_abundance(dim, eps * lam, k) / eps**2
 
 
 def pair_weight(dim: int, n, eps: float = 1.0) -> np.ndarray:
-    """f_eps(n) = sum_k a_k B_k(n, eps): contribución a S_eps de un par con n
-    elementos entre sus extremos (sin el término a_N N). Con eps = 1,
-    f(n) = a_n para n < n_d y 0 si no."""
+    """f_eps(n) = sum_k a_k B_k(n, eps): contribution to S_eps of a pair with n
+    elements between its endpoints (without the a_N N term). With eps = 1,
+    f(n) = a_n for n < n_d and 0 otherwise."""
     from scipy.stats import binom
 
     a = action_coefficients(dim, eps)[1:]
@@ -823,26 +825,26 @@ def pair_weight(dim: int, n, eps: float = 1.0) -> np.ndarray:
 
 
 def same_pair_log_coefficient(eps: float = 1.0, n_max: int = 20_000) -> float:
-    """Coeficiente b de (Delta S)^2 ≈ b rho V ln(rho V) + O(rho V) que aporta
-    el término "mismo par" (J¹ de MYZ) en un diamante de Minkowski 2D.
+    """Coefficient b of (Delta S)^2 ≈ b rho V ln(rho V) + O(rho V) contributed
+    by the "same pair" term (J¹ of MYZ) in a 2D Minkowski diamond.
 
-    Derivación (Goal 3d, ver README): en coordenadas de cono de luz, con
-    diamante de lado l (V = l²/2),
-        <sum_pares h(n)> = (rho²/4) ∫∫_0^l (l-a)(l-b) E_{n~Poisson(rho a b/2)}[h(n)] da db.
-    A ab = x fijo, ∫_{x/l}^{l} da/a = ln(l²/x): el rango de rapidez de los
-    intervalos casi nulos, cortado por el diamante. Con ∫_0^∞ P_n(mu) dmu = 1,
-        <sum_pares h(n)> = rho V ln(rho V) sum_n h(n) + O(rho V).
-    Para h = f_eps² sale b = sum_n f_eps(n)². El término cruzado con N lleva
-    sum_n f_eps(n) = 0 (porque sum_k C_k = 0), y no tiene logaritmo."""
+    Derivation (Goal 3d, see README): in light-cone coordinates, with a
+    diamond of side l (V = l²/2),
+        <sum_pairs h(n)> = (rho²/4) ∫∫_0^l (l-a)(l-b) E_{n~Poisson(rho a b/2)}[h(n)] da db.
+    At fixed ab = x, ∫_{x/l}^{l} da/a = ln(l²/x): the rapidity range of the
+    nearly null intervals, cut off by the diamond. With ∫_0^∞ P_n(mu) dmu = 1,
+        <sum_pairs h(n)> = rho V ln(rho V) sum_n h(n) + O(rho V).
+    For h = f_eps² one gets b = sum_n f_eps(n)². The cross term with N carries
+    sum_n f_eps(n) = 0 (because sum_k C_k = 0), and has no logarithm."""
     return float(np.sum(pair_weight(2, np.arange(n_max), eps) ** 2))
 
 
 def smeared_pair_moment(dim: int, lam: float, eps: float = 1.0, power: int = 1) -> float:
-    """E[sum_{pares y ≺ x} f_eps(n(y,x))^power] exacto en un diamante plano
-    con rho V = lam (``continuum._diamond_pair_integral`` con
-    H(z) = E_{n~Poisson(z)}[f_eps(n)^power]). Con power = 2 es el término
-    "mismo par" J¹ de MYZ para la acción suavizada; con power = 1, la media de
-    la parte de pares de S_eps. Sólo d = 4 o 2 (núcleo de ``continuum``)."""
+    """Exact E[sum_{pairs y ≺ x} f_eps(n(y,x))^power] in a flat diamond
+    with rho V = lam (``continuum._diamond_pair_integral`` with
+    H(z) = E_{n~Poisson(z)}[f_eps(n)^power]). With power = 2 it is the
+    "same pair" term J¹ of MYZ for the smeared action; with power = 1, the
+    mean of the pair part of S_eps. Only d = 4 or 2 (kernel of ``continuum``)."""
     from scipy.stats import poisson
 
     from .continuum import _diamond_pair_integral
@@ -860,13 +862,13 @@ def smeared_pair_moment(dim: int, lam: float, eps: float = 1.0, power: int = 1) 
 
 
 def smeared_pair_mecke_slope(dim: int, lam: float, eps: float = 1.0, h: float = 0.01) -> float:
-    """g = d E[sum_pares f_eps] / d(rho V). Con la ecuación de Mecke (Last &
-    Penrose, "Lectures on the Poisson Process", Cambridge UP 2017, teor. 4.1),
-    E[N F] = rho ∫ E[F(eta + δ_x)] dx, y la derivada respecto a la intensidad,
-    rho dE[F]/drho = rho ∫ E[F(eta + δ_x) - F(eta)] dx, sale
-    Cov(N, F) = rho dE[F]/drho = lam * g. Con eps = 1 reproduce el cruzado
-    exacto (k+2)L_k - (k+1)L_{k+1} del Paso 2 (test). Diferencia central
-    relativa de paso h."""
+    """g = d E[sum_pairs f_eps] / d(rho V). With the Mecke equation (Last &
+    Penrose, "Lectures on the Poisson Process", Cambridge UP 2017, thm. 4.1),
+    E[N F] = rho ∫ E[F(eta + δ_x)] dx, and the derivative with respect to the
+    intensity, rho dE[F]/drho = rho ∫ E[F(eta + δ_x) - F(eta)] dx, one gets
+    Cov(N, F) = rho dE[F]/drho = lam * g. With eps = 1 it reproduces the exact
+    cross term (k+2)L_k - (k+1)L_{k+1} of Step 2 (test). Central difference
+    with relative step h."""
     up = smeared_pair_moment(dim, lam * (1 + h), eps)
     dn = smeared_pair_moment(dim, lam * (1 - h), eps)
     return (up - dn) / (2 * h * lam)

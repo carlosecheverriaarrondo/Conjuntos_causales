@@ -1,31 +1,31 @@
-"""Goal 4b-1: correlación temporal de la acción BD entre los conos pasados de
-varios instantes de la misma línea de universo.
+"""Goal 4b-1: temporal correlation of the BD action between the past cones of
+several instants on the same worldline.
 
-Los conos pasados de los observadores q_j = (t_j, 0) son anidados: C_i ⊂ C_j
-si t_i < t_j. Como la región es causalmente convexa, cada par de C_i es par de
-C_j con la misma cardinalidad, así que S(t_j) = S(t_i) + incremento. Si el
-incremento es independiente de S(t_i), S(t) es un paseo aleatorio con
-"reloj" Var S(t) (∝ V^1.5 asintóticamente), como la recursión de Model 1
-(Das-Nasiri-Yazdi 2023, ec. 3.15) pero con Var ∝ V^1.5 en lugar de V.
+The past cones of the observers q_j = (t_j, 0) are nested: C_i ⊂ C_j
+if t_i < t_j. Since the region is causally convex, every pair of C_i is a pair
+of C_j with the same cardinality, so S(t_j) = S(t_i) + increment. If the
+increment is independent of S(t_i), S(t) is a random walk with
+"clock" Var S(t) (∝ V^1.5 asymptotically), like the recursion of Model 1
+(Das-Nasiri-Yazdi 2023, eq. 3.15) but with Var ∝ V^1.5 instead of V.
 
-Con un solo sprinkling del cono mayor se obtiene S(t_j) de todos los
-subconos (elementos con t + |x| <= t_j).
+A single sprinkling of the largest cone gives S(t_j) for all the
+subcones (elements with t + |x| <= t_j).
 
-Criterios (fijados antes de calcular), acción local:
-  B1  kappa_ij = Cov(S_i, S_j - S_i) / Var(S_i) compatible con 0 a 4σ, todos
-      los pares (independencia exacta).
-  B2  |kappa_ij| < 0.2 (independencia práctica: el paseo aleatorio cambia la
-      covarianza menos de un 20 %).
-  B3  Var(S_j) de los subconos frente a la varianza del cono completo de los
-      puntos 1c / 1d a la misma rho V (Minkowski: rho V = 200, 3200; FLRW
+Criteria (fixed before computing), local action:
+  B1  kappa_ij = Cov(S_i, S_j - S_i) / Var(S_i) compatible with 0 at 4σ, all
+      pairs (exact independence).
+  B2  |kappa_ij| < 0.2 (practical independence: the random walk changes the
+      covariance by less than 20 %).
+  B3  Var(S_j) of the subcones versus the variance of the full cone of
+      points 1c / 1d at the same rho V (Minkowski: rho V = 200, 3200; FLRW
       alpha = 2: rho V = 200, 3200): |z| < 4.
 
-Fases:
+Phases:
   sim GEOM   GEOM = mink4 | flrw4: sprinklings -> figures/goal4b_sim_GEOM.json
-             (S(t_j) de cada sprinkling, para cualquier análisis posterior)
-  fit        criterios y figura -> figures/goal4b_results.json, figures/goal4b_correlations.png
+             (S(t_j) of each sprinkling, for any later analysis)
+  fit        criteria and figure -> figures/goal4b_results.json, figures/goal4b_correlations.png
 
-Uso:  python scripts/goal4b_correlations.py sim mink4 | sim flrw4 | fit
+Usage:  python scripts/goal4b_correlations.py sim mink4 | sim flrw4 | fit
 """
 
 from __future__ import annotations
@@ -52,8 +52,8 @@ from causets.geometry import FLRWConeGeometry, MinkowskiConeGeometry  # noqa: E4
 from causets.intervals import interval_cardinalities  # noqa: E402
 
 warnings.filterwarnings("ignore")
-LAMS = (200, 500, 1250, 3200)  # rho V de los subconos; el mayor es el cono completo
-N_SPRINKLINGS = 4000  # ampliado de 1000 (B2 no concluyente con 1000; ver README)
+LAMS = (200, 500, 1250, 3200)  # rho V of the subcones; the largest is the full cone
+N_SPRINKLINGS = 4000  # extended from 1000 (B2 inconclusive with 1000; see README)
 GEOMS = {"mink4": lambda: MinkowskiConeGeometry(4), "flrw4": lambda: FLRWConeGeometry(2.0, dim=4)}
 K_SIGMA = 4.0
 INK, INK_MUTED, GRID = "#0b0b0b", "#52514e", "#e4e3df"
@@ -65,22 +65,22 @@ def sim_path(geom):
 
 
 def subcone_heights(g, lams):
-    """t_j tal que el subcono J^-(t_j) ∩ {t >= 0} tenga rho V = lams[j] (rho
-    fijado por el cono mayor). Minkowski: V ∝ t^4; FLRW a = eta^alpha: V ∝ t^(4 + 4 alpha)."""
+    """t_j such that the subcone J^-(t_j) ∩ {t >= 0} has rho V = lams[j] (rho
+    fixed by the largest cone). Minkowski: V ∝ t^4; FLRW a = eta^alpha: V ∝ t^(4 + 4 alpha)."""
     h = g.region.height
     power = 4 + 4 * getattr(g, "alpha", 0.0)
     return [h * (lam / lams[-1]) ** (1 / power) for lam in lams]
 
 
 def subcone_actions(pts, heights, a):
-    """S(t_j) de la acción local 4D para cada subcono."""
+    """S(t_j) of the local 4D action for each subcone."""
     C = minkowski_causal_matrix(pts)
     n = interval_cardinalities(C)
     t, r = pts[:, 0], np.linalg.norm(pts[:, 1:], axis=1)
     out = []
     for tj in heights:
         inside = t + r <= tj
-        # par y ≺ x con x en el subcono (y ya lo está: pasado de x)
+        # pair y ≺ x with x in the subcone (y already is: it lies in the past of x)
         sel = C & inside[None, :]
         counts = np.bincount(n[sel], minlength=4)[:4]
         out.append(float(a @ np.concatenate([[inside.sum()], counts])))
@@ -104,13 +104,13 @@ def sim(geom: str):
 
 
 def kappa(S, i, j):
-    """kappa_ij = Cov(S_i, S_j - S_i)/Var(S_i) y su error (delta method por
-    lotes: error estándar de la media de d_i e_ij / Var(S_i))."""
+    """kappa_ij = Cov(S_i, S_j - S_i)/Var(S_i) and its error (delta method by
+    batches: standard error of the mean of d_i e_ij / Var(S_i))."""
     d = S[:, i] - S[:, i].mean()
     e = (S[:, j] - S[:, i]) - (S[:, j] - S[:, i]).mean()
     var = np.mean(d * d)
     k = np.mean(d * e) / var
-    # error: linealización de cov/var
+    # error: linearisation of cov/var
     z = (d * e - k * d * d) / var
     return float(k), float(np.std(z, ddof=1) / np.sqrt(len(d)))
 
@@ -142,30 +142,30 @@ def fit():
                          B1=bool(all(abs(k) < K_SIGMA * s for k, s in kap.values())),
                          B2=bool(all(abs(k) < 0.2 for k, _ in kap.values())),
                          B3=b3, B3_ok=bool(all(abs(b["z"]) < K_SIGMA for b in b3)),
-                         # predicción del paseo aleatorio: corr_ij = sqrt(Var_i / Var_j)
+                         # random-walk prediction: corr_ij = sqrt(Var_i / Var_j)
                          corr_random_walk=[[float(np.sqrt(var[min(i, j)] / var[max(i, j)])) for j in range(len(LAMS))]
                                            for i in range(len(LAMS))])
         print(f"--- {geom}: {M} sprinklings")
         print("   Var(S_j):", [f"{v:.4g} ± {s:.2g}" for v, s in zip(var, var_se)])
         for k, (v, s) in kap.items():
             print(f"   kappa {k:>10}: {v:+.3f} ± {s:.3f}  ({v / s:+.1f}σ)")
-        print("   corr medida / paseo aleatorio:")
+        print("   measured corr / random walk:")
         for i in range(len(LAMS)):
             print("     ", " ".join(f"{corr[i, j]:.3f}/{out[geom]['corr_random_walk'][i][j]:.3f}" for j in range(len(LAMS))))
         for b in b3:
-            print(f"   B3 ρV={b['rhoV']}: subcono {b['sub']:.4g} ± {b['sub_se']:.2g}, cono completo {b['ref']:.4g} ± {b['ref_se']:.2g}, z = {b['z']:+.2f}")
+            print(f"   B3 ρV={b['rhoV']}: subcone {b['sub']:.4g} ± {b['sub_se']:.2g}, full cone {b['ref']:.4g} ± {b['ref_se']:.2g}, z = {b['z']:+.2f}")
         print(f"   B1 {out[geom]['B1']}  B2 {out[geom]['B2']}  B3 {out[geom]['B3_ok']}")
-        # figura: corr(S_i, S_j) frente a sqrt(Var_i/Var_j)
+        # figure: corr(S_i, S_j) versus sqrt(Var_i/Var_j)
         xs, ys = [], []
         for i in range(len(LAMS)):
             for j in range(i + 1, len(LAMS)):
                 xs.append(out[geom]["corr_random_walk"][i][j])
                 ys.append(corr[i, j])
-        ax.plot([0, 1], [0, 1], "--", color=INK_MUTED, linewidth=1, label="paseo aleatorio")
-        ax.plot(xs, ys, "o", color=BLUE if geom == "mink4" else ORANGE, markersize=6, label="medido")
+        ax.plot([0, 1], [0, 1], "--", color=INK_MUTED, linewidth=1, label="random walk")
+        ax.plot(xs, ys, "o", color=BLUE if geom == "mink4" else ORANGE, markersize=6, label="measured")
         ax.set_xlabel("√(Var S_i / Var S_j)", color=INK)
         ax.set_ylabel("corr(S_i, S_j)", color=INK)
-        ax.set_title({"mink4": "cono de Minkowski 4D", "flrw4": "cono de FLRW 4D (materia)"}[geom], color=INK, fontsize=10)
+        ax.set_title({"mink4": "4D Minkowski cone", "flrw4": "4D FLRW cone (matter)"}[geom], color=INK, fontsize=10)
         ax.grid(True, color=GRID, linewidth=0.8)
         for side in ("top", "right"):
             ax.spines[side].set_visible(False)
@@ -173,7 +173,7 @@ def fit():
     (ROOT / "figures" / "goal4b_results.json").write_text(json.dumps(out, indent=1))
     path = ROOT / "figures" / "goal4b_correlations.png"
     fig.savefig(path, dpi=150, facecolor="#fcfcfb")
-    print("figura", path)
+    print("figure", path)
 
 
 if __name__ == "__main__":

@@ -1,16 +1,16 @@
-"""Regiones del espacio-tiempo donde se hace el sprinkling.
+"""Spacetime regions in which the sprinkling is done.
 
-Convención: coordenadas ``(t, x_1, ..., x_{d-1})`` con c = 1; la columna 0 es
-siempre el tiempo (tiempo conforme eta en espaciotiempos conformemente planos).
+Convention: coordinates ``(t, x_1, ..., x_{d-1})`` with c = 1; column 0 is
+always the time (conformal time eta in conformally flat spacetimes).
 
-Interfaz común a toda región (la usa ``sprinkling.sample_uniform``):
-  - ``dim``, ``volume`` (volumen físico, con la medida sqrt(-g))
+Interface common to every region (used by ``sprinkling.sample_uniform``):
+  - ``dim``, ``volume`` (physical volume, with the measure sqrt(-g))
   - ``contains(coords)``, ``bounding_box()``
-  - ``weight(coords)`` en [0, 1]: densidad relativa de volumen físico respecto
-    a la medida de coordenadas (1 en Minkowski; (a / a_max)^d en métricas
-    conformemente planas g = a^2 eta).
-  - ``top_vertex``: el vértice futuro del diamante (punto en el que se evalúa
-    el operador BD cuando todo su pasado está sprinkleado).
+  - ``weight(coords)`` in [0, 1]: relative density of physical volume with
+    respect to the coordinate measure (1 in Minkowski; (a / a_max)^d in
+    conformally flat metrics g = a^2 eta).
+  - ``top_vertex``: the future vertex of the diamond (point at which the BD
+    operator is evaluated when its whole past is sprinkled).
 """
 
 from __future__ import annotations
@@ -24,29 +24,29 @@ from scipy.special import gamma
 
 
 def unit_ball_volume(n: int) -> float:
-    """Volumen de la bola unidad en R^n: pi^(n/2) / Gamma(n/2 + 1)."""
+    """Volume of the unit ball in R^n: pi^(n/2) / Gamma(n/2 + 1)."""
     return float(np.pi ** (n / 2) / gamma(n / 2 + 1))
 
 
 def unit_sphere_area(n: int) -> float:
-    """Área de la esfera unidad S^n (en R^(n+1)): 2 pi^((n+1)/2) / Gamma((n+1)/2)."""
+    """Area of the unit sphere S^n (in R^(n+1)): 2 pi^((n+1)/2) / Gamma((n+1)/2)."""
     return float(2 * np.pi ** ((n + 1) / 2) / gamma((n + 1) / 2))
 
 
 def diamond_volume(dim: int, half_height: float) -> float:
-    """Volumen de un diamante causal plano de semialtura h (dos conos)."""
+    """Volume of a flat causal diamond of half-height h (two cones)."""
     return 2.0 * half_height**dim * unit_ball_volume(dim - 1) / dim
 
 
 @dataclass(frozen=True)
 class CausalDiamond:
-    """Diamante causal J+(p) ∩ J-(q) en Minkowski d-dimensional.
+    """Causal diamond J+(p) ∩ J-(q) in d-dimensional Minkowski.
 
-    Los vértices son p = (-h, 0, ..., 0) y q = (+h, 0, ..., 0), con
-    h = ``half_height``. Un punto está dentro si |t| + |x| <= h.
+    The vertices are p = (-h, 0, ..., 0) and q = (+h, 0, ..., 0), with
+    h = ``half_height``. A point is inside if |t| + |x| <= h.
 
-    Volumen: dos conos de altura h y base una bola (d-1)-dimensional de
-    radio h, V = 2 * (h / d) * V_{d-1}(1) * h^(d-1).
+    Volume: two cones of height h with a (d-1)-dimensional ball of radius h
+    as base, V = 2 * (h / d) * V_{d-1}(1) * h^(d-1).
     """
 
     dim: int
@@ -54,9 +54,9 @@ class CausalDiamond:
 
     def __post_init__(self):
         if self.dim < 2:
-            raise ValueError("dim debe ser >= 2")
+            raise ValueError("dim must be >= 2")
         if self.half_height <= 0:
-            raise ValueError("half_height debe ser > 0")
+            raise ValueError("half_height must be > 0")
 
     @property
     def volume(self) -> float:
@@ -84,16 +84,16 @@ class CausalDiamond:
 
 @dataclass(frozen=True)
 class TruncatedPastCone:
-    """Pasado causal de un observador cortado por una superficie inicial:
-    J^-(q) ∩ {t >= 0} en Minkowski d-dimensional, con q = (h, 0, ..., 0) y
-    h = ``height``. Un punto está dentro si t >= 0 y t + |x| <= h.
+    """Causal past of an observer cut off by an initial surface:
+    J^-(q) ∩ {t >= 0} in d-dimensional Minkowski, with q = (h, 0, ..., 0) and
+    h = ``height``. A point is inside if t >= 0 and t + |x| <= h.
 
-    Es el análogo plano de la región que usa Everpresent Λ (el pasado causal
-    del observador hasta la superficie inicial). Es causalmente convexa: el
-    intervalo entre dos puntos de la región está contenido en ella.
+    It is the flat analogue of the region used by Everpresent Λ (the causal
+    past of the observer down to the initial surface). It is causally convex:
+    the interval between two points of the region is contained in it.
 
-    Volumen: un cono de altura h y base una bola (d-1)-dimensional de radio h,
-    V = (h / d) * V_{d-1}(1) * h^(d-1)  (V = h^2 en 2D).
+    Volume: a cone of height h with a (d-1)-dimensional ball of radius h as
+    base, V = (h / d) * V_{d-1}(1) * h^(d-1)  (V = h^2 in 2D).
     """
 
     dim: int
@@ -101,9 +101,9 @@ class TruncatedPastCone:
 
     def __post_init__(self):
         if self.dim < 2:
-            raise ValueError("dim debe ser >= 2")
+            raise ValueError("dim must be >= 2")
         if self.height <= 0:
-            raise ValueError("height debe ser > 0")
+            raise ValueError("height must be > 0")
 
     @property
     def volume(self) -> float:
@@ -133,12 +133,12 @@ class TruncatedPastCone:
 
 @dataclass(frozen=True)
 class ConformalPastCone:
-    """Cono de luz pasado de un observador hasta la superficie eta = 0, en
-    coordenadas conformes de una métrica g = a(eta)^2 eta_Minkowski:
-    {eta >= 0, eta + |x| <= h}. Con a(0) = 0 es el pasado causal del
-    observador hasta el big bang de un FLRW plano (la región de
-    Everpresent Λ). La estructura causal es la de Minkowski; la medida es
-    dV = a(eta)^d d eta d^(d-1)x. ``scale_factor`` debe ser creciente."""
+    """Past light cone of an observer down to the surface eta = 0, in
+    conformal coordinates of a metric g = a(eta)^2 eta_Minkowski:
+    {eta >= 0, eta + |x| <= h}. With a(0) = 0 it is the causal past of the
+    observer down to the big bang of a flat FLRW (the Everpresent Λ
+    region). The causal structure is that of Minkowski; the measure is
+    dV = a(eta)^d d eta d^(d-1)x. ``scale_factor`` must be increasing."""
 
     dim: int
     height: float
@@ -170,8 +170,8 @@ class ConformalPastCone:
 
 
 def power_law_scale_factor(alpha: float) -> Callable[[np.ndarray], np.ndarray]:
-    """a(eta) = eta^alpha (eta >= 0): FLRW plano con big bang en eta = 0.
-    En 4D, alpha = 1 es radiación y alpha = 2 materia (a ∝ t^(1/2), t^(2/3))."""
+    """a(eta) = eta^alpha (eta >= 0): flat FLRW with big bang at eta = 0.
+    In 4D, alpha = 1 is radiation and alpha = 2 matter (a ∝ t^(1/2), t^(2/3))."""
 
     def a(eta):
         return np.maximum(np.asarray(eta, dtype=float), 0.0) ** alpha
@@ -181,15 +181,15 @@ def power_law_scale_factor(alpha: float) -> Callable[[np.ndarray], np.ndarray]:
 
 @dataclass(frozen=True)
 class ConformalDiamond:
-    """Diamante en coordenadas conformes de una métrica g = a(eta)^2 eta_Minkowski.
+    """Diamond in conformal coordinates of a metric g = a(eta)^2 eta_Minkowski.
 
-    En coordenadas (eta, x) el diamante es |eta - eta_c| + |x| <= h, y como la
-    métrica es conforme a Minkowski, su estructura causal es la de Minkowski
-    (el diamante sigue siendo J+(p) ∩ J-(q)). Lo que cambia es la medida de
-    volumen: dV = a(eta)^d d eta d^(d-1)x.
+    In coordinates (eta, x) the diamond is |eta - eta_c| + |x| <= h, and since
+    the metric is conformal to Minkowski, its causal structure is that of
+    Minkowski (the diamond is still J+(p) ∩ J-(q)). What changes is the
+    volume measure: dV = a(eta)^d d eta d^(d-1)x.
 
-    ``scale_factor`` debe ser positiva y monótona en el intervalo temporal del
-    diamante (así el máximo está en un extremo).
+    ``scale_factor`` must be positive and monotonic over the time range of the
+    diamond (so that the maximum is at an endpoint).
     """
 
     dim: int
@@ -238,30 +238,30 @@ class ConformalDiamond:
 
 
 def de_sitter_scale_factor(hubble: float) -> Callable[[np.ndarray], np.ndarray]:
-    """a(eta) = -1 / (H eta), eta < 0: parche plano (cosmológico) de de Sitter.
+    """a(eta) = -1 / (H eta), eta < 0: flat (cosmological) patch of de Sitter.
 
-    ds^2 = a(eta)^2 (-d eta^2 + dx^2), curvatura escalar R = d(d-1) H^2
-    (R = 2H^2 en 2D, R = 12H^2 en 4D).
+    ds^2 = a(eta)^2 (-d eta^2 + dx^2), scalar curvature R = d(d-1) H^2
+    (R = 2H^2 in 2D, R = 12H^2 in 4D).
     """
 
     def a(eta):
         eta = np.asarray(eta, dtype=float)
         if np.any(eta >= 0):
-            raise ValueError("el parche plano de de Sitter requiere eta < 0")
+            raise ValueError("the flat patch of de Sitter requires eta < 0")
         return -1.0 / (hubble * eta)
 
     return a
 
 
 class DeSitterIntervalVolume:
-    """Volumen físico de un intervalo causal de de Sitter en función de su
-    tiempo propio tau (o, equivalentemente, del invariante Z = cosh(H tau)).
+    """Physical volume of a de Sitter causal interval as a function of its
+    proper time tau (or, equivalently, of the invariant Z = cosh(H tau)).
 
-    De Sitter es maximalmente simétrico, así que el volumen de I(y, x) sólo
-    depende de tau(y, x). Se calcula en el par equivalente sobre el eje,
-    x' = (-1/H, 0), y' = (-e^{H tau}/H, 0), cuyo intervalo es un
-    ``ConformalDiamond``, se tabula en H tau y se interpola en V^(1/d) (casi
-    lineal en tau para intervalos pequeños, donde V ~ c_d tau^d).
+    De Sitter is maximally symmetric, so the volume of I(y, x) only depends
+    on tau(y, x). It is computed for the equivalent pair on the axis,
+    x' = (-1/H, 0), y' = (-e^{H tau}/H, 0), whose interval is a
+    ``ConformalDiamond``, tabulated in H tau and interpolated in V^(1/d)
+    (almost linear in tau for small intervals, where V ~ c_d tau^d).
     """
 
     def __init__(self, hubble: float, dim: int, max_h_tau: float, n_grid: int = 600):
@@ -279,26 +279,26 @@ class DeSitterIntervalVolume:
     def from_h_tau(self, h_tau) -> np.ndarray:
         h_tau = np.asarray(h_tau, dtype=float)
         if np.any(h_tau > self._grid[-1] * (1 + 1e-12)):
-            raise ValueError("H tau fuera del rango tabulado")
+            raise ValueError("H tau outside the tabulated range")
         return np.interp(h_tau, self._grid, self._root) ** self.dim
 
     def from_invariant(self, Z) -> np.ndarray:
-        """V(Z) con Z = cosh(H tau) >= 1."""
+        """V(Z) with Z = cosh(H tau) >= 1."""
         Z = np.maximum(np.asarray(Z, dtype=float), 1.0)
         return self.from_h_tau(np.arccosh(Z))
 
 
 def de_sitter_invariant(y: np.ndarray, x: np.ndarray) -> np.ndarray:
-    """Z(y, x) = (eta_y^2 + eta_x^2 - |dx|^2) / (2 eta_y eta_x) en el parche plano.
-    Para y, x con separación temporal, Z = cosh(H tau(y, x)) > 1."""
+    """Z(y, x) = (eta_y^2 + eta_x^2 - |dx|^2) / (2 eta_y eta_x) in the flat patch.
+    For timelike separated y, x, Z = cosh(H tau(y, x)) > 1."""
     y, x = np.atleast_2d(y), np.atleast_2d(x)
     dx2 = np.sum((y[:, 1:] - x[:, 1:]) ** 2, axis=1)
     return (y[:, 0] ** 2 + x[:, 0] ** 2 - dx2) / (2 * y[:, 0] * x[:, 0])
 
 
 def de_sitter_interval_volume(past: np.ndarray, x: np.ndarray, hubble: float, dim: int) -> np.ndarray:
-    """Volumen físico de I(y, x) en de Sitter para cada par de filas (y, x)
-    (``x`` puede ser un único punto). Devuelve 0 si y no precede a x."""
+    """Physical volume of I(y, x) in de Sitter for each pair of rows (y, x)
+    (``x`` may be a single point). Returns 0 if y does not precede x."""
     past = np.atleast_2d(past)
     x = np.broadcast_to(np.atleast_2d(x), past.shape)
     Z = de_sitter_invariant(past, x)

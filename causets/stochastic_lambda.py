@@ -1,37 +1,37 @@
-"""Λ(t) estocástico con retroacción sobre la expansión (Goal 4b-2).
+"""Stochastic Λ(t) with back-reaction on the expansion (Goal 4b-2).
 
-MODELO
-------
-A lo largo de la línea de universo de un observador comóvil,
+MODEL
+-----
+Along the worldline of a comoving observer,
     Λ(t) = lam · V(t)^(-q) · s(t),
-con V(t) el volumen del pasado causal (hasta el big bang) y s(t) un proceso
-gaussiano de media 0 y varianza 1 con
+with V(t) the volume of the causal past (down to the big bang) and s(t) a
+Gaussian process with mean 0 and variance 1 with
     corr(s(t1), s(t2)) = (V1 / V2)^c       (t1 < t2),
-es decir, un proceso de Ornstein-Uhlenbeck en u = ln V con tasa c
+that is, an Ornstein-Uhlenbeck process in u = ln V with rate c
 (``ou_step``).
   - Everpresent Λ, Model 1 (Das, Nasiri & Yazdi, JCAP 10 (2023) 047,
-    arXiv:2304.03819, ecs. 3.13 y 3.15): Λ V es un paseo aleatorio con
-    Var ∝ V, así que q = 1/2, c = 1/2 y lam = 8π alpha (en unidades H_100,
-    c = 1: los factores de Planck se cancelan).
-  - Acción BD (este proyecto, Goal 4a-4b): Λ V ∝ Delta S con
-    Var(Delta S) ∝ V^(3/2), así que q = 1/4 y, si S(t) es un paseo aleatorio,
-    c = 3/4. Con correlación de incrementos (Goal 4b-1), c = 3 beta / 4,
-    beta <= 1. La amplitud lam se traduce en la escala de no localidad l_k
-    con ``bd_lambda_to_lk``.
+    arXiv:2304.03819, eqs. 3.13 and 3.15): Λ V is a random walk with
+    Var ∝ V, so q = 1/2, c = 1/2 and lam = 8π alpha (in H_100 units,
+    c = 1: the Planck factors cancel).
+  - BD action (this project, Goals 4a-4b): Λ V ∝ Delta S with
+    Var(Delta S) ∝ V^(3/2), so q = 1/4 and, if S(t) is a random walk,
+    c = 3/4. With correlated increments (Goal 4b-1), c = 3 beta / 4,
+    beta <= 1. The amplitude lam is translated into the non-locality scale
+    l_k with ``bd_lambda_to_lk``.
 
-FONDO Y RETROACCIÓN
--------------------
-Unidades: H_100 = 100 km/s/Mpc, c = 1. Densidades físicas fijas (Planck 2018,
+BACKGROUND AND BACK-REACTION
+----------------------------
+Units: H_100 = 100 km/s/Mpc, c = 1. Fixed physical densities (Planck 2018,
 Astron. Astrophys. 641, A6 (2020), arXiv:1807.06209): omega_m = 0.1430,
-omega_r = 4.15e-5 (fotones + neutrinos sin masa). Friedmann:
+omega_r = 4.15e-5 (photons + massless neutrinos). Friedmann:
     (H / H_100)² = omega_r / a^4 + omega_m / a³ + Λ / 3,
-con Λ(t) evaluado sobre la propia historia. "Hoy" es a = 1, así que h = H(1)
-y Omega_Λ0 = Λ(1) / (3 h²) salen de cada realización (como en DNY, sec. 4).
-Si H² < 0 la realización colapsa y se marca.
+with Λ(t) evaluated along the history itself. "Today" is a = 1, so h = H(1)
+and Omega_Λ0 = Λ(1) / (3 h²) come out of each realisation (as in DNY, sec. 4).
+If H² < 0 the realisation collapses and is flagged.
 
-Volumen del pasado causal (FLRW plano, ver ``everpresent.past_cone_volume``):
+Volume of the causal past (flat FLRW, see ``everpresent.past_cone_volume``):
     V(eta) = (4π/3) [eta³ M0 - 3 eta² M1 + 3 eta M2 - M3],  M_k = ∫ a^4 eta'^k d eta',
-acumulado paso a paso (O(1) por paso). Se arranca en la era de radiación
+accumulated step by step (O(1) per step). It starts in the radiation era
 (a = sqrt(omega_r) eta, M_k = omega_r² eta^(5+k)/(5+k)).
 """
 
@@ -43,7 +43,7 @@ import numpy as np
 
 OMEGA_M = 0.1430
 OMEGA_R = 4.15e-5
-H100_TP = 100e3 / 3.0856776e22 * 5.391247e-44  # H_100 en unidades de Planck
+H100_TP = 100e3 / 3.0856776e22 * 5.391247e-44  # H_100 in Planck units
 
 
 @dataclass
@@ -65,11 +65,11 @@ def bd_process(lam: float, beta: float = 1.0) -> ProcessSpec:
 
 
 def bd_lambda_to_lk(lam: float, l_over_lp: float = 1.0, r: float = 0.33, g_over_v15: float = 1.4194) -> float:
-    """l_k (m) de la acción suavizada que da Λ_env = lam V^(-1/4) (unidades H_100).
+    """l_k (m) of the smeared action that gives Λ_env = lam V^(-1/4) (H_100 units).
 
-    Del Goal 4a: Λ l_p² = A (rho V)^(-1/4) (l_p/l)², con V en l_p^4; en
-    unidades H_100, Λ = A / (l H100_TP) · V^(-1/4), así que A = lam l H100_TP,
-    y A² = (1 + r) (G/V^1.5)/(8 √c4) · c_asym eps^(5/2), l_k = l eps^(-1/4)."""
+    From Goal 4a: Λ l_p² = A (rho V)^(-1/4) (l_p/l)², with V in l_p^4; in
+    H_100 units, Λ = A / (l H100_TP) · V^(-1/4), so A = lam l H100_TP,
+    and A² = (1 + r) (G/V^1.5)/(8 √c4) · c_asym eps^(5/2), l_k = l eps^(-1/4)."""
     from .everpresent import C4, L_PLANCK_M, smeared_asymptotic_constant
 
     A = lam * l_over_lp * H100_TP
@@ -78,8 +78,8 @@ def bd_lambda_to_lk(lam: float, l_over_lp: float = 1.0, r: float = 0.33, g_over_
 
 
 def ou_step(s: np.ndarray, du: float, c: float, rng, xi: np.ndarray | None = None) -> np.ndarray:
-    """Un paso del proceso OU en u = ln V: corr(s(u), s(u + du)) = e^(-c du).
-    ``xi``: normales estándar ya generadas (si no, se sacan de ``rng``)."""
+    """One step of the OU process in u = ln V: corr(s(u), s(u + du)) = e^(-c du).
+    ``xi``: standard normals already generated (otherwise drawn from ``rng``)."""
     rho = np.exp(-c * du)
     if xi is None:
         xi = rng.standard_normal(s.shape)
@@ -92,8 +92,8 @@ class Realizations:
     h: np.ndarray
     omega_lambda0: np.ndarray
     collapsed: np.ndarray
-    z: np.ndarray  # rejilla de corrimientos al rojo
-    dL: np.ndarray  # (R, nz) distancia de luminosidad (unidades c/H_100)
+    z: np.ndarray  # redshift grid
+    dL: np.ndarray  # (R, nz) luminosity distance (units of c/H_100)
     E: np.ndarray  # (R, nz) H(z)/H0
     lam_today: np.ndarray
     extra: dict = field(default_factory=dict)
@@ -103,25 +103,25 @@ def evolve(spec: ProcessSpec, n_real: int, rng, a_start: float = 1e-6, n_steps: 
            z_grid: np.ndarray | None = None, s_fixed: float | None = None, z_on: float = 1e4,
            omega_m: float | np.ndarray | None = None, noise: np.ndarray | None = None,
            record_path: bool = False, exact_start: bool = False) -> Realizations:
-    """Integra n_real realizaciones a la vez desde a_start hasta a = 1 (pasos
-    uniformes en ln a; Λ constante dentro de cada paso, trapecio en eta).
+    """Integrate n_real realisations at once from a_start to a = 1 (uniform
+    steps in ln a; Λ constant within each step, trapezoidal rule in eta).
 
-    Convención de DNY (sec. 5.2): Λ = 0 antes de z_on = 1e4 (el volumen previo
-    sólo cuenta materia y radiación) y la "acción" arranca en S0 = 0, es decir
-    s = 0 en z_on. Para Model 1 esto da exactamente su paseo aleatorio desde
-    S0 = 0: Var(Λ V) = lam² (V - V0). (Arrancar antes dispara los colapsos
-    H² < 0, como documentan DNY.)
-    ``s_fixed``: si se da, s(t) = s_fixed desde el principio (determinista; con
-    q = c = 0 es un Λ constante, para validar frente a ΛCDM).
-    ``omega_m``: escalar o (n_real,) (por defecto OMEGA_M); ``spec.lam`` puede
-    ser también (n_real,). ``noise``: (n_steps, n_real) normales estándar; fija
-    la "semilla" de cada realización con independencia de los parámetros
-    (Goal 4c, ajuste por semilla como en DNY 2024). ``record_path``: guarda
-    eta en todos los a de la rejilla, ``extra["a_grid"]`` y ``extra["eta_path"]``
-    (n_steps + 1, n_real) (horizonte sonoro, Goal 4d). ``exact_start``: eta(a_start)
-    exacto con radiación + materia, eta = (2/omega_m)(sqrt(omega_r + omega_m a) - sqrt(omega_r)),
-    en vez de sólo radiación (sesgo relativo ~1e-4 en r_s con a_start = 1e-5;
-    Goal 4d. Por defecto False: Goals 4b y 4c reproducibles bit a bit)."""
+    DNY convention (sec. 5.2): Λ = 0 before z_on = 1e4 (the earlier volume
+    only counts matter and radiation) and the "action" starts at S0 = 0, that
+    is, s = 0 at z_on. For Model 1 this gives exactly their random walk from
+    S0 = 0: Var(Λ V) = lam² (V - V0). (Starting earlier triggers the H² < 0
+    collapses, as DNY document.)
+    ``s_fixed``: if given, s(t) = s_fixed from the start (deterministic; with
+    q = c = 0 it is a constant Λ, to validate against ΛCDM).
+    ``omega_m``: scalar or (n_real,) (OMEGA_M by default); ``spec.lam`` may
+    also be (n_real,). ``noise``: (n_steps, n_real) standard normals; fixes
+    the "seed" of each realisation independently of the parameters
+    (Goal 4c, per-seed fit as in DNY 2024). ``record_path``: stores eta at
+    all the a of the grid, ``extra["a_grid"]`` and ``extra["eta_path"]``
+    (n_steps + 1, n_real) (sound horizon, Goal 4d). ``exact_start``: eta(a_start)
+    exact with radiation + matter, eta = (2/omega_m)(sqrt(omega_r + omega_m a) - sqrt(omega_r)),
+    instead of radiation only (relative bias ~1e-4 in r_s with a_start = 1e-5;
+    Goal 4d. False by default: Goals 4b and 4c reproducible bit by bit)."""
     if z_grid is None:
         z_grid = np.concatenate([np.geomspace(0.01, 2.3, 40)])
     a_grid = np.exp(np.linspace(np.log(a_start), 0.0, n_steps + 1))
@@ -140,7 +140,7 @@ def evolve(spec: ProcessSpec, n_real: int, rng, a_start: float = 1e-6, n_steps: 
     V = volume(eta, M)
     collapsed = np.zeros(R, dtype=bool)
     path = [eta.copy()] if record_path else None
-    # eta en los a de la rejilla de z (para distancias) y H en esos puntos
+    # eta at the a of the z grid (for distances) and H at those points
     a_z = 1 / (1 + z_grid)
     eta_at = np.full((R, len(z_grid)), np.nan)
     H_at = np.full((R, len(z_grid)), np.nan)
@@ -158,11 +158,11 @@ def evolve(spec: ProcessSpec, n_real: int, rng, a_start: float = 1e-6, n_steps: 
         collapsed |= bad
         h0_ = np.sqrt(np.where(bad, np.nan, h2_0))
         h1_ = np.sqrt(np.where(bad, np.nan, h2_1))
-        # d eta = da / (a² H) = d ln a / (a H): trapecio en ln a
+        # d eta = da / (a² H) = d ln a / (a H): trapezoidal rule in ln a
         dlna = np.log(a1 / a0)
         deta = 0.5 * dlna * (1 / (a0 * h0_) + 1 / (a1 * h1_))
         eta_new = eta + deta
-        # momentos M_k: trapecio en eta de a^4 eta^k
+        # moments M_k: trapezoidal rule in eta of a^4 eta^k
         for k in range(4):
             M[k] = M[k] + 0.5 * deta * (a0**4 * eta**k + a1**4 * eta_new**k)
         eta = eta_new
@@ -172,7 +172,7 @@ def evolve(spec: ProcessSpec, n_real: int, rng, a_start: float = 1e-6, n_steps: 
         if s_fixed is None and a1 > a_on:
             s = ou_step(s, np.log(V_new / V), spec.c, rng, None if noise is None else noise[i])
         V = V_new
-        # registrar los a de la rejilla que caen en (a0, a1]
+        # record the grid values of a that fall in (a0, a1]
         for jz in np.nonzero((a_z > a0) & (a_z <= a1))[0]:
             frac = np.log(a_z[jz] / a0) / dlna
             eta_at[:, jz] = eta - deta + frac * deta
@@ -180,14 +180,14 @@ def evolve(spec: ProcessSpec, n_real: int, rng, a_start: float = 1e-6, n_steps: 
 
     lam_today = spec.lam * V ** (-spec.q) * s
     h = np.sqrt(np.where(collapsed, np.nan, np.maximum(H2(1.0, lam_today), 0)))
-    chi = eta[:, None] - eta_at  # distancia comóvil
+    chi = eta[:, None] - eta_at  # comoving distance
     dL = chi * (1 + z_grid[None, :])
     return Realizations(spec, h, lam_today / (3 * h**2), collapsed, z_grid, dL, H_at / h[:, None], lam_today,
                         dict(V_today=V, **(dict(a_grid=a_grid, eta_path=np.array(path)) if record_path else {})))
 
 
 def lcdm_reference(z_grid: np.ndarray, omega_lambda: float = 0.685, h: float = 0.674):
-    """Distancias y E(z) de ΛCDM plano con omega_m, omega_r fijos (Λ constante)."""
+    """Distances and E(z) of flat ΛCDM with fixed omega_m, omega_r (constant Λ)."""
     from scipy.integrate import quad
 
     om, orad = OMEGA_M / h**2, OMEGA_R / h**2
@@ -201,10 +201,10 @@ def lcdm_reference(z_grid: np.ndarray, omega_lambda: float = 0.685, h: float = 0
 
 
 def lcdm_like(real: Realizations, omega_l=(0.6, 0.8), h_range=(0.6, 0.8), dmu_max=0.1, e_tol=0.05):
-    """Criterio "tipo ΛCDM" (fijado antes de calcular, ver README Goal 4b-2):
-    Omega_Λ0 y h en los rangos; forma de mu(z) (restada la media, que absorbe H0
-    y la magnitud absoluta de las SN) a menos de dmu_max de ΛCDM en
-    0.01 < z < 2.3; |E(z)/E_ΛCDM(z) - 1| < e_tol en z = 0.5, 1, 2."""
+    """Criterion "ΛCDM-like" (fixed before computing, see README Goal 4b-2):
+    Omega_Λ0 and h within the ranges; shape of mu(z) (mean subtracted, which
+    absorbs H0 and the absolute magnitude of the SNe) within dmu_max of ΛCDM
+    for 0.01 < z < 2.3; |E(z)/E_ΛCDM(z) - 1| < e_tol at z = 0.5, 1, 2."""
     dL_ref, E_ref, _ = lcdm_reference(real.z)
     with np.errstate(invalid="ignore", divide="ignore"):
         dmu = 5 * np.log10(real.dL / dL_ref[None, :])

@@ -1,10 +1,10 @@
-"""Goal 4c: likelihood Pantheon+SH0ES (``causets/supernovae.py``).
+"""Goal 4c: Pantheon+SH0ES likelihood (``causets/supernovae.py``).
 
-Criterio V2 (fijado antes de calcular, ver ``scripts/goal4c_sn_fit.py``):
-el chi² comprimido coincide con el directo, |Δ| < 0.01. Dos partes: (a) la
-forma cuadrática es algebraicamente exacta para el modelo spline; (b) el
-spline en los nodos reproduce mu(z) exacta de ΛCDM en cada SN.
-Necesita los datos (``scripts/get_pantheon.sh``); si faltan, se salta.
+Criterion V2 (fixed before computing, see ``scripts/goal4c_sn_fit.py``):
+the compressed chi² agrees with the direct one, |Δ| < 0.01. Two parts: (a) the
+quadratic form is algebraically exact for the spline model; (b) the spline
+through the nodes reproduces the exact ΛCDM mu(z) at each SN.
+Requires the data (``scripts/get_pantheon.sh``); skipped if missing.
 """
 
 import importlib.util
@@ -16,7 +16,7 @@ import pytest
 from causets.supernovae import DATA_DIR, PantheonPlusSH0ES
 
 pytestmark = pytest.mark.skipif(not (DATA_DIR / "PantheonPlusSH0ES.dat").exists(),
-                                reason="faltan los datos de Pantheon+ (scripts/get_pantheon.sh)")
+                                reason="Pantheon+ data missing (scripts/get_pantheon.sh)")
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -35,7 +35,7 @@ def script():
 
 
 def test_sample_size(sn):
-    """Corte estándar: 1701 curvas de luz -> zHD > 0.01 o calibrador; 77 curvas de calibradores."""
+    """Standard cut: 1701 light curves -> zHD > 0.01 or calibrator; 77 calibrator light curves."""
     assert sn.cov.shape == (sn.n, sn.n)
     assert sn.calib.sum() == 77
 
@@ -59,14 +59,14 @@ def test_V2a_profiled_MB_is_minimum(sn):
 def test_V2b_spline_reproduces_exact_lcdm(sn, script):
     om, h = 0.15, 0.73
     mu_nodes = script.lcdm_mu_nodes(om, h, sn.nodes)
-    mu_exact = script.lcdm_mu_nodes(om, h, sn.z_hd)  # en cada SN (calibradores: no se usa)
+    mu_exact = script.lcdm_mu_nodes(om, h, sn.z_hd)  # at each SN (calibrators: unused)
     MB = -19.25
     assert abs(sn.chi2_nodes(mu_nodes, MB)[0] - sn.chi2_direct(mu_exact, MB)) < 0.01
 
 
 def test_seed_noise_independent_of_batch():
-    """El ajuste por semilla exige que una semilla dé la misma historia sea cual
-    sea el lote y los parámetros de las demás realizaciones."""
+    """The per-seed fit requires that a seed give the same history whatever
+    the batch and the parameters of the other realisations."""
     from causets import stochastic_lambda as sl
 
     n_steps = 300

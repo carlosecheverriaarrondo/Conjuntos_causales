@@ -1,37 +1,37 @@
-"""Punto 1d: escalado de (Delta S)^2 de la acción BD local en el cono de luz
-pasado hasta el big bang de un FLRW plano 4D, a(eta) = eta^alpha, con
-alpha = 1 (radiación) y 2 (materia). Es la región de Everpresent Λ.
+"""Point 1d: scaling of (Delta S)^2 of the local BD action in the past light
+cone down to the big bang of a flat 4D FLRW spacetime, a(eta) = eta^alpha, with
+alpha = 1 (radiation) and 2 (matter). This is the region used by Everpresent Λ.
 
-Predicción (derivada antes de calcular, ver README "Punto 1d"): el argumento
-de los boosts del punto 1c, con el volumen físico de un intervalo casi nulo
-c_4 tau^4 w (tau conforme, w = media de a^4 con el perfil s(lambda - s)), da
+Prediction (derived before computing, see README "Point 1d"): the boost
+argument of point 1c, with the physical volume of an almost null interval
+c_4 tau^4 w (conformal tau, w = mean of a^4 with the profile s(lambda - s)), gives
     <N_k> ≈ (rho V)^1.5 · (G / V^1.5) / (8 sqrt(c_4)) · Γ(k+½)/k!,
-con G de ``cone4d_scaling.g_flrw``: G/V^1.5 = 1.3145 (alpha = 1) y 1.4194
-(alpha = 2), frente a 0.8187 en el cono de Minkowski. Mismo exponente:
+with G from ``cone4d_scaling.g_flrw``: G/V^1.5 = 1.3145 (alpha = 1) and 1.4194
+(alpha = 2), versus 0.8187 in the Minkowski cone. Same exponent:
 ΔS ∝ (rho V)^0.75.
 
-Las medias no tienen forma cerrada: <N_k> por el Monte Carlo del formalismo
-(``FluctuationKernel.abundance_means``, propuesta local), validado con
-alpha = 0 frente a la integral exacta del cono.
+The means have no closed form: <N_k> by the Monte Carlo of the formalism
+(``FluctuationKernel.abundance_means``, local proposal), validated with
+alpha = 0 against the exact integral of the cone.
 
-Criterios (fijados antes de ver los resultados; el de K3 es el del punto 1c,
-sin cambiar, porque en la prueba de precisión del MC se vio de pasada
-<N_0>/(rho V)^1.5 = 0.799 frente a 0.805 con alpha = 1 y rho V = 1e8):
-  K1  volúmenes de intervalos frente a MC; alpha = 0 reproduce Minkowski;
-      g_flrw(0) = g_cone (tests deterministas).
-  K2  <N_k> (MC) frente a sprinklings: |z| < 4.
-  K3  cociente <N_k> (MC) / asintótico, k = 0..3: |1 - r| < 3 % con
-      rho V = 1e8, y menor que con 1e6.
-  K4  resto/J¹: pendiente frente a ln(rho V) compatible con 0 a 4σ.
+Criteria (fixed before looking at the results; K3 is that of point 1c,
+unchanged, because the MC precision check incidentally showed
+<N_0>/(rho V)^1.5 = 0.799 versus 0.805 with alpha = 1 and rho V = 1e8):
+  K1  interval volumes versus MC; alpha = 0 reproduces Minkowski;
+      g_flrw(0) = g_cone (deterministic tests).
+  K2  <N_k> (MC) versus sprinklings: |z| < 4.
+  K3  ratio <N_k> (MC) / asymptotic, k = 0..3: |1 - r| < 3 % at
+      rho V = 1e8, and smaller than at 1e6.
+  K4  rest/J¹: slope versus ln(rho V) compatible with 0 at 4σ.
 
-Fases (por alpha, para lanzarlas en paralelo):
+Phases (per alpha, to be run in parallel):
   sim ALPHA     sprinklings -> figures/flrw4d_sim_aALPHA.json
-  means ALPHA   medias MC en las densidades de la simulación y en 1e6..1e8
+  means ALPHA   MC means at the simulation densities and at 1e6..1e8
                 -> figures/flrw4d_means_aALPHA.json
-  fit           criterios, figura figures/flrw4d_scaling.png y resumen
+  fit           criteria, figure figures/flrw4d_scaling.png and summary
                 figures/flrw4d_results.json
 
-Uso:  python scripts/flrw4d_scaling.py sim 1 | means 1 | fit
+Usage:  python scripts/flrw4d_scaling.py sim 1 | means 1 | fit
 """
 
 from __future__ import annotations
@@ -118,12 +118,13 @@ def means(alpha: float):
 
 
 def parts(L, L_se, lam):
-    """NN, cruzado N-k y J¹ con las medias MC (y el error de J¹ y del cruzado)."""
+    """NN, N-k cross term and J¹ from the MC means (and the error of J¹ and of
+    the cross term)."""
     a = local_action_coefficients(4)
     aN, ak = a[0], a[1:]
     L, L_se = np.asarray(L), np.asarray(L_se)
     j = np.arange(4)
-    # (Delta S)² ⊇ J¹ + cruzado = sum_k (a_k² + 2 aN a_k (k+2)) L_k - 2 aN sum_k a_k (k+1) L_{k+1}
+    # (Delta S)² ⊇ J¹ + cross term = sum_k (a_k² + 2 aN a_k (k+2)) L_k - 2 aN sum_k a_k (k+1) L_{k+1}
     grad = np.zeros(5)
     grad[:4] += ak**2 + 2 * aN * ak * (j + 2)
     grad[1:] += -2 * aN * ak * (j + 1)
@@ -169,10 +170,10 @@ def fit():
                                                p=float(np.log(tot[i + 1] / tot[i]) / np.log(lam[i + 1] / lam[i]) / 2),
                                                se=float(np.hypot(tot_se[i] / tot[i], tot_se[i + 1] / tot[i + 1]) / np.log(lam[i + 1] / lam[i]) / 2))
                                           for i in range(len(lam) - 1)]
-        # figura
+        # figure
         col = colors[alpha]
         ax1.errorbar(lam, tot / lam, yerr=tot_se / lam, fmt="o", color=col, markerfacecolor="white", capsize=3,
-                     label=f"(ΔS)² simulación, α = {alpha:g}")
+                     label=f"(ΔS)² simulation, α = {alpha:g}")
         ax1.plot(lam, [p["J1"] / p["rhoV"] for p in pts], "-", color=col, linewidth=1.4, label=f"J¹ (MC), α = {alpha:g}")
         lam_a = np.array(ASYMP_LAMS)
         j1a = [parts(mns[x]["L"], mns[x]["L_se"], x)["J1"] / x for x in ASYMP_LAMS]
@@ -181,7 +182,7 @@ def fit():
         ref = np.geomspace(1e5, 1e8, 20)
         ax1.plot(ref, asym * ref**0.5, ":", color=col, linewidth=1.2)
         ax2.errorbar(lam * (1.04 if alpha == 2 else 1), y, yerr=se, fmt="o", color=col, markerfacecolor="white", capsize=3,
-                     label=f"α = {alpha:g}: media {out['K4'][str(alpha)]['mean']:.3f}")
+                     label=f"α = {alpha:g}: mean {out['K4'][str(alpha)]['mean']:.3f}")
     out["K2_max"] = max(max(abs(v) for v in r["z"]) for r in out["K2"])
     (ROOT / "figures" / "flrw4d_results.json").write_text(json.dumps(out, indent=1))
 
@@ -191,26 +192,26 @@ def fit():
         print(f"--- alpha = {alpha:g}")
         for lam_s, vs in k3["ratios"].items():
             print(f"   K3 ρV={float(lam_s):.0e}: r =", [f"{v:.4f}±{e:.4f}" for v, e in zip(vs, k3["ratios_se"][lam_s])])
-        print(f"   K3 max |1-r| a 1e8 = {k3['max_dev_last']:.4f}, más cerca que a 1e6: {k3['closer_than_1e6']}")
+        print(f"   K3 max |1-r| at 1e8 = {k3['max_dev_last']:.4f}, closer than at 1e6: {k3['closer_than_1e6']}")
         for p in out["points"][str(alpha)]:
             print(f"   ρV={p['rhoV']:<5} total/ρV={p['sim'] / p['rhoV']:9.2f}±{p['sim_se'] / p['rhoV']:<7.2f} "
-                  f"J1/ρV={p['J1'] / p['rhoV']:9.2f}  resto/J1={p['rest_over_J1']:+.3f}±{p['rest_over_J1_se']:.3f}")
-        print(f"   K4: pendiente {k4['slope']:+.4f} ± {k4['slope_se']:.4f} (z = {k4['z']:+.2f}, chi2/dof {k4['chi2dof']:.2f});"
-              f" media {k4['mean']:.3f} ± {k4['mean_se']:.3f}")
-        print("   p local:", [f"{p['p']:.2f}±{p['se']:.2f}" for p in out["p_local_sim"][str(alpha)]])
+                  f"J1/ρV={p['J1'] / p['rhoV']:9.2f}  rest/J1={p['rest_over_J1']:+.3f}±{p['rest_over_J1_se']:.3f}")
+        print(f"   K4: slope {k4['slope']:+.4f} ± {k4['slope_se']:.4f} (z = {k4['z']:+.2f}, chi2/dof {k4['chi2dof']:.2f});"
+              f" mean {k4['mean']:.3f} ± {k4['mean_se']:.3f}")
+        print("   local p:", [f"{p['p']:.2f}±{p['se']:.2f}" for p in out["p_local_sim"][str(alpha)]])
 
     ax1.set_xscale("log")
     ax1.set_yscale("log")
     ax1.set_xlabel("ρV", color=INK)
     ax1.set_ylabel("(ΔS)² / ρV", color=INK)
-    ax1.set_title("Cono pasado hasta el big bang, FLRW 4D (a ∝ η^α)", color=INK, fontsize=10)
+    ax1.set_title("Past cone down to the big bang, 4D FLRW (a ∝ η^α)", color=INK, fontsize=10)
     ax1.legend(frameon=False, fontsize=7)
-    ax2.axhline(0.317, color=INK_MUTED, linestyle="--", linewidth=1, label="diamante de Minkowski: 0.317")
-    ax2.axhline(0.342, color=GREEN, linestyle=":", linewidth=1, label="cono de Minkowski: 0.342")
+    ax2.axhline(0.317, color=INK_MUTED, linestyle="--", linewidth=1, label="Minkowski diamond: 0.317")
+    ax2.axhline(0.342, color=GREEN, linestyle=":", linewidth=1, label="Minkowski cone: 0.342")
     ax2.set_xscale("log")
     ax2.set_xlabel("ρV", color=INK)
-    ax2.set_ylabel("correlaciones / J¹", color=INK)
-    ax2.set_title("Fracción de correlaciones", color=INK, fontsize=10)
+    ax2.set_ylabel("correlations / J¹", color=INK)
+    ax2.set_title("Fraction of correlations", color=INK, fontsize=10)
     ax2.legend(frameon=False, fontsize=8)
     for ax in (ax1, ax2):
         ax.grid(True, color=GRID, linewidth=0.8)
@@ -218,7 +219,7 @@ def fit():
             ax.spines[side].set_visible(False)
     path = ROOT / "figures" / "flrw4d_scaling.png"
     fig.savefig(path, dpi=150, facecolor="#fcfcfb")
-    print("figura", path)
+    print("figure", path)
 
 
 if __name__ == "__main__":

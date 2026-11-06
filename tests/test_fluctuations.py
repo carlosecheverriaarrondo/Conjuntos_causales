@@ -1,13 +1,13 @@
-"""Tests del Goal 3: fluctuaciones de la acción BD LOCAL (formalismo de
+"""Goal 3 tests: fluctuations of the LOCAL BD action (formalism of
 Moradi, Yazdi & Zilhão, Class. Quantum Grav. 42 (2025) 045017, arXiv:2407.03395).
 
-Margen estadístico (fijado a priori, no ajustado a los resultados):
-  |simulación - predicción| < K_SIGMA * sqrt(se_sim^2 + se_pred^2),  K_SIGMA = 4,
-donde se_sim es el error estándar del estimador sobre sprinklings
-independientes y se_pred el error estadístico de la integración Monte Carlo
-de las integrales de MYZ. Semillas fijas: los tests son deterministas.
-La predicción de Minkowski 2D es exacta salvo el error MC (|A ∩ B| en forma
-cerrada); ver ``causets/fluctuations.py``.
+Statistical tolerance (fixed a priori, not tuned to the results):
+  |simulation - prediction| < K_SIGMA * sqrt(se_sim^2 + se_pred^2),  K_SIGMA = 4,
+where se_sim is the standard error of the estimator over independent
+sprinklings and se_pred the statistical error of the Monte Carlo integration
+of the MYZ integrals. Fixed seeds: the tests are deterministic.
+The 2D Minkowski prediction is exact up to the MC error (|A ∩ B| in closed
+form); see ``causets/fluctuations.py``.
 """
 
 import numpy as np
@@ -37,14 +37,14 @@ def _poisson(k, z):
     return poisson.pmf(k, z)
 
 
-# ------------------------------------------------------------ indicadores
+# ------------------------------------------------------------- indicators
 
 
 def test_cardinality_indicator_partitions_relations():
     g = MinkowskiDiamondGeometry(2)
     C = minkowski_causal_matrix(sprinkle(g.region, 100.0, np.random.default_rng(1)))
     total = sum(cardinality_indicator(C, i).astype(int) for i in range(len(C)))
-    np.testing.assert_array_equal(total, C.astype(int))  # cada relación tiene una única cardinalidad
+    np.testing.assert_array_equal(total, C.astype(int))  # each relation has exactly one cardinality
 
 
 def test_occupation_indicator():
@@ -60,7 +60,7 @@ def test_abundance_vector_gives_local_action():
     assert abundance_vector(C, 4) @ a == pytest.approx(bd_action(C, 4), rel=1e-12)
 
 
-# ------------------------------------------- reglas de correlación (sec. 3.3)
+# ------------------------------------------------ correlation rules (sec. 3.3)
 
 
 def _counts_in(points, y, x):
@@ -68,7 +68,7 @@ def _counts_in(points, y, x):
 
 
 def test_zeta_chi_rule():
-    """MYZ (3.31): con un elemento fijo z ∈ I(y, x), P(zeta_i) = P_{i-1}(rho V)."""
+    """MYZ (3.31): with a fixed element z ∈ I(y, x), P(zeta_i) = P_{i-1}(rho V)."""
     g = MinkowskiDiamondGeometry(2)
     rho = 30.0
     y, x, z = np.array([-0.6, 0.0]), np.array([0.4, 0.1]), np.array([0.0, 0.05])
@@ -83,7 +83,7 @@ def test_zeta_chi_rule():
 
 
 def test_zeta_zeta_overlapping_diamonds():
-    """MYZ (3.34): dos diamantes solapados, <zeta_i zeta_j> = sum P_a P_b P_c."""
+    """MYZ (3.34): two overlapping diamonds, <zeta_i zeta_j> = sum P_a P_b P_c."""
     g = MinkowskiDiamondGeometry(2)
     rho = 20.0
     y1, x1 = np.array([-0.6, -0.1]), np.array([0.2, -0.1])
@@ -107,12 +107,12 @@ def test_zeta_zeta_overlapping_diamonds():
     assert np.all(np.abs(freq - P) < tol), np.max(np.abs(freq - P) / tol)
 
 
-# ------------------------------------------------- varianza de la acción
+# ------------------------------------------------- variance of the action
 
 
 @pytest.fixture(scope="module")
 def minkowski_2d_ensembles():
-    """Simulación y predicción MYZ en Minkowski 2D para rho V = 50 y 100."""
+    """Simulation and MYZ prediction in 2D Minkowski for rho V = 50 and 100."""
     g = MinkowskiDiamondGeometry(2)
     out = {}
     for lam in (50.0, 100.0):
@@ -136,7 +136,7 @@ def test_action_variance_2d_matches_myz_prediction(minkowski_2d_ensembles, lam):
 
 @pytest.mark.parametrize("lam", [50.0, 100.0])
 def test_covariance_with_N_matches(minkowski_2d_ensembles, lam):
-    """M_{-1,j} = (j+2) L_j - (j+1) L_{j+1} (de MYZ 5.26-5.27) y M_{-1,-1} = rho V (5.20)."""
+    """M_{-1,j} = (j+2) L_j - (j+1) L_{j+1} (from MYZ 5.26-5.27) and M_{-1,-1} = rho V (5.20)."""
     pred, sim = minkowski_2d_ensembles[lam]
     cov, se = sim.covariance, sim.covariance_se
     for j in range(4):
@@ -144,8 +144,9 @@ def test_covariance_with_N_matches(minkowski_2d_ensembles, lam):
 
 
 def test_variance_is_super_poissonian_2d(minkowski_2d_ensembles):
-    """Observación (no una predicción de MYZ): (Delta S)^2 >> rho V y la razón
-    crece con rho V, i.e. las fluctuaciones de la acción local no escalan como
-    las de N (sqrt V). Relevante para la conexión con Everpresent Lambda."""
+    """Observation (not a prediction of MYZ): (Delta S)^2 >> rho V and the
+    ratio grows with rho V, i.e. the fluctuations of the local action do not
+    scale like those of N (sqrt V). Relevant to the link with Everpresent
+    Lambda."""
     ratios = [minkowski_2d_ensembles[lam][0].variance / lam for lam in (50.0, 100.0)]
     assert ratios[0] > 10 and ratios[1] > ratios[0]

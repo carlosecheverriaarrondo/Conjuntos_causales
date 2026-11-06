@@ -1,57 +1,58 @@
-"""Goal 6: cálculos pedidos por la revisión externa del borrador (2026-10-15).
+"""Goal 6: calculations requested by the external review of the draft (2026-10-15).
 
-La revisión (árbitro independiente) señaló tres puntos que se pueden reforzar
-con más datos, sin cambiar ningún resultado anterior:
-  (a) la extrapolación p → 3/4 se apoya en resto/J¹ constante sólo hasta
-      ρV = 6400 (diamante) y 3200 (FLRW);
-  (b) con la acción suavizada (ε ≤ 0.2) la constancia del resto sin proyectar
-      es una conclusión a posteriori del Goal 5b (el F2 prerregistrado falló);
-  (c) la mejor celda del mapa (q, c) del Goal 4e (q = 1/8, c = 1/4, Δχ² = +17)
-      se midió con sólo 1000 semillas.
+The review (independent referee) pointed out three points that can be
+strengthened with more data, without changing any earlier result:
+  (a) the extrapolation p → 3/4 rests on a constant rest/J¹ only up to
+      ρV = 6400 (diamond) and 3200 (FLRW);
+  (b) with the smeared action (ε ≤ 0.2) the constancy of the unprojected rest
+      is an a posteriori conclusion of Goal 5b (the preregistered F2 failed);
+  (c) the best cell of the (q, c) map of Goal 4e (q = 1/8, c = 1/4, Δχ² = +17)
+      was measured with only 1000 seeds.
 
-Cálculos (salidas nuevas; los JSON de los goals anteriores no se tocan):
-  diamond   diamante de Minkowski 4D, ρV = 12 800, 500 sprinklings; histograma
-            completo de cardinalidades por sprinkling (data/goal5/, mismo
-            formato que el Goal 5, semillas nuevas) -> ε = 1, 0.5, 0.2, 0.1
-  pred      J¹_ε, E[F], g exactos con ρV = 12 800 -> figures/goal6_pred.json
-  flrw A    cono pasado FLRW 4D, a = η^A (A = 1, 2), ρV = 6400, 500
-            sprinklings y medias MC (1.6e7 muestras), como el punto 1d
+Calculations (new outputs; the JSON files of the earlier goals are untouched):
+  diamond   4D Minkowski diamond, ρV = 12 800, 500 sprinklings; full histogram
+            of cardinalities per sprinkling (data/goal5/, same format as
+            Goal 5, new seeds) -> ε = 1, 0.5, 0.2, 0.1
+  pred      exact J¹_ε, E[F], g with ρV = 12 800 -> figures/goal6_pred.json
+  flrw A    4D FLRW past cone, a = η^A (A = 1, 2), ρV = 6400, 500
+            sprinklings and MC means (1.6e7 samples), as in point 1d
             -> figures/goal6_flrw_aA.json
-  cell      Goal 4e, celda (q, c) = (1/8, 1/4) con 10 000 semillas
+  cell      Goal 4e, cell (q, c) = (1/8, 1/4) with 10 000 seeds
             -> figures/goal4e_q0.125_c0.25_n10000.json
-  snbao M   ajuste por semilla con SN + BAO (sin CMB), M = model1 | bd
+  snbao M   fit per seed with SN + BAO (without CMB), M = model1 | bd
             -> figures/goal6_snbao_lcdm.json, figures/goal6_snbao_M.json
-  fit       criterios -> figures/goal6_results.json
+  fit       criteria -> figures/goal6_results.json
 
-CRITERIOS PRERREGISTRADOS (2026-10-15, antes de calcular; 4σ combinada):
-  R1 (diamante, acción local). Se combinan todos los sprinklings
-     independientes con ε = 1: Paso 2 (ρV = 25-6400), Goal 5 (400-6400) y el
-     punto nuevo (12 800); en cada ρV se promedian ponderando por 1/se².
-     (i) resto/J¹ con ρV = 12 800 compatible con la media ponderada del
-     Paso 2 (0.317 ± 0.014); (ii) la pendiente de resto/J¹ frente a ln ρV
-     sobre todo el rango es compatible con 0. Se reporta además la cota sobre
-     el exponente diferencial δ de las correlaciones, (resto/J¹) ∝ (ρV)^δ, a
-     2σ y a 4σ.
-  R2 (acción suavizada, ε = 0.5, 0.2, 0.1). Resto SIN proyectar,
-     r = (Var F − J¹)/J¹. Se combinan Goal 5 y Goal 5b (sprinklings
-     independientes, 400-6400) y el punto nuevo (12 800). La pendiente de r
-     frente a ln ρV es compatible con 0. Esta es la afirmación a posteriori del
-     Goal 5b; aquí se pone a prueba con un punto que duplica ερV.
-  R3 (FLRW 4D, α = 1, 2). resto/J¹ con ρV = 6400 compatible con la media
-     ponderada del punto 1d (0.348 ± 0.016 y 0.317 ± 0.016), y la pendiente
-     sobre ρV = 25-6400 sigue compatible con 0.
-  R4 (mapa del Goal 4e). Se cuenta el número de semillas buenas
-     (Δχ² < 14.7) de la celda (1/8, 1/4) con 10 000 semillas. Si hay alguna,
-     la frase "ninguna celda tiene semillas buenas" se corrige en el paper.
-  R5 (añadido el mismo día, también antes de calcular). Los priors de
-     distancia del CMB no son aplicables a Model 1 (Λ/3H² ~ 0.5 en z = 1100).
-     Se repite el ajuste por semilla del Goal 4d SIN el CMB (χ² = SN + BAO),
-     con la referencia ΛCDM ajustada también a SN + BAO, para Model 1 y para
-     la acción BD (β = 0.9), mismas 10 000 semillas. Se reporta el número de
-     semillas buenas (Δχ² < 14.7) y el Δχ² mínimo. Descriptivo: sustituye en
-     la tabla 2 del paper al +364 de Model 1, que incluía un CMB no aplicable.
+PREREGISTERED CRITERIA (2026-10-15, before computing; 4σ combined):
+  R1 (diamond, local action). All independent sprinklings with ε = 1 are
+     combined: Step 2 (ρV = 25-6400), Goal 5 (400-6400) and the new point
+     (12 800); at each ρV they are averaged with weights 1/se².
+     (i) rest/J¹ at ρV = 12 800 compatible with the weighted mean of
+     Step 2 (0.317 ± 0.014); (ii) the slope of rest/J¹ versus ln ρV
+     over the whole range is compatible with 0. The bound on the differential
+     exponent δ of the correlations, (rest/J¹) ∝ (ρV)^δ, is also reported at
+     2σ and at 4σ.
+  R2 (smeared action, ε = 0.5, 0.2, 0.1). UNPROJECTED rest,
+     r = (Var F − J¹)/J¹. Goal 5 and Goal 5b (independent sprinklings,
+     400-6400) and the new point (12 800) are combined. The slope of r
+     versus ln ρV is compatible with 0. This is the a posteriori claim of
+     Goal 5b; here it is tested with a point that doubles ερV.
+  R3 (4D FLRW, α = 1, 2). rest/J¹ at ρV = 6400 compatible with the weighted
+     mean of point 1d (0.348 ± 0.016 and 0.317 ± 0.016), and the slope
+     over ρV = 25-6400 remains compatible with 0.
+  R4 (map of Goal 4e). The number of good seeds (Δχ² < 14.7) of the cell
+     (1/8, 1/4) with 10 000 seeds is counted. If there is any, the sentence
+     "no cell has good seeds" is corrected in the paper.
+  R5 (added the same day, also before computing). The CMB distance priors
+     are not applicable to Model 1 (Λ/3H² ~ 0.5 at z = 1100).
+     The fit per seed of Goal 4d is repeated WITHOUT the CMB (χ² = SN + BAO),
+     with the ΛCDM reference also fitted to SN + BAO, for Model 1 and for
+     the BD action (β = 0.9), same 10 000 seeds. The number of good seeds
+     (Δχ² < 14.7) and the minimum Δχ² are reported. Descriptive: it replaces
+     in table 2 of the paper the +364 of Model 1, which included an
+     inapplicable CMB.
 
-Uso:  python scripts/goal6_referee.py diamond | pred | flrw A | cell | snbao M | fit
+Usage:  python scripts/goal6_referee.py diamond | pred | flrw A | cell | snbao M | fit
 """
 
 from __future__ import annotations
@@ -98,8 +99,8 @@ def flrw_path(alpha):
 
 
 def diamond():
-    """Histogramas con ρV = 12 800 (mismo formato y carpeta que el Goal 5;
-    semillas [93_000, ρV, bloque], distintas de las del Goal 5)."""
+    """Histograms with ρV = 12 800 (same format and folder as Goal 5;
+    seeds [93_000, ρV, block], different from those of Goal 5)."""
     g = MinkowskiDiamondGeometry(4)
     g5.DATA.mkdir(parents=True, exist_ok=True)
     for c in range(M_D // g5.CHUNK):
@@ -118,7 +119,7 @@ def diamond():
         for i, h in enumerate(H):
             hist[i, : len(h)] = h
         np.savez_compressed(path, N=np.array(N), hist=hist)
-        print(f"ρV={LAM_D} bloque {c} {time.time() - t0:.0f}s", flush=True)
+        print(f"ρV={LAM_D} block {c} {time.time() - t0:.0f}s", flush=True)
 
 
 def pred():
@@ -135,7 +136,7 @@ def pred():
 
 
 def flrw(alpha: float):
-    """Sprinklings y medias MC con ρV = 6400, como ``flrw4d_scaling`` (semillas nuevas)."""
+    """Sprinklings and MC means with ρV = 6400, as in ``flrw4d_scaling`` (new seeds)."""
     path = flrw_path(alpha)
     res = json.loads(path.read_text()) if path.exists() else {}
     g = FLRWConeGeometry(alpha, dim=4)
@@ -224,7 +225,7 @@ def snbao(model):
             r.update(sn=float(p["sn"][k]), bao=float(p["bao"][k]))
         rows += new
         path.write_text(json.dumps(dict(model=model, probes="SN+BAO", rows=rows)))
-        print(f"{model} SN+BAO: {len(rows)} semillas, {time.time() - t0:.0f} s", flush=True)
+        print(f"{model} SN+BAO: {len(rows)} seeds, {time.time() - t0:.0f} s", flush=True)
 
 
 def _wmean(y, se):
@@ -238,7 +239,7 @@ def _slope(x, y, se):
 
 
 def _combine(points):
-    """{ρV: [(r, se), ...]} -> filas con la media ponderada en cada ρV."""
+    """{ρV: [(r, se), ...]} -> rows with the weighted mean at each ρV."""
     rows = []
     for lam in sorted(points):
         r, se = _wmean([p[0] for p in points[lam]], [p[1] for p in points[lam]])
@@ -247,7 +248,7 @@ def _combine(points):
 
 
 def _rest_new(eps, P):
-    """resto/J¹ sin proyectar con ρV = 12 800 a partir de los histogramas nuevos."""
+    """Unprojected rest/J¹ with ρV = 12 800 from the new histograms."""
     N, hist = g5.load(LAM_D)
     F = hist @ pair_weight(4, np.arange(hist.shape[1]), eps)
     var, var_se = g5._var_se(F)
@@ -260,7 +261,7 @@ def fit():
 
     P = json.loads(PRED.read_text())
     res = {}
-    # --- R1: diamante, acción local
+    # --- R1: diamond, local action
     pts = {}
     for p in json.loads((ROOT / "figures" / "step2_4d_results.json").read_text())["points"]:
         pts.setdefault(p["rhoV"], []).append((p["rest_over_J1"], p["rest_over_J1_se"]))
@@ -270,14 +271,14 @@ def fit():
             pts.setdefault(p["rhoV"], []).append((p["rest_over_J1"], p["rest_over_J1_se"]))
     r_new, se_new, m_new = _rest_new(1.0, P)
     pts.setdefault(LAM_D, []).append((r_new, se_new))
-    # Var S total con ρV = 12 800 (para la figura 1 del paper; añadido en la segunda revisión)
+    # total Var S with ρV = 12 800 (for figure 1 of the paper; added in the second review)
     N12, h12 = g5.load(LAM_D)
     varS12 = g5._var_se(g5.action_coefficients(4, 1.0)[0] * N12 + h12 @ pair_weight(4, np.arange(h12.shape[1]), 1.0))
     rows = _combine(pts)
     z1 = (r_new - STEP2_R[0]) / np.hypot(se_new, STEP2_R[1])
     sl = _slope(np.log([r["rhoV"] for r in rows]), [r["r"] for r in rows], [r["se"] for r in rows])
     mean, mean_se = _wmean([r["r"] for r in rows], [r["se"] for r in rows])
-    # cota sobre δ: si las correlaciones ∝ J¹ (ρV)^δ, r ∝ (ρV)^δ y d r / d ln ρV = δ r
+    # bound on δ: if the correlations ∝ J¹ (ρV)^δ, then r ∝ (ρV)^δ and d r / d ln ρV = δ r
     delta = [(sl["slope"] - k * sl["slope_se"]) / mean for k in (4, 2)] + \
             [(sl["slope"] + k * sl["slope_se"]) / mean for k in (2, 4)]
     res["R1"] = dict(points=rows, r_12800=r_new, r_12800_se=se_new, M=m_new, z_12800=float(z1),
@@ -285,7 +286,7 @@ def fit():
                      slope=sl, mean=mean, mean_se=mean_se,
                      delta_4sigma=[delta[0], delta[3]], delta_2sigma=[delta[1], delta[2]],
                      passed=bool(abs(z1) < K and abs(sl["z"]) < K))
-    # --- R2: acción suavizada, resto sin proyectar
+    # --- R2: smeared action, unprojected rest
     g5b = json.loads((ROOT / "figures" / "goal5b_results.json").read_text())["points"]
     res["R2"] = {}
     for eps in (0.5, 0.2, 0.1):
@@ -319,14 +320,14 @@ def fit():
         sl = _slope(x, y, se)
         res["R3"][str(alpha)] = dict(r_6400=float(r), r_6400_se=float(r_se), z=float(z), slope=sl,
                                      passed=bool(abs(z) < K and abs(sl["z"]) < K))
-    # --- R4: celda del mapa con 10 000 semillas
+    # --- R4: map cell with 10 000 seeds
     import goal4e_robustness as g4e
 
     rows = json.loads(g4e.path_for(g4e.register(0.125, 0.25), 10_000).read_text())["rows"]
     lcdm = json.loads((ROOT / "figures" / "goal4e_results.json").read_text())["lcdm_chi2"]
-    d = np.array([r["chi2"] for r in rows]) - lcdm  # mismo χ² que goal4e_robustness.summary
+    d = np.array([r["chi2"] for r in rows]) - lcdm  # same χ² as goal4e_robustness.summary
     res["R4"] = dict(n=len(d), n_good=int(np.sum(d < 14.7)), dchi2_min=float(d.min()))
-    # --- R5: SN + BAO sin CMB
+    # --- R5: SN + BAO without CMB
     ref = json.loads((ROOT / "figures" / "goal6_snbao_lcdm.json").read_text())
     res["R5"] = dict(lcdm=ref)
     for model in ("model1", "bd"):
@@ -346,15 +347,16 @@ BOOT = ROOT / "figures" / "goal6_bootstrap.json"
 
 
 def boot(B: int = 2000):
-    """A POSTERIORI (segunda revisión, 2026-10-16): bootstrap de los errores de r.
+    """A POSTERIORI (second review, 2026-10-16): bootstrap of the errors of r.
 
-    El error std(d²)/√M de la varianza puede subestimarse con colas pesadas.
-    Para cada conjunto con datos por sprinkling (Goal 5, Goal 5b y ρV = 12 800)
-    se remuestrean los sprinklings (B réplicas) y se compara el error bootstrap
-    de r = (Var F − J¹)/J¹ con el de la fórmula. Después se repiten las
-    pendientes de R1 y R2 con el mayor de los dos errores, con el error
-    escalado por sqrt(χ²/dof) y restringiendo el rango (ρV ≥ 400, ≥ 800).
-    No es un criterio: es una comprobación de la robustez de las cotas.
+    The error std(d²)/√M of the variance may be underestimated with heavy
+    tails. For each set with per-sprinkling data (Goal 5, Goal 5b and
+    ρV = 12 800) the sprinklings are resampled (B replicas) and the bootstrap
+    error of r = (Var F − J¹)/J¹ is compared with that of the formula. Then the
+    slopes of R1 and R2 are repeated with the larger of the two errors, with
+    the error scaled by sqrt(χ²/dof) and restricting the range (ρV ≥ 400,
+    ≥ 800). This is not a criterion: it is a check of the robustness of the
+    bounds.
     """
     import goal5b_decomposition as g5b
 
@@ -390,7 +392,7 @@ def boot(B: int = 2000):
     res = json.loads(OUT.read_text())
 
     def variants(rows_by_set):
-        """rows_by_set: {ρV: [(r, se_formula, se_boot or None), ...]} -> pendientes."""
+        """rows_by_set: {ρV: [(r, se_formula, se_boot or None), ...]} -> slopes."""
         v = {}
         for name, use_boot, lmin in (("formula", False, 0), ("max_boot", True, 0),
                                      ("max_boot_ge400", True, 400), ("max_boot_ge800", True, 800)):
@@ -407,7 +409,7 @@ def boot(B: int = 2000):
                                                 (sl["slope"] + 2 * scale * sl["slope_se"]) / mean])
         return v
 
-    # R1: Paso 2 (sin datos por sprinkling: sólo error de fórmula) + Goal 5 (ε = 1) + 12 800
+    # R1: Step 2 (no per-sprinkling data: formula error only) + Goal 5 (ε = 1) + 12 800
     sets = {}
     for p in json.loads((ROOT / "figures" / "step2_4d_results.json").read_text())["points"]:
         sets.setdefault(p["rhoV"], []).append((p["rest_over_J1"], p["rest_over_J1_se"], None))
@@ -432,11 +434,11 @@ def boot(B: int = 2000):
         out["R2"][str(eps)] = variants(sets)
     BOOT.write_text(json.dumps(out, indent=1))
     rr = np.array([x["ratio"] for x in ratios])
-    print(f"se_boot/se_formula: min {rr.min():.3f} mediana {np.median(rr):.3f} max {rr.max():.3f}")
+    print(f"se_boot/se_formula: min {rr.min():.3f} median {np.median(rr):.3f} max {rr.max():.3f}")
     for k in ("R1",):
         for name, v in out[k].items():
             print(k, name, {kk: (round(vv, 4) if isinstance(vv, float) else vv) for kk, vv in v["slope"].items()},
-                  "δ2σ", np.round(v["delta_2sigma"], 3), "escalado", np.round(v["delta_2sigma_scaled"], 3))
+                  "δ2σ", np.round(v["delta_2sigma"], 3), "scaled", np.round(v["delta_2sigma_scaled"], 3))
     for e, vs in out["R2"].items():
         for name, v in vs.items():
             print("R2", e, name, round(v["slope"]["slope"], 3), "±", round(v["slope"]["slope_se"], 3),

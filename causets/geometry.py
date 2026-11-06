@@ -1,27 +1,27 @@
-"""Geometrías para el cálculo de fluctuaciones: todo lo que el formalismo de
-``fluctuations.py`` necesita saber de la variedad M (la región sprinkleada).
+"""Geometries for the fluctuation calculation: everything the formalism of
+``fluctuations.py`` needs to know about the manifold M (the sprinkled region).
 
-Una geometría expone, en coordenadas en las que la estructura causal es la
-de Minkowski (cartesianas en Minkowski, conformes en métricas a(eta)^2 eta):
+A geometry exposes, in coordinates in which the causal structure is that of
+Minkowski (Cartesian in Minkowski, conformal in metrics a(eta)^2 eta):
 
-  dim, volume                         volumen físico de M
-  coordinate_volume                   volumen coordenado de M (= volume en
+  dim, volume                         physical volume of M
+  coordinate_volume                   coordinate volume of M (= volume in
                                       Minkowski)
-  sample_M(n, rng)                    n puntos de M distribuidos según dV físico
-  contains(z)                         z en M
-  weight(z)                           densidad física por unidad de volumen
-                                      coordenado (a^d; 1 en Minkowski)
-  precedes(a, b)                      a ≺ b (fila a fila)
-  interval_volume(y, x)               volumen físico de I(y, x) (0 si y no ≺ x)
-  overlap_volume(y1, x1, y2, x2)      |I(y1,x1) ∩ I(y2,x2)| si hay forma
-                                      cerrada; si no, None
-  sample_in_intervals(y, x, k, rng)   k[m] puntos en I(y[m], x[m]) (dV físico)
+  sample_M(n, rng)                    n points of M distributed by physical dV
+  contains(z)                         z in M
+  weight(z)                           physical density per unit coordinate
+                                      volume (a^d; 1 in Minkowski)
+  precedes(a, b)                      a ≺ b (row by row)
+  interval_volume(y, x)               physical volume of I(y, x) (0 if y not ≺ x)
+  overlap_volume(y1, x1, y2, x2)      |I(y1,x1) ∩ I(y2,x2)| if there is a
+                                      closed form; otherwise None
+  sample_in_intervals(y, x, k, rng)   k[m] points in I(y[m], x[m]) (physical dV)
 
-La relación causal de ``causal.py`` sirve para todas (métricas conformemente
-planas). Los volúmenes de intervalos son exactos; la intersección de dos
-intervalos sólo tiene forma cerrada en 2D (coordenadas de cono de luz, donde
-los intervalos son rectángulos); en Minkowski 4D se calcula con una
-cuadratura determinista (``overlap.py``).
+The causal relation of ``causal.py`` serves for all of them (conformally flat
+metrics). Interval volumes are exact; the intersection of two intervals only
+has a closed form in 2D (light-cone coordinates, where intervals are
+rectangles); in 4D Minkowski it is computed with a deterministic quadrature
+(``overlap.py``).
 """
 
 from __future__ import annotations
@@ -43,24 +43,24 @@ from .sprinkling import sample_uniform
 
 
 def minkowski_precedes(a: np.ndarray, b: np.ndarray) -> np.ndarray:
-    """a ≺ b estrictamente (fila a fila, con broadcasting)."""
+    """a ≺ b strictly (row by row, with broadcasting)."""
     dt = b[..., 0] - a[..., 0]
     dx2 = np.sum((b[..., 1:] - a[..., 1:]) ** 2, axis=-1)
     return (dt > 0) & (dt * dt >= dx2)
 
 
 def proper_time(y: np.ndarray, x: np.ndarray) -> np.ndarray:
-    """Tiempo propio de Minkowski entre y y x (0 si no hay separación temporal)."""
+    """Minkowski proper time between y and x (0 if not timelike separated)."""
     dt = x[..., 0] - y[..., 0]
     dx2 = np.sum((x[..., 1:] - y[..., 1:]) ** 2, axis=-1)
     return np.sqrt(np.maximum(dt * dt - dx2, 0.0)) * (dt > 0)
 
 
 def _boost_from_rest(points: np.ndarray, delta: np.ndarray, tau: np.ndarray) -> np.ndarray:
-    """Aplica a ``points`` (en el sistema en reposo, eje temporal) el boost que
-    lleva (tau, 0) a ``delta`` (vector temporal futuro). Fila a fila."""
+    """Apply to ``points`` (in the rest frame, time axis) the boost that takes
+    (tau, 0) to ``delta`` (future timelike vector). Row by row."""
     gamma = delta[:, 0] / tau
-    u = delta[:, 1:] / delta[:, :1]  # velocidad
+    u = delta[:, 1:] / delta[:, :1]  # velocity
     u2 = np.sum(u * u, axis=1)
     t_p, x_p = points[:, 0], points[:, 1:]
     ux = np.sum(u * x_p, axis=1)
@@ -72,7 +72,7 @@ def _boost_from_rest(points: np.ndarray, delta: np.ndarray, tau: np.ndarray) -> 
 
 
 def _sample_unit_diamond(dim: int, n: int, rng) -> np.ndarray:
-    """n puntos uniformes en el diamante con vértices (0, 0) y (1, 0)."""
+    """n uniform points in the diamond with vertices (0, 0) and (1, 0)."""
     pts = sample_uniform(CausalDiamond(dim, 0.5), n, rng)
     pts[:, 0] += 0.5
     return rng.permutation(pts)
@@ -99,7 +99,7 @@ class _ConformallyFlatGeometry:
         return None
 
     def _sample_coordinate_uniform(self, y, x, k, rng):
-        """Puntos uniformes (medida coordenada) en los intervalos coordenados."""
+        """Uniform points (coordinate measure) in the coordinate intervals."""
         k = np.asarray(k, dtype=int)
         total = int(k.sum())
         if total == 0:
@@ -112,9 +112,9 @@ class _ConformallyFlatGeometry:
         return pts, owner
 
     def _sample_conformal_weighted(self, y, x, k, rng):
-        """Puntos según dV físico en métricas a(eta)^2 eta con a creciente:
-        rechazo con peso (a / a_max)^d dentro de cada intervalo (a_max está en
-        el vértice superior). Requiere ``self.a``."""
+        """Points by physical dV in metrics a(eta)^2 eta with increasing a:
+        rejection with weight (a / a_max)^d within each interval (a_max is at
+        the top vertex). Requires ``self.a``."""
         k = np.asarray(k, dtype=int)
         out_pts, out_owner = [], []
         need = k.copy()
@@ -122,7 +122,7 @@ class _ConformallyFlatGeometry:
             pts, owner = self._sample_coordinate_uniform(y, x, 2 * need + 2 * (need > 0), rng)
             accept = rng.random(len(pts)) < (self.a(pts[:, 0]) / self.a(x[owner, 0])) ** self.dim
             pts, owner = pts[accept], owner[accept]
-            # quedarse con como mucho need[m] puntos por intervalo
+            # keep at most need[m] points per interval
             order = np.argsort(owner, kind="stable")
             pts, owner = pts[order], owner[order]
             rank = np.arange(len(owner)) - np.searchsorted(owner, owner)
@@ -136,9 +136,9 @@ class _ConformallyFlatGeometry:
 
 
 class _MinkowskiGeometry(_ConformallyFlatGeometry):
-    """Región de Minkowski causalmente convexa (``region``), d = 2, 3, 4."""
+    """Causally convex region of Minkowski (``region``), d = 2, 3, 4."""
 
-    overlap_nodes: int = 32  # nodos de la cuadratura 4D en t y en z
+    overlap_nodes: int = 32  # nodes of the 4D quadrature in t and in z
 
     @property
     def coordinate_volume(self) -> float:
@@ -151,7 +151,7 @@ class _MinkowskiGeometry(_ConformallyFlatGeometry):
         return diamond_volume(self.dim, proper_time(y, x) / 2)
 
     def overlap_volume(self, y1, x1, y2, x2):
-        """2D: forma cerrada. 4D: cuadratura determinista (``overlap.py``)."""
+        """2D: closed form. 4D: deterministic quadrature (``overlap.py``)."""
         if self.dim == 4:
             from .overlap import interval_intersection_volume_4d
 
@@ -159,7 +159,7 @@ class _MinkowskiGeometry(_ConformallyFlatGeometry):
             return interval_intersection_volume_4d(y1, x1, y2, x2, n, n)
         if self.dim != 2:
             return None
-        # coordenadas de cono de luz u = t + x, v = t - x;  dV = du dv / 2
+        # light-cone coordinates u = t + x, v = t - x;  dV = du dv / 2
         def uv(p):
             return p[..., 0] + p[..., 1], p[..., 0] - p[..., 1]
 
@@ -173,7 +173,7 @@ class _MinkowskiGeometry(_ConformallyFlatGeometry):
 
 
 class MinkowskiDiamondGeometry(_MinkowskiGeometry):
-    """Diamante causal de Minkowski (``CausalDiamond``), d = 2, 3, 4."""
+    """Causal diamond of Minkowski (``CausalDiamond``), d = 2, 3, 4."""
 
     def __init__(self, dim: int, half_height: float = 1.0, overlap_nodes: int = 32):
         self.dim = dim
@@ -182,10 +182,10 @@ class MinkowskiDiamondGeometry(_MinkowskiGeometry):
 
 
 class MinkowskiConeGeometry(_MinkowskiGeometry):
-    """Cono de luz pasado truncado de Minkowski (``TruncatedPastCone``):
-    J^-(q) ∩ {t >= 0}, d = 2, 3, 4. Al ser causalmente convexo, los
-    intervalos de pares de la región están contenidos en ella y todo lo
-    demás es igual que en el diamante."""
+    """Truncated past light cone of Minkowski (``TruncatedPastCone``):
+    J^-(q) ∩ {t >= 0}, d = 2, 3, 4. Being causally convex, the intervals of
+    pairs of the region are contained in it and everything else is the same
+    as in the diamond."""
 
     def __init__(self, dim: int, height: float = 1.0, overlap_nodes: int = 32):
         self.dim = dim
@@ -194,13 +194,13 @@ class MinkowskiConeGeometry(_MinkowskiGeometry):
 
 
 class DeSitterGeometry(_ConformallyFlatGeometry):
-    """Diamante en coordenadas conformes del parche plano de de Sitter,
-    a(eta) = -1/(H eta). Volúmenes de intervalos exactos por simetría máxima
-    (``DeSitterIntervalVolume``); intersecciones sin forma cerrada."""
+    """Diamond in conformal coordinates of the flat patch of de Sitter,
+    a(eta) = -1/(H eta). Exact interval volumes by maximal symmetry
+    (``DeSitterIntervalVolume``); intersections without closed form."""
 
     def __init__(self, dim: int, eta_bottom: float, eta_top: float, hubble: float = 1.0):
         if not eta_bottom < eta_top < 0:
-            raise ValueError("se requiere eta_bottom < eta_top < 0")
+            raise ValueError("eta_bottom < eta_top < 0 is required")
         self.dim, self.hubble = dim, hubble
         self.a = de_sitter_scale_factor(hubble)
         self.region = ConformalDiamond(dim, (eta_top - eta_bottom) / 2, (eta_top + eta_bottom) / 2, self.a)
@@ -211,15 +211,15 @@ class DeSitterGeometry(_ConformallyFlatGeometry):
         return diamond_volume(self.dim, self.region.half_height)
 
     def weight(self, z):
-        # fuera del parche (eta >= 0) el punto no está en M: peso 0
+        # outside the patch (eta >= 0) the point is not in M: weight 0
         eta = np.atleast_2d(z)[:, 0]
         inside = eta < 0
         return np.where(inside, self.a(np.where(inside, eta, -1.0)) ** self.dim, 0.0)
 
     def interval_volume(self, y, x):
-        """0 si y no ≺ x o si algún punto está fuera del parche (eta >= 0) o
-        el par excede el tiempo propio máximo dentro de M (puntos propuestos
-        fuera de M, que el integrador descarta)."""
+        """0 if y not ≺ x, or if either point is outside the patch (eta >= 0), or
+        the pair exceeds the maximum proper time within M (proposed points
+        outside M, which the integrator discards)."""
         related = minkowski_precedes(y, x) & (np.atleast_2d(y)[:, 0] < 0) & (np.atleast_2d(x)[:, 0] < 0)
         Z = np.where(related, de_sitter_invariant(y, x), 1.0)
         h_tau = np.arccosh(np.maximum(Z, 1.0))
@@ -231,15 +231,15 @@ class DeSitterGeometry(_ConformallyFlatGeometry):
 
 
 def power_law_rectangle_volume(s0, du, dv, p: int) -> np.ndarray:
-    """∫∫ ((u + v)/2)^p du dv / 2 sobre el rectángulo [u0, u0 + du] x
-    [v0, v0 + dv], con s0 = u0 + v0 >= 0 y p entero >= 0: volumen físico de
-    un intervalo (o de la intersección de dos) en el FLRW 2D a(eta) = eta^(p/2).
+    """∫∫ ((u + v)/2)^p du dv / 2 over the rectangle [u0, u0 + du] x
+    [v0, v0 + dv], with s0 = u0 + v0 >= 0 and integer p >= 0: physical volume
+    of an interval (or of the intersection of two) in the 2D FLRW a(eta) = eta^(p/2).
 
-    Con t = u - u0, r = v - v0 y el binomio de Newton,
+    With t = u - u0, r = v - v0 and the binomial theorem,
         ∫∫ (s0 + t + r)^p = sum_k C(p, k) s0^(p-k) ∫_0^du ∫_0^dv (t + r)^k,
         ∫∫ (t + r)^k = sum_{j=1}^{k+1} C(k+2, j) du^j dv^(k+2-j) / ((k+1)(k+2)):
-    todos los términos son >= 0, así que no hay cancelaciones (exacto también
-    para intervalos casi nulos)."""
+    all the terms are >= 0, so there are no cancellations (exact also for
+    nearly null intervals)."""
     from math import comb
 
     s0, du, dv = (np.asarray(v, dtype=float) for v in (s0, du, dv))
@@ -251,8 +251,8 @@ def power_law_rectangle_volume(s0, du, dv, p: int) -> np.ndarray:
 
 
 def _lens_volume(r1, r2, d):
-    """Volumen de la intersección de dos bolas de R^3 de radios r1, r2 cuyos
-    centros distan d (con d <= r1 + r2)."""
+    """Volume of the intersection of two balls of R^3 with radii r1, r2 whose
+    centres are a distance d apart (with d <= r1 + r2)."""
     with np.errstate(divide="ignore", invalid="ignore"):
         lens = np.pi * (r1 + r2 - d) ** 2 * (d * d + 2 * d * (r1 + r2) - 3 * (r1 - r2) ** 2) / (12 * d)
     small = 4 * np.pi / 3 * np.minimum(r1, r2) ** 3
@@ -260,16 +260,16 @@ def _lens_volume(r1, r2, d):
 
 
 def conformal_interval_volume_4d(y, x, a, nodes: int = 8) -> np.ndarray:
-    """Volumen físico ∫ a(eta)^4 d^4x de I(y, x) en una métrica a(eta)^2 eta
-    (Minkowski 4D en coordenadas conformes), fila a fila; 0 si y no ≺ x.
+    """Physical volume ∫ a(eta)^4 d^4x of I(y, x) in a metric a(eta)^2 eta
+    (4D Minkowski in conformal coordinates), row by row; 0 if y not ≺ x.
 
-    A eta fijo, la sección de I(y, x) es la intersección de las bolas de
-    radios r1 = eta - eta_y y r2 = eta_x - eta centradas en x_y y x_x
-    (``_lens_volume``). Se integra en eta con Gauss-Legendre en los tres
-    tramos separados por los puntos donde una bola contiene a la otra,
-    eta = (eta_y + eta_x ∓ d)/2. En cada tramo la sección es un polinomio en
-    eta (grado <= 4), así que con a^4 polinómico de grado <= 2 nodes - 5 el
-    resultado es exacto."""
+    At fixed eta, the section of I(y, x) is the intersection of the balls of
+    radii r1 = eta - eta_y and r2 = eta_x - eta centred at x_y and x_x
+    (``_lens_volume``). It is integrated in eta with Gauss-Legendre over the
+    three segments separated by the points where one ball contains the other,
+    eta = (eta_y + eta_x ∓ d)/2. In each segment the section is a polynomial
+    in eta (degree <= 4), so with a^4 polynomial of degree <= 2 nodes - 5 the
+    result is exact."""
     y, x = np.atleast_2d(y), np.atleast_2d(x)
     ey, ex = y[:, 0], x[:, 0]
     d = np.linalg.norm(x[:, 1:] - y[:, 1:], axis=1)
@@ -286,25 +286,25 @@ def conformal_interval_volume_4d(y, x, a, nodes: int = 8) -> np.ndarray:
 
 
 class FLRWConeGeometry(_ConformallyFlatGeometry):
-    """Cono de luz pasado hasta el big bang en un FLRW plano con
-    a(eta) = eta^alpha (``ConformalPastCone``), d = 2 o 4.
+    """Past light cone down to the big bang in a flat FLRW with
+    a(eta) = eta^alpha (``ConformalPastCone``), d = 2 or 4.
 
-    2D (2 alpha entero): en coordenadas de cono de luz u = eta + x,
-    v = eta - x los intervalos y sus intersecciones son rectángulos y sus
-    volúmenes físicos tienen forma cerrada (``power_law_rectangle_volume``).
-    4D: volúmenes de intervalos por ``conformal_interval_volume_4d`` (exacto
-    para alpha entero <= 2); intersecciones sin forma cerrada (sólo se usan
-    las medias de abundancias). Con alpha = 0 se recupera Minkowski."""
+    2D (2 alpha integer): in light-cone coordinates u = eta + x,
+    v = eta - x the intervals and their intersections are rectangles and
+    their physical volumes have a closed form (``power_law_rectangle_volume``).
+    4D: interval volumes by ``conformal_interval_volume_4d`` (exact for
+    integer alpha <= 2); intersections without closed form (only the mean
+    abundances are used). With alpha = 0 Minkowski is recovered."""
 
-    local_proposal = True  # escala de la propuesta según a(eta)^d local (``fluctuations._local``)
+    local_proposal = True  # proposal scale by the local a(eta)^d (``fluctuations._local``)
 
     def __init__(self, alpha: float, height: float = 1.0, dim: int = 2):
         if dim == 2 and (abs(2 * alpha - round(2 * alpha)) > 1e-12 or alpha < 0):
-            raise ValueError("en 2D se requiere 2 alpha entero >= 0")
+            raise ValueError("in 2D, 2 alpha must be an integer >= 0")
         if dim == 4 and (alpha not in (0, 1, 2)):
-            raise ValueError("en 4D se requiere alpha = 0, 1 o 2 (volúmenes exactos)")
+            raise ValueError("in 4D, alpha must be 0, 1 or 2 (exact volumes)")
         if dim not in (2, 4):
-            raise ValueError("dim debe ser 2 o 4")
+            raise ValueError("dim must be 2 or 4")
         self.dim, self.alpha, self._p = dim, alpha, int(round(2 * alpha))
         self.a = power_law_scale_factor(alpha)
         self.region = ConformalPastCone(dim, height, self.a)
@@ -314,13 +314,13 @@ class FLRWConeGeometry(_ConformallyFlatGeometry):
         return TruncatedPastCone(self.dim, self.region.height).volume
 
     def sample_M(self, n: int, rng) -> np.ndarray:
-        """n puntos según dV físico, sin rechazo: la densidad marginal de eta es
-        ∝ eta^(d alpha) (h - eta)^(d-1), es decir eta = h · Beta(d alpha + 1, d),
-        y a eta fijo el punto es uniforme en la bola de radio h - eta. (El
-        rechazo genérico de ``sample_uniform`` acepta ~V/(caja·a_max^d), del
-        orden de 1e-4 con alpha = 2 en 4D: inviable para millones de puntos.)
-        En 2D se mantiene el rechazo genérico, con el que se calcularon los
-        resultados del punto 1b (reproducibilidad bit a bit)."""
+        """n points by physical dV, without rejection: the marginal density of
+        eta is ∝ eta^(d alpha) (h - eta)^(d-1), that is, eta = h · Beta(d alpha + 1, d),
+        and at fixed eta the point is uniform in the ball of radius h - eta. (The
+        generic rejection of ``sample_uniform`` accepts ~V/(box·a_max^d), of
+        order 1e-4 with alpha = 2 in 4D: unfeasible for millions of points.)
+        In 2D the generic rejection is kept, with which the results of item 1b
+        were computed (bit-by-bit reproducibility)."""
         if self.dim == 2:
             return super().sample_M(n, rng)
         h, d = self.region.height, self.dim

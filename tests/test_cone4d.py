@@ -1,10 +1,10 @@
-"""Punto 1c: escalado de (Delta S)^2 en el cono pasado truncado de Minkowski 4D
+"""Item 1c: scaling of (Delta S)^2 in the truncated past cone of 4D Minkowski
 (``scripts/cone4d_scaling.py``).
 
-Márgenes fijados ANTES de ver los resultados del cono:
-  integral del cono en 2D frente a la fórmula exacta del punto 1a: relativo 1e-9;
-  G del cono (forma cerrada) frente a Monte Carlo: 4σ;
-  H1, H3: 4σ; H2: convergencia monótona y < 3 % a rho V = 1e8.
+Tolerances fixed BEFORE seeing the cone results:
+  2D cone integral vs. the exact formula of item 1a: relative 1e-9;
+  G of the cone (closed form) vs. Monte Carlo: 4σ;
+  H1, H3: 4σ; H2: monotonic convergence and < 3 % at rho V = 1e8.
 """
 
 import json
@@ -27,7 +27,7 @@ def test_cone_integral_reduces_to_2d_formula(lam, k):
 
 
 def test_cone_G_closed_form():
-    """G/V^1.5 = 4π ∫ t² dV / V^1.5 (l = t en el cono) frente a Monte Carlo."""
+    """G/V^1.5 = 4π ∫ t² dV / V^1.5 (l = t in the cone) vs. Monte Carlo."""
     import sys
 
     sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
@@ -40,13 +40,13 @@ def test_cone_G_closed_form():
     assert abs(g_cone() - mc) < K_SIGMA * se
 
 
-# --- resultados guardados por scripts/cone4d_scaling.py (fallan si faltan) ---
+# --- results saved by scripts/cone4d_scaling.py (fail if missing) ---
 
 
 @pytest.fixture(scope="module")
 def results():
     path = FIG / "cone4d_results.json"
-    assert path.exists(), "ejecuta scripts/cone4d_scaling.py sim y fit"
+    assert path.exists(), "run scripts/cone4d_scaling.py sim and fit"
     return json.loads(path.read_text())
 
 

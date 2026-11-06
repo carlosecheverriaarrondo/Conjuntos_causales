@@ -1,31 +1,31 @@
-"""Goal 5b: ¿qué término de MYZ hace crecer resto/J¹ con suavizado fuerte?
+"""Goal 5b: which MYZ term makes rest/J¹ grow with strong smearing?
 
-El Goal 5 encontró que, con eps ≤ 0.2, resto⊥/J¹ crece con ρV (≈ ln ρV)
-en Minkowski 4D. Aquí se descompone Var(F), F = sum_pares f_eps(n), en los
-términos de Moradi, Yazdi & Zilhão (arXiv:2407.03395, ecs. 5.47-5.60),
-estimados directamente sobre cada sprinkling con la matriz f(y, x) (0 si y ⊀ x),
-sus sumas por filas R_y = sum_x f(y, x) y por columnas C_x = sum_y f(y, x):
-  sum f²                      -> J¹  (mismo par)
-  sum_y R_y² − sum f²          -> J²  (vértice inferior común)
-  sum_x C_x² − sum f²          -> J³  (vértice superior común)
-  sum_z C_z R_z                -> J⁴  (cadena y1 ≺ x1 = y2 ≺ x2; entra 2 veces)
-  (F − <F>)² − (J¹+J²+J³+2J⁴)  -> J⁶ conexo (4 puntos distintos)
-Son estimadores insesgados de cada término (salvo O(1/M) por la media de F).
-También resto⊥ = Var(F − gN) − J¹ con g exacto (Goal 5, ``goal5_pred.json``).
-Semillas nuevas, independientes de las del Goal 5. ρV = 400 … 6400 (2000,
+Goal 5 found that, with eps ≤ 0.2, rest⊥/J¹ grows with ρV (≈ ln ρV)
+in 4D Minkowski. Here Var(F), F = sum_pairs f_eps(n), is decomposed into the
+terms of Moradi, Yazdi & Zilhão (arXiv:2407.03395, eqs. 5.47-5.60),
+estimated directly on each sprinkling with the matrix f(y, x) (0 if y ⊀ x),
+its row sums R_y = sum_x f(y, x) and column sums C_x = sum_y f(y, x):
+  sum f²                      -> J¹  (same pair)
+  sum_y R_y² − sum f²          -> J²  (common lower vertex)
+  sum_x C_x² − sum f²          -> J³  (common upper vertex)
+  sum_z C_z R_z                -> J⁴  (chain y1 ≺ x1 = y2 ≺ x2; enters twice)
+  (F − <F>)² − (J¹+J²+J³+2J⁴)  -> connected J⁶ (4 distinct points)
+These are unbiased estimators of each term (up to O(1/M) from the mean of F).
+Also rest⊥ = Var(F − gN) − J¹ with exact g (Goal 5, ``goal5_pred.json``).
+New seeds, independent of those of Goal 5. ρV = 400 … 6400 (2000,
 2000, 1000, 1000, 500 sprinklings), eps = 0.5, 0.2, 0.1.
 
-CRITERIOS PRERREGISTRADOS (2026-10-12, antes de simular; 4σ):
-  G0 (exactitud): (a) J¹ estimado = J¹ exacto con |z| < 4 en las 15
-     combinaciones (eps, ρV); (b) J⁴ con eps = 0.1, ρV = 400 compatible con la
-     estimación independiente del integrador MYZ (``FluctuationKernel``,
-     4·10⁵ muestras, semilla 1): 19.38 ± 2.1.
-  G1 (reproducción): la pendiente de resto⊥/J¹ frente a ln ρV con eps = 0.1
-     es compatible con la del Goal 5 (0.548 ± 0.082) a 4σ combinada.
-  G2 (descriptivo, sin criterio): pendiente de cada término / J¹ frente a
-     ln ρV para cada eps; dice qué término produce el crecimiento.
+PREREGISTERED CRITERIA (2026-10-12, before simulating; 4σ):
+  G0 (exactness): (a) estimated J¹ = exact J¹ with |z| < 4 in the 15
+     (eps, ρV) combinations; (b) J⁴ with eps = 0.1, ρV = 400 compatible with
+     the independent estimate of the MYZ integrator (``FluctuationKernel``,
+     4·10⁵ samples, seed 1): 19.38 ± 2.1.
+  G1 (reproduction): the slope of rest⊥/J¹ versus ln ρV with eps = 0.1
+     is compatible with that of Goal 5 (0.548 ± 0.082) at 4σ combined.
+  G2 (descriptive, no criterion): slope of each term / J¹ versus
+     ln ρV for each eps; it says which term produces the growth.
 
-Uso:  python scripts/goal5b_decomposition.py sim LAM [LAM...] | fit | plot
+Usage:  python scripts/goal5b_decomposition.py sim LAM [LAM...] | fit | plot
 """
 
 from __future__ import annotations
@@ -59,15 +59,15 @@ PLAN = {400: 2000, 800: 2000, 1600: 1000, 3200: 1000, 6400: 500}
 EPS = (0.5, 0.2, 0.1)
 CHUNK = 50
 STATS = ("N", "F", "S2", "R2", "C2", "CR")
-J4_MYZ = (19.38, 2.1)  # FluctuationKernel, eps = 0.1, ρV = 400 (ver docstring)
-G5_SLOPE = (0.548, 0.082)  # Goal 5, F2 con eps = 0.1
+J4_MYZ = (19.38, 2.1)  # FluctuationKernel, eps = 0.1, ρV = 400 (see docstring)
+G5_SLOPE = (0.548, 0.082)  # Goal 5, F2 with eps = 0.1
 TERMS = ("J2", "J3", "2J4", "J6c")
 INK, INK_MUTED, GRID = "#0b0b0b", "#52514e", "#e4e3df"
 COLORS = {"J2": "#2a78d6", "J3": "#1baf7a", "2J4": "#9b59b6", "J6c": "#eb6834", "rest": "#0b0b0b"}
 
 
 def pair_statistics(C: np.ndarray, eps: float) -> dict:
-    """N, F, sum f², sum R², sum C², sum C·R de un conjunto causal."""
+    """N, F, sum f², sum R², sum C², sum C·R of a causal set."""
     n = interval_cardinalities(C)
     table = pair_weight(4, np.arange(n.max() + 1), eps)
     f = np.where(C, table[n], 0.0)
@@ -113,10 +113,10 @@ def _slope(x, y, se):
 
 
 def decompose(st: np.ndarray, J1: float, g: float) -> dict:
-    """Términos por sprinkling (columnas de ``STATS``) -> medias y errores."""
+    """Terms per sprinkling (columns of ``STATS``) -> means and errors."""
     N, F, S2, R2, C2, CR = st.T
     M = len(F)
-    dF = (F - F.mean()) * np.sqrt(M / (M - 1))  # varianza insesgada
+    dF = (F - F.mean()) * np.sqrt(M / (M - 1))  # unbiased variance
     P = F - g * N
     dP = (P - P.mean()) * np.sqrt(M / (M - 1))
     per = dict(J1=S2, J2=R2 - S2, J3=C2 - S2, **{"2J4": 2 * CR})
@@ -180,7 +180,7 @@ def plot(rows):
         for i, k in enumerate((*TERMS, "rest")):
             ax.errorbar(lam * (1 + 0.025 * i), [r[k + "_over_J1"] for r in sel], yerr=[r[k + "_over_J1_se"] for r in sel],
                         fmt="o-", color=COLORS[k], markerfacecolor="white", capsize=3,
-                        label={"rest": "resto (suma)", "J6c": "J⁶ conexo", "2J4": "2 J⁴", "J2": "J²", "J3": "J³"}[k])
+                        label={"rest": "rest (sum)", "J6c": "connected J⁶", "2J4": "2 J⁴", "J2": "J²", "J3": "J³"}[k])
         ax.axhline(0, color=INK_MUTED, linewidth=0.8)
         ax.set_xscale("log")
         ax.set_xlabel("ρV", color=INK)
@@ -188,11 +188,11 @@ def plot(rows):
         ax.grid(True, color=GRID, linewidth=0.8)
         for side in ("top", "right"):
             ax.spines[side].set_visible(False)
-    axes[0].set_ylabel("término / J¹", color=INK)
+    axes[0].set_ylabel("term / J¹", color=INK)
     axes[0].legend(frameon=False, fontsize=8)
     path = ROOT / "figures" / "goal5b_decomposition.png"
     fig.savefig(path, dpi=150, facecolor="#fcfcfb")
-    print("figura", path)
+    print("figure", path)
 
 
 if __name__ == "__main__":

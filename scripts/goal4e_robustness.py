@@ -1,38 +1,38 @@
-"""Goal 4e: ¿es robusta la exclusión de la acción BD del Goal 4d?
+"""Goal 4e: is the exclusion of the BD action of Goal 4d robust?
 
-El Goal 4d excluye la acción BD (0 de 10 000 semillas buenas con SN + BAO +
-CMB, Δχ² mínimo +124) para UNA dinámica: Λ = lam V^(-q) s, con s un proceso
-de Ornstein-Uhlenbeck en ln V de tasa c (``causets/stochastic_lambda.py``),
-q = 1/4 (ΔS ∝ V^(3/4), Puntos 1c-1d, y δΛ ∝ ΔS/V, Goal 4a) y c = 3β/4 con
-β = 0.9 (memoria medida con la acción local, Goal 4b-1: β = 0.88-0.97).
-Aquí se varían esas elecciones con el mismo ajuste por semilla y el mismo χ²
-(SN + BAO + CMB, análisis principal sin calibrar del Goal 4d).
+Goal 4d excludes the BD action (0 of 10 000 good seeds with SN + BAO +
+CMB, minimum Δχ² +124) for ONE dynamics: Λ = lam V^(-q) s, with s an
+Ornstein-Uhlenbeck process in ln V with rate c (``causets/stochastic_lambda.py``),
+q = 1/4 (ΔS ∝ V^(3/4), Points 1c-1d, and δΛ ∝ ΔS/V, Goal 4a) and c = 3β/4 with
+β = 0.9 (memory measured with the local action, Goal 4b-1: β = 0.88-0.97).
+Here those choices are varied with the same fit per seed and the same χ²
+(SN + BAO + CMB, uncalibrated main analysis of Goal 4d).
 
-Amplitud: lam = λ V_ref^(q - 1/4), λ en la rejilla del Goal 4d [0.1, 10] y
-V_ref = 0.5976 (volumen del pasado causal hoy en el mejor ajuste ΛCDM de
-Planck, unidades H_100). Así Λ hoy cubre el mismo rango para todo q, y con
-q = 1/4 la rejilla es idéntica a la del Goal 4d.
+Amplitude: lam = λ V_ref^(q - 1/4), λ on the grid of Goal 4d [0.1, 10] and
+V_ref = 0.5976 (volume of the causal past today at the Planck ΛCDM best fit,
+H_100 units). Thus Λ today covers the same range for every q, and with
+q = 1/4 the grid is identical to that of Goal 4d.
 
-CRITERIOS (fijados el 2026-10-10, ANTES de calcular ninguna variante):
-  E0  Reproducción: la variante (q = 1/4, c = 0.675) da, semilla a semilla,
-      el mismo χ² que el Goal 4d (|Δ| < 1e-6; test).
-  E1  Principal. Familia BD (q = 1/4) con β ∈ {0.5, 0.88, 0.97, 1.0}
-      (c = 3β/4), 10 000 semillas cada una (las mismas del Goal 4c/4d).
-      0.88-0.97 es el rango medido; 1.0, paseo aleatorio; 0.5, prueba de
-      estrés sin respaldo en las medidas.
-      La exclusión es ROBUSTA en β si ninguna de las cuatro tiene semillas
-      buenas (χ² < χ²_ΛCDM + 14.7). Si alguna tiene, NO es robusta y se da su
-      fracción.
-  E2  Mapa de la clase (q, c): q ∈ {0, 1/8, 1/4, 3/8, 1/2},
-      c ∈ {0.25, 0.5, 0.75, 1.0}, 1000 semillas por celda (semillas 0-999).
-      Descriptivo: Δχ² mínimo por celda. Si alguna celda tiene una semilla
-      buena, se repite con 10 000 semillas. (Model 1 es q = c = 1/2 con otra
-      amplitud; la acción BD, q = 1/4, c ≈ 0.66-0.73.)
-  Bordes: si la mejor semilla de una variante cae en un borde de la rejilla
-  (ω_m o amplitud), esa variante se repite con el rango ampliado ×10 por ese
-  lado.
+CRITERIA (fixed on 2026-10-10, BEFORE computing any variant):
+  E0  Reproduction: the variant (q = 1/4, c = 0.675) gives, seed by seed,
+      the same χ² as Goal 4d (|Δ| < 1e-6; test).
+  E1  Main. BD family (q = 1/4) with β ∈ {0.5, 0.88, 0.97, 1.0}
+      (c = 3β/4), 10 000 seeds each (the same as in Goal 4c/4d).
+      0.88-0.97 is the measured range; 1.0, random walk; 0.5, stress test
+      without support from the measurements.
+      The exclusion is ROBUST in β if none of the four has good seeds
+      (χ² < χ²_ΛCDM + 14.7). If any has, it is NOT robust and its fraction
+      is given.
+  E2  Map of the class (q, c): q ∈ {0, 1/8, 1/4, 3/8, 1/2},
+      c ∈ {0.25, 0.5, 0.75, 1.0}, 1000 seeds per cell (seeds 0-999).
+      Descriptive: minimum Δχ² per cell. If any cell has a good seed, it is
+      repeated with 10 000 seeds. (Model 1 is q = c = 1/2 with another
+      amplitude; the BD action, q = 1/4, c ≈ 0.66-0.73.)
+  Edges: if the best seed of a variant falls on an edge of the grid
+  (ω_m or amplitude), that variant is repeated with the range extended ×10 on
+  that side.
 
-Uso:  python scripts/goal4e_robustness.py beta B | map WORKER NWORKERS | fit
+Usage:  python scripts/goal4e_robustness.py beta B | map WORKER NWORKERS | fit
 """
 
 from __future__ import annotations
@@ -73,7 +73,7 @@ def key(q, c):
 
 
 def register(q, c):
-    """Da de alta la variante en la rejilla de amplitudes del Goal 4c y devuelve su clave."""
+    """Registers the variant in the amplitude grid of Goal 4c and returns its key."""
     k = key(q, c)
     g4c.AMP_GRID[k] = g4c.AMP_GRID["bd"] * V_REF ** (q - 0.25)
     return k
@@ -118,7 +118,7 @@ def run_variant(v, k, n):
         rows += fit_seeds(v, k, list(range(start, min(start + g4c.BATCH, n))))
         q, c = parse(k)
         path.write_text(json.dumps(dict(q=q, c=c, v_ref=V_REF, rows=rows)))
-        print(f"{k}: {len(rows)}/{n} semillas, {time.time() - t0:.0f} s", flush=True)
+        print(f"{k}: {len(rows)}/{n} seeds, {time.time() - t0:.0f} s", flush=True)
 
 
 def beta(b):
@@ -170,9 +170,9 @@ def fit():
         chi2 = s.pop("chi2")
         out["E1"][f"beta={b:g}"] = s
         any_good |= s["n_good"] > 0
-        print(f"β = {b:g} (c = {0.75 * b:g}){' [' + tag + ']' if tag else ''}: {s['n']} semillas, buenas {s['n_good']}, "
-              f"Δχ² min = {s['dchi2_min']:+.1f}; mejor: ΔSN {s['best']['sn']:+.1f}, ΔBAO {s['best']['bao']:+.1f}, "
-              f"ΔCMB {s['best']['cmb']:+.1f}; borde: {s['best_at_edge'] or 'no'}")
+        print(f"β = {b:g} (c = {0.75 * b:g}){' [' + tag + ']' if tag else ''}: {s['n']} seeds, good {s['n_good']}, "
+              f"Δχ² min = {s['dchi2_min']:+.1f}; best: ΔSN {s['best']['sn']:+.1f}, ΔBAO {s['best']['bao']:+.1f}, "
+              f"ΔCMB {s['best']['cmb']:+.1f}; edge: {s['best_at_edge'] or 'none'}")
         xs = np.sort(chi2 - ref["chi2"])
         xs = xs[np.isfinite(xs)]
         ax1.step(xs, np.arange(1, len(xs) + 1) / len(rows), where="post", color=col,
@@ -180,7 +180,7 @@ def fit():
     n_e1 = sum(1 for b in BETAS if f"beta={b:g}" in out["E1"])
     out["E1_verdict"] = ("incompleto" if n_e1 < len(BETAS) else
                          "NO robusta: hay semillas buenas" if any_good else "robusta en β")
-    print(f"E1 ({n_e1}/{len(BETAS)} variantes): {out['E1_verdict']}")
+    print(f"E1 ({n_e1}/{len(BETAS)} variants): {out['E1_verdict']}")
     grid = np.full((len(MAP_C), len(MAP_Q)), np.nan)
     for i, c in enumerate(MAP_C):
         for j, q in enumerate(MAP_Q):
@@ -196,12 +196,12 @@ def fit():
             out["E2"][k] = s
             grid[i, j] = s["dchi2_min"]
     if out["E2"]:
-        print("E2: Δχ² mínimo por celda (filas c, columnas q =", MAP_Q, ")")
+        print("E2: minimum Δχ² per cell (rows c, columns q =", MAP_Q, ")")
         for i, c in enumerate(MAP_C):
             print(f"   c = {c:<5g}" + "".join(f"{x:9.1f}" for x in grid[i]))
         edges = {k: s["best_at_edge"] for k, s in out["E2"].items() if s["best_at_edge"]}
         goods = [k for k, s in out["E2"].items() if s["n_good"] > 0]
-        print(f"   celdas con semillas buenas: {goods or 'ninguna'}; mejor semilla en un borde: {edges or 'ninguna'}")
+        print(f"   cells with good seeds: {goods or 'none'}; best seed on an edge: {edges or 'none'}")
         out["E2_cells_with_good"] = goods
         im = ax2.imshow(np.log10(np.clip(grid, 1, None)), origin="lower", cmap="viridis_r", aspect="auto",
                         extent=(-0.0625, 0.5625, -0.5, len(MAP_C) - 0.5))
@@ -213,16 +213,16 @@ def fit():
         ax2.set_xticks(MAP_Q)
         ax2.set_yticks(range(len(MAP_C)), [f"{c:g}" for c in MAP_C])
         ax2.set_xlabel("q  (Λ ∝ V^(−q))", color=INK)
-        ax2.set_ylabel("c  (memoria: corr = (V1/V2)^c)", color=INK)
-        ax2.set_title(f"Δχ² mínimo frente a ΛCDM ({MAP_SEEDS} semillas por celda)", color=INK, fontsize=10)
+        ax2.set_ylabel("c  (memory: corr = (V1/V2)^c)", color=INK)
+        ax2.set_title(f"Minimum Δχ² relative to ΛCDM ({MAP_SEEDS} seeds per cell)", color=INK, fontsize=10)
         fig.colorbar(im, ax=ax2, label="log10 Δχ²_min")
     ax1.axvline(0, color=INK_MUTED, linestyle="--", linewidth=1)
     ax1.axvline(GOOD_MARGIN, color=INK_MUTED, linestyle=":", linewidth=1)
     ax1.set_xlim(-30, 500)
     ax1.set_yscale("log")
-    ax1.set_xlabel("χ²_min(semilla) − χ²_ΛCDM  (SN + BAO + CMB)", color=INK)
-    ax1.set_ylabel("fracción de semillas por debajo", color=INK)
-    ax1.set_title("Acción BD (q = 1/4): memoria β", color=INK, fontsize=10)
+    ax1.set_xlabel("χ²_min(seed) − χ²_ΛCDM  (SN + BAO + CMB)", color=INK)
+    ax1.set_ylabel("fraction of seeds below", color=INK)
+    ax1.set_title("BD action (q = 1/4): memory β", color=INK, fontsize=10)
     ax1.grid(True, color=GRID, linewidth=0.8)
     for side in ("top", "right"):
         ax1.spines[side].set_visible(False)
@@ -230,7 +230,7 @@ def fit():
     (ROOT / "figures" / "goal4e_results.json").write_text(json.dumps(out, indent=1, ensure_ascii=False))
     path = ROOT / "figures" / "goal4e_robustness.png"
     fig.savefig(path, dpi=150)
-    print(f"figura {path}")
+    print(f"figure {path}")
 
 
 if __name__ == "__main__":

@@ -1,11 +1,11 @@
-"""Goal 6: cálculos pedidos por la revisión externa (``scripts/goal6_referee.py``).
+"""Goal 6: computations requested by the external review (``scripts/goal6_referee.py``).
 
-Tolerancia: 4σ combinada, la del proyecto. Los criterios R1-R5 se fijaron antes
-de calcular (docstring del script); estos tests recalculan de forma
-independiente (np.polyfit) lo que afirma ``figures/goal6_results.json`` y
-comprueban el ajuste SN + BAO. Los valores de los logs se vieron antes de
-escribir los tests (la tolerancia es la estándar, no ajustada a ellos).
-Si faltan resultados o datos, se saltan.
+Tolerance: 4σ combined, the project standard. Criteria R1-R5 were fixed before
+computing (script docstring); these tests independently recompute
+(np.polyfit) what ``figures/goal6_results.json`` claims and check the
+SN + BAO fit. The values in the logs were seen before writing the tests (the
+tolerance is the standard one, not tuned to them).
+Skipped if results or data are missing.
 """
 
 import importlib.util
@@ -33,12 +33,12 @@ def _load_script():
 
 
 def _slope(x, y, se):
-    """Pendiente y su error con np.polyfit (independiente de goal5_smeared4d._slope)."""
+    """Slope and its error with np.polyfit (independent of goal5_smeared4d._slope)."""
     coef, cov = np.polyfit(np.asarray(x, float), np.asarray(y, float), 1, w=1 / np.asarray(se), cov="unscaled")
     return coef[0], np.sqrt(cov[0, 0])
 
 
-@pytest.mark.skipif(not HAVE_RES, reason="falta figures/goal6_results.json")
+@pytest.mark.skipif(not HAVE_RES, reason="figures/goal6_results.json missing")
 def test_R1_R2_slopes_recomputed():
     r = json.loads(RES.read_text())
     R1 = r["R1"]
@@ -59,7 +59,7 @@ def test_R1_R2_slopes_recomputed():
         assert abs(b / b_se) < K and v["passed"]
 
 
-@pytest.mark.skipif(not HAVE_RES, reason="falta figures/goal6_results.json")
+@pytest.mark.skipif(not HAVE_RES, reason="figures/goal6_results.json missing")
 def test_R3_flrw_6400():
     sys.path.insert(0, str(ROOT / "scripts"))
     import flrw4d_scaling as f4
@@ -68,19 +68,19 @@ def test_R3_flrw_6400():
     for alpha, ref in (("1.0", (0.348, 0.016)), ("2.0", (0.317, 0.016))):
         new = json.loads((FIG / f"goal6_flrw_a{float(alpha):g}.json").read_text())
         s, m = new["sim"], new["means"]
-        # Las abundancias simuladas <N_k> (k = 0..3) coinciden con las medias MC L_k.
+        # The simulated abundances <N_k> (k = 0..3) agree with the MC means L_k.
         z = (np.array(s["means"][1:]) - np.array(m["L"][:4])) / np.hypot(s["means_se"][1:], m["L_se"][:4])
         assert np.all(np.abs(z) < K), z
         assert abs(s["means"][0] / 6400 - 1) < K * np.sqrt(6400 / s["n_sprinklings"]) / 6400
         v = r[alpha]
-        # resto/J¹ recalculado: Var = NN + cruzado N-k + J¹ + resto (descomposición del punto 1d).
+        # rest/J¹ recomputed: Var = NN + N-k cross term + J¹ + rest (decomposition of item 1d).
         pa = f4.parts(m["L"], m["L_se"], 6400)
         assert v["r_6400"] == pytest.approx((s["sim"] - pa["NN"] - pa["Nk"] - pa["J1"]) / pa["J1"], rel=1e-10)
         assert abs((v["r_6400"] - ref[0]) / np.hypot(v["r_6400_se"], ref[1])) < K
         assert abs(v["slope"]["z"]) < K and v["passed"]
 
 
-@pytest.mark.skipif(not HAVE_RES, reason="falta figures/goal6_results.json")
+@pytest.mark.skipif(not HAVE_RES, reason="figures/goal6_results.json missing")
 def test_R4_R5_counts_from_rows():
     r = json.loads(RES.read_text())
     rows = json.loads((FIG / "goal4e_q0.125_c0.25_n10000.json").read_text())["rows"]
@@ -93,13 +93,13 @@ def test_R4_R5_counts_from_rows():
         rows = json.loads((FIG / f"goal6_snbao_{model}.json").read_text())["rows"]
         assert len(rows) == 10_000 and len({x["seed"] for x in rows}) == 10_000
         chi = np.array([x["chi2"] for x in rows])
-        # χ² sin CMB: es exactamente SN + BAO en cada semilla.
+        # χ² without CMB: it is exactly SN + BAO for each seed.
         np.testing.assert_allclose(chi, [x["sn"] + x["bao"] for x in rows], rtol=1e-9)
         assert r["R5"][model]["n_good"] == int(np.sum(chi < ref["chi2"] + 14.7))
         assert r["R5"][model]["dchi2_min"] == pytest.approx(chi.min() - ref["chi2"], rel=1e-12)
 
 
-@pytest.mark.skipif(not (HAVE_RES and HAVE_DATA), reason="faltan datos o resultados")
+@pytest.mark.skipif(not (HAVE_RES and HAVE_DATA), reason="data or results missing")
 def test_snbao_lcdm_is_a_minimum():
     g6 = _load_script()
     c, _, _ = g6._snbao()

@@ -1,26 +1,26 @@
-"""Paso 1 (Goal 3d): origen del término rho V ln(rho V) en (Delta S)^2,
-Minkowski 2D.
+"""Step 1 (Goal 3d): origin of the rho V ln(rho V) term in (Delta S)^2,
+2D Minkowski.
 
-Hipótesis (formulada antes del cálculo): el logaritmo viene del término
-"mismo par" (J¹ de MYZ, ruido de Poisson del número de intervalos), porque
-<N_k> = rho V ln(rho V) + O(rho V) en 2D: los intervalos casi nulos de
-volumen fijo aparecen con todas las rapideces hasta el corte del diamante.
-Predice (Delta S)² = b rho V ln(rho V) + O(rho V) con
+Hypothesis (formulated before the calculation): the logarithm comes from the
+"same pair" term (J¹ of MYZ, Poisson noise of the number of intervals), because
+<N_k> = rho V ln(rho V) + O(rho V) in 2D: the almost-null intervals of fixed
+volume appear with all rapidities up to the cut-off set by the diamond.
+It predicts (Delta S)² = b rho V ln(rho V) + O(rho V) with
     b(eps) = sum_n f_eps(n)^2,
-f_eps(n) = peso suavizado de un par con n elementos (``b_coefficient``), y
-que los términos de correlación (J², J³, J⁴, J⁶) y el cruzado con N son
-O(rho V) sin logaritmo.
+f_eps(n) = smeared weight of a pair with n elements (``b_coefficient``), and
+that the correlation terms (J², J³, J⁴, J⁶) and the cross term with N are
+O(rho V) without a logarithm.
 
-Fases:
-  terms     descomposición de la predicción MYZ por términos,
-            eps = 1, 0.5, 0.25 y rho V = 50 .. 12800 -> figures/goal3d_terms.json
-  rapidity  sobre sprinklings (rho V = 3200), contribución de los pares a
-            sum f(n)^2 por intervalo de rapidez eta = ½ ln(Δu/Δv)
+Phases:
+  terms     decomposition of the MYZ prediction by terms,
+            eps = 1, 0.5, 0.25 and rho V = 50 .. 12800 -> figures/goal3d_terms.json
+  rapidity  on sprinklings (rho V = 3200), contribution of the pairs to
+            sum f(n)^2 per rapidity bin eta = ½ ln(Δu/Δv)
             -> figures/goal3d_rapidity.json
-  fit       ajustes T/rho V = c + b ln(rho V) por término y figura
+  fit       fits T/rho V = c + b ln(rho V) per term and the figure
             figures/goal3d_log_origin.png
 
-Uso:  python scripts/goal3d_log_origin.py terms | rapidity | fit
+Usage:  python scripts/goal3d_log_origin.py terms | rapidity | fit
 """
 
 from __future__ import annotations
@@ -60,20 +60,20 @@ INK, INK_MUTED, GRID = "#0b0b0b", "#52514e", "#e4e3df"
 
 
 def pair_weight(eps: float, n: np.ndarray) -> np.ndarray:
-    """f_eps(n) = sum_k a_k B_k(n, eps): contribución de un par con n elementos
-    a la acción (sin el término a_N N)."""
+    """f_eps(n) = sum_k a_k B_k(n, eps): contribution of a pair with n elements
+    to the action (without the a_N N term)."""
     a = action_coefficients(2, eps)[1:]
     return sum(a[k] * binom.pmf(k, n, eps) for k in range(len(a)))
 
 
 def b_coefficient(eps: float, n_max: int = 20_000) -> float:
-    """Coeficiente de rho V ln(rho V) predicho: sum_n f_eps(n)^2 (usa
-    ∫_0^∞ P_n(mu) dmu = 1 en la asintótica de <sum_pares f(n)^2>)."""
+    """Predicted coefficient of rho V ln(rho V): sum_n f_eps(n)^2 (uses
+    ∫_0^∞ P_n(mu) dmu = 1 in the asymptotics of <sum_pairs f(n)^2>)."""
     return float(np.sum(pair_weight(eps, np.arange(n_max)) ** 2))
 
 
 def decompose(P, eps: float) -> dict:
-    """Contribuciones a a^T M a por término (sumadas dan P.variance)."""
+    """Contributions to a^T M a by term (they add up to P.variance)."""
     a = P.coefficients
     aN, ak = a[0], a[1:]
     n = len(ak)
@@ -110,7 +110,7 @@ def terms():
 
 
 def rapidity(lam: float = 3200, n_sprinklings: int = 20, n_bins: int = 40):
-    """Histograma de sum f(n)^2 en eta = ½ ln(Δu/Δv) sobre sprinklings."""
+    """Histogram of sum f(n)^2 in eta = ½ ln(Δu/Δv) over sprinklings."""
     g = MinkowskiDiamondGeometry(2)
     rng = np.random.default_rng(61_000)
     edges = np.linspace(-6, 6, n_bins + 1)
@@ -129,11 +129,11 @@ def rapidity(lam: float = 3200, n_sprinklings: int = 20, n_bins: int = 40):
     res = dict(rhoV=lam, n_sprinklings=n_sprinklings, edges=edges.tolist(),
                per_unit_eta={k: (v / n_sprinklings / np.diff(edges) / lam).tolist() for k, v in out.items()})
     RAPIDITY.write_text(json.dumps(res, indent=1))
-    print("guardado", RAPIDITY)
+    print("saved", RAPIDITY)
 
 
 def fit_log(lam, y, se):
-    """y = T/rho V = c + b ln(rho V), mínimos cuadrados ponderados. Devuelve
+    """y = T/rho V = c + b ln(rho V), weighted least squares. Returns
     (b, se_b, c, chi2/dof)."""
     X = np.column_stack([np.ones_like(lam), np.log(lam)])
     w = 1 / np.maximum(se, 1e-12 * np.abs(y).max())
@@ -153,7 +153,7 @@ def fit():
             continue
         lam = np.array([r["rhoV"] for r in sel], float)
         res = dict(b_pred=b_coefficient(eps))
-        # total: el error de la predicción completa
+        # total: the error of the full prediction
         tot = np.array([r["variance"] for r in sel]) / lam
         tot_se = np.array([r["variance_se"] for r in sel]) / lam
         res["total"] = dict(zip(("b", "se", "c", "chi2dof"), fit_log(lam, tot, tot_se)))
@@ -166,7 +166,7 @@ def fit():
                 corr_v += y
                 corr_se2 += s**2
             if name in ("NN", "Nk") or (name == "J1" and eps == 1):
-                s = np.full_like(y, 1e-9)  # exactos
+                s = np.full_like(y, 1e-9)  # exact
             res[name] = dict(zip(("b", "se", "c", "chi2dof"), fit_log(lam, y, s)))
             ax.plot(lam, y, "o-", color=COLORS[name], label=name, markersize=4, linewidth=1.4)
         res["no_J1"] = dict(zip(("b", "se", "c", "chi2dof"), fit_log(lam, corr_v, np.sqrt(corr_se2) + 1e-9)))
@@ -177,19 +177,19 @@ def fit():
         for side in ("top", "right"):
             ax.spines[side].set_visible(False)
         ax.set_xlabel("ρV", color=INK)
-        ax.set_ylabel("contribución / ρV", color=INK)
-        ax.set_title(f"ε = {eps:g}:  b(J¹) = {res['J1']['b']:.3g},  predicho Σf² = {res['b_pred']:.3g}", color=INK, fontsize=10)
+        ax.set_ylabel("contribution / ρV", color=INK)
+        ax.set_title(f"ε = {eps:g}:  b(J¹) = {res['J1']['b']:.3g},  predicted Σf² = {res['b_pred']:.3g}", color=INK, fontsize=10)
         ax.legend(frameon=False, fontsize=8, ncol=2)
         summary[str(eps)] = res
     FIT.write_text(json.dumps(summary, indent=1))
     path = ROOT / "figures" / "goal3d_log_origin.png"
     fig.savefig(path, dpi=150, facecolor="#fcfcfb")
     for eps, res in summary.items():
-        print(f"--- eps={eps}  b predicho = {res['b_pred']:.4f}")
+        print(f"--- eps={eps}  predicted b = {res['b_pred']:.4f}")
         for k, v in res.items():
             if isinstance(v, dict):
                 print(f"  {k:6s} b={v['b']:+.4g} ± {v['se']:.2g}   c={v['c']:+.4g}   chi2/dof={v['chi2dof']:.2f}")
-    print("figura", path)
+    print("figure", path)
 
 
 if __name__ == "__main__":

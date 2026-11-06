@@ -1,4 +1,4 @@
-"""Tests de la relación causal y de la validez del orden parcial."""
+"""Tests of the causal relation and of the validity of the partial order."""
 
 import numpy as np
 import pytest
@@ -16,9 +16,9 @@ def test_small_hand_examples_2d():
     pts = np.array(
         [
             [0.0, 0.0],  # a
-            [1.0, 0.5],  # b: temporal respecto a a
-            [1.0, 2.0],  # c: espacial respecto a a y b
-            [3.0, 1.0],  # d: futuro de a, b y c
+            [1.0, 0.5],  # b: timelike to a
+            [1.0, 2.0],  # c: spacelike to a and b
+            [3.0, 1.0],  # d: in the future of a, b and c
         ]
     )
     C = minkowski_causal_matrix(pts)
@@ -41,7 +41,7 @@ def test_null_separation_is_related():
 
 @pytest.mark.parametrize("dim", [2, 3, 4])
 def test_matches_pointwise_definition(dim):
-    """La versión vectorizada por bloques coincide con la definición par a par."""
+    """The block-vectorised version agrees with the pairwise definition."""
     pts = sample_uniform(CausalDiamond(dim), 150, np.random.default_rng(10))
     C = minkowski_causal_matrix(pts)
     for i in range(len(pts)):
@@ -52,7 +52,7 @@ def test_matches_pointwise_definition(dim):
 
 
 def test_chunking_consistent(monkeypatch):
-    """El resultado no depende del tamaño de bloque."""
+    """The result does not depend on the block size."""
     import causets.causal as causal
 
     pts = sample_uniform(CausalDiamond(4), 700, np.random.default_rng(11))
@@ -63,7 +63,7 @@ def test_chunking_consistent(monkeypatch):
 
 @pytest.mark.parametrize("dim", [2, 4])
 def test_lorentz_invariance(dim):
-    """Un boost en la dirección x_1 no cambia la relación causal."""
+    """A boost along x_1 does not change the causal relation."""
     pts = sample_uniform(CausalDiamond(dim), 500, np.random.default_rng(12))
     v = 0.8
     g = 1 / np.sqrt(1 - v**2)
@@ -84,19 +84,19 @@ def test_sprinkled_causet_is_partial_order(dim, n):
         "antisymmetric": 0,
         "transitive": 0,
     }
-    # Con los puntos ordenados por t, C es estrictamente triangular superior.
+    # With the points sorted by t, C is strictly upper triangular.
     assert not np.tril(C).any()
 
 
 def test_violations_are_detected():
-    """El verificador no es trivial: detecta cada tipo de violación."""
+    """The checker is not trivial: it detects each kind of violation."""
     refl = np.eye(3, dtype=bool)
     assert partial_order_violations(refl)["reflexive"] == 3
 
     anti = np.array([[0, 1], [1, 0]], dtype=bool)
     assert partial_order_violations(anti)["antisymmetric"] == 1
 
-    # 0 ≺ 1 ≺ 2 pero falta 0 ≺ 2
+    # 0 ≺ 1 ≺ 2 but 0 ≺ 2 is missing
     intrans = np.array([[0, 1, 0], [0, 0, 1], [0, 0, 0]], dtype=bool)
     assert partial_order_violations(intrans)["transitive"] == 1
     assert not is_partial_order(intrans)

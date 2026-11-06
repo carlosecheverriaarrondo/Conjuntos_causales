@@ -1,7 +1,7 @@
-"""Goal 5: momentos exactos de la acción suavizada en 4D (``smeared_pair_moment``,
-``smeared_pair_mecke_slope``) y el histograma de ``scripts/goal5_smeared4d.py``.
+"""Goal 5: exact moments of the smeared action in 4D (``smeared_pair_moment``,
+``smeared_pair_mecke_slope``) and the histogram of ``scripts/goal5_smeared4d.py``.
 
-Tolerancias fijadas antes de ejecutar estos tests (4σ en los de Monte Carlo).
+Tolerances fixed before running these tests (4σ in the Monte Carlo ones).
 """
 
 import importlib.util
@@ -34,7 +34,7 @@ LAM = 50.0
 
 
 def test_local_limit_reproduces_step2():
-    """Con eps = 1, J¹ y el cruzado N-k coinciden con las fórmulas del Paso 2."""
+    """With eps = 1, J¹ and the N-k cross term agree with the Step 2 formulae."""
     ref = exact_parts(LAM)
     a_N = action_coefficients(4, 1.0)[0]
     assert smeared_pair_moment(4, LAM, 1.0, 2) == pytest.approx(ref["J1"], rel=1e-6)
@@ -42,7 +42,7 @@ def test_local_limit_reproduces_step2():
 
 
 def test_histogram_gives_thinned_action():
-    """a_N N + hist · f_eps reproduce a · Ñ (abundancias adelgazadas, Goal 3)."""
+    """a_N N + hist · f_eps reproduces a · Ñ (thinned abundances, Goal 3)."""
     g = MinkowskiDiamondGeometry(4)
     C = minkowski_causal_matrix(sprinkle(g.region, 200 / g.volume, np.random.default_rng(5)))
     eps = 0.3
@@ -54,7 +54,7 @@ def test_histogram_gives_thinned_action():
 
 
 def test_mecke_covariance_monte_carlo():
-    """Cov(N, F) simulada = rho V g y <F> = E[F] exactos (eps = 0.5), |z| < 4."""
+    """Simulated Cov(N, F) = rho V g and <F> = E[F] exact (eps = 0.5), |z| < 4."""
     eps, M = 0.5, 3000
     g = MinkowskiDiamondGeometry(4)
     rng = np.random.default_rng(2026)

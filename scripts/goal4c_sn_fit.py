@@ -1,37 +1,37 @@
-"""Goal 4c: Everpresent Λ (Model 1) frente a las fluctuaciones de la acción BD
-con datos reales de supernovas (Pantheon+SH0ES), siguiendo el análisis de Das,
+"""Goal 4c: Everpresent Λ (Model 1) versus the fluctuations of the BD action
+with real supernova data (Pantheon+SH0ES), following the analysis of Das,
 Nasiri & Yazdi, JCAP 10 (2024) 076, arXiv:2307.13743, sec. 4.
 
-Método (como DNY sec. 4.1): cada "semilla" fija la secuencia de números
-aleatorios del proceso; para cada semilla se busca el mejor ajuste en
-(omega_m, amplitud, M_B) y se guarda su chi² mínimo. M_B se minimiza
-analíticamente; (omega_m, amplitud) con una rejilla y dos refinamientos
-locales (DNY usan MCMC por semilla). Datos: Pantheon+SH0ES (Brout et al.,
-ApJ 938 (2022) 110, arXiv:2202.04077; Riess et al., ApJL 934 (2022) L7),
-corte estándar zHD > 0.01 o calibrador, covarianza STAT+SYS.
+Method (as DNY sec. 4.1): each "seed" fixes the sequence of random numbers
+of the process; for each seed the best fit in (omega_m, amplitude, M_B) is
+searched for and its minimum chi² is stored. M_B is minimised analytically;
+(omega_m, amplitude) with a grid and two local refinements (DNY use MCMC per
+seed). Data: Pantheon+SH0ES (Brout et al., ApJ 938 (2022) 110,
+arXiv:2202.04077; Riess et al., ApJL 934 (2022) L7), standard cut zHD > 0.01
+or calibrator, STAT+SYS covariance.
 
-CRITERIOS (fijados el 2026-10-10, ANTES de calcular ningún chi²):
-  V1  chi² mínimo de ΛCDM plano (omega_m, h, M_B) frente al de DNY, 1485.3:
-      |diferencia| < 2 (mismos datos y corte). Si falla se documenta y los
-      umbrales se toman relativos a NUESTRO chi²_ΛCDM.
-  V2  chi² comprimido (spline de mu en nodos) = chi² directo, |Δ| < 0.01 (test).
-  V3  Model 1 frente a DNY: fracción de semillas con chi² < chi²_ΛCDM + 14.7
-      ("buenas"; DNY: 1500 = 1485.3 + 14.7, fracción ≈ 0.003 leída de su
-      fig. 1a) dentro de [0.001, 0.009] (factor 3: rejilla frente a MCMC,
-      proceso continuo frente a 10 000 pasos, valor leído de una figura).
-      Fracción con chi² < chi²_ΛCDM ("mejores"; DNY 16/90 000) compatible a
+CRITERIA (fixed on 2026-10-10, BEFORE computing any chi²):
+  V1  minimum chi² of flat ΛCDM (omega_m, h, M_B) versus that of DNY, 1485.3:
+      |difference| < 2 (same data and cut). If it fails, this is documented and
+      the thresholds are taken relative to OUR chi²_ΛCDM.
+  V2  compressed chi² (spline of mu at nodes) = direct chi², |Δ| < 0.01 (test).
+  V3  Model 1 versus DNY: fraction of seeds with chi² < chi²_ΛCDM + 14.7
+      ("good"; DNY: 1500 = 1485.3 + 14.7, fraction ≈ 0.003 read off their
+      fig. 1a) within [0.001, 0.009] (factor 3: grid versus MCMC, continuous
+      process versus 10 000 steps, value read off a figure).
+      Fraction with chi² < chi²_ΛCDM ("better"; DNY 16/90 000) compatible at
       4σ (Poisson).
-  Comparación principal: acción BD (q = 1/4, beta = 0.9, del Goal 4b-1)
-  frente a Model 1, con el mismo número de semillas, los mismos datos y la
-  misma rejilla en omega_m. Fracción de semillas "buenas": BD mejor / peor
-  si la diferencia supera 4σ (binomial combinada); si no, indistinguibles.
-  Se informa también de la fracción "mejores" y de los parámetros de las
-  semillas buenas (omega_m, h, amplitud -> l_k).
+  Main comparison: BD action (q = 1/4, beta = 0.9, from Goal 4b-1)
+  versus Model 1, with the same number of seeds, the same data and the
+  same grid in omega_m. Fraction of "good" seeds: BD better / worse
+  if the difference exceeds 4σ (pooled binomial); otherwise indistinguishable.
+  The "better" fraction and the parameters of the good seeds
+  (omega_m, h, amplitude -> l_k) are also reported.
 
-Fuera de alcance: BAO y CMB (DNY sec. 5 usan el likelihood completo de Planck).
+Out of scope: BAO and CMB (DNY sec. 5 use the full Planck likelihood).
 
-Uso:  python scripts/goal4c_sn_fit.py lcdm | seeds MODEL START STOP | fit
-      MODEL = model1 | bd
+Usage:  python scripts/goal4c_sn_fit.py lcdm | seeds MODEL START STOP | fit
+        MODEL = model1 | bd
 """
 
 from __future__ import annotations
@@ -64,9 +64,9 @@ A_START, N_STEPS = 1e-5, 2000
 N_SEEDS = 10_000
 BATCH = 50
 SEED0 = 4_000_000
-OMEGA_M_GRID = np.geomspace(0.02, 0.8, 10)  # prior de DNY: [0.01, 1]
-AMP_GRID = {"model1": np.geomspace(0.001, 0.025, 10),  # alpha, prior de DNY
-            "bd": np.geomspace(0.1, 10.0, 10)}  # lambda de la acción BD
+OMEGA_M_GRID = np.geomspace(0.02, 0.8, 10)  # DNY prior: [0.01, 1]
+AMP_GRID = {"model1": np.geomspace(0.001, 0.025, 10),  # alpha, DNY prior
+            "bd": np.geomspace(0.1, 10.0, 10)}  # lambda of the BD action
 INK, INK_MUTED, GRID = "#0b0b0b", "#52514e", "#e4e3df"
 GREEN, BLUE = "#1baf7a", "#2a78d6"
 
@@ -101,7 +101,7 @@ def lcdm():
                 [(0.14, 0.73), (0.17, 0.70), (0.12, 0.75)]), key=lambda r: r.fun)
     om, h = best.x
     chi2, MB = sn.chi2_nodes(lcdm_mu_nodes(om, h, sn.nodes))
-    # misma cosmología con evolve (Λ constante) para medir el error de la integración
+    # same cosmology with evolve (constant Λ) to measure the integration error
     real = sl.evolve(sl.ProcessSpec(3 * (h**2 - om - sl.OMEGA_R), 0, 0), 1, None, a_start=A_START,
                      n_steps=N_STEPS, z_grid=sn.nodes, s_fixed=1.0, omega_m=om)
     chi2_ev = float(sn.chi2_nodes(mu_from_dl(real.dL[0]))[0])
@@ -112,7 +112,7 @@ def lcdm():
 
 
 def _eval(sn, model, seeds_noise, om, amp):
-    """chi² mínimo en M_B para cada (semilla, om, amp); arrays planos de igual longitud."""
+    """chi² minimised over M_B for each (seed, om, amp); flat arrays of equal length."""
     R = len(om)
     real = sl.evolve(spec_for(model, amp), R, None, a_start=A_START, n_steps=N_STEPS, z_grid=sn.nodes,
                      omega_m=om, noise=seeds_noise)
@@ -124,14 +124,14 @@ def _eval(sn, model, seeds_noise, om, amp):
 
 
 def fit_batch(sn, model, seeds, evaluator=None):
-    """``evaluator(model, noise, om, amp) -> (chi2, M_B, h, Omega_L0)``; por defecto, sólo SN (Goal 4c)."""
+    """``evaluator(model, noise, om, amp) -> (chi2, M_B, h, Omega_L0)``; by default, SN only (Goal 4c)."""
     if evaluator is None:
         evaluator = lambda m, nz, om, amp: _eval(sn, m, nz, om, amp)  # noqa: E731
     B = len(seeds)
     noise = np.stack([np.random.default_rng(SEED0 + s).standard_normal(N_STEPS) for s in seeds], axis=1)
     lom, lamp = np.log(OMEGA_M_GRID), np.log(AMP_GRID[model])
     d_om, d_amp = lom[1] - lom[0], lamp[1] - lamp[0]
-    # rejilla: centros por semilla (B, n_om, n_amp)
+    # grid: centres per seed (B, n_om, n_amp)
     cand_om = np.broadcast_to(lom[None, :, None], (B, len(lom), len(lamp)))
     cand_amp = np.broadcast_to(lamp[None, None, :], (B, len(lom), len(lamp)))
     best = None
@@ -173,7 +173,7 @@ def seeds(model):
         start = len(rows)
         rows += fit_batch(sn, model, list(range(start, min(start + BATCH, N_SEEDS))))
         path.write_text(json.dumps(dict(model=model, beta=BETA if model == "bd" else None, rows=rows)))
-        print(f"{model}: {len(rows)} semillas, {time.time() - t0:.0f} s", flush=True)
+        print(f"{model}: {len(rows)} seeds, {time.time() - t0:.0f} s", flush=True)
 
 
 def _frac(k, n):
@@ -185,7 +185,7 @@ def fit():
     chi2_ref = ref["chi2"]
     out = dict(chi2_lcdm=chi2_ref, V1=ref["V1"], models={})
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 4.4), constrained_layout=True)
-    for model, col, label in (("model1", GREEN, "Model 1 (DNY)"), ("bd", BLUE, f"acción BD (β = {BETA:g})")):
+    for model, col, label in (("model1", GREEN, "Model 1 (DNY)"), ("bd", BLUE, f"BD action (β = {BETA:g})")):
         if not seeds_path(model).exists():
             continue
         rows = json.loads(seeds_path(model).read_text())["rows"]
@@ -204,10 +204,10 @@ def fit():
                  frac_at_amp_floor=float(np.mean([r["amp"] <= AMP_GRID[model][0] * 1.0001 for r in rows])),
                  good_params=par, best=sorted(rows, key=lambda r: r["chi2"])[:5])
         out["models"][model] = m
-        print(f"--- {label}: {n} semillas; chi2 min = {m['chi2_min']:.1f} (ΛCDM {chi2_ref:.1f})")
-        print(f"   buenas (< ΛCDM + {GOOD_MARGIN}): {m['n_good']}  f = {m['f_good'][0]:.4f} ± {m['f_good'][1]:.4f}")
-        print(f"   mejores que ΛCDM: {m['n_better']}  f = {m['f_better'][0]:.5f}")
-        print(f"   parámetros de las buenas (16/50/84 %): {json.dumps(par)}")
+        print(f"--- {label}: {n} seeds; chi2 min = {m['chi2_min']:.1f} (ΛCDM {chi2_ref:.1f})")
+        print(f"   good (< ΛCDM + {GOOD_MARGIN}): {m['n_good']}  f = {m['f_good'][0]:.4f} ± {m['f_good'][1]:.4f}")
+        print(f"   better than ΛCDM: {m['n_better']}  f = {m['f_better'][0]:.5f}")
+        print(f"   parameters of the good seeds (16/50/84 %): {json.dumps(par)}")
         xs = np.sort(chi2 - chi2_ref)
         xs = xs[np.isfinite(xs)]
         ax1.step(xs, np.arange(1, len(xs) + 1) / n, where="post", color=col, label=label)
@@ -222,25 +222,25 @@ def fit():
         out["V3"] = dict(f_good_in_range=bool(0.001 <= m1["f_good"][0] <= 0.009),
                          better_z=float((m1["f_better"][0] - k_dny / n_dny) / se))
         out["V3"]["ok"] = out["V3"]["f_good_in_range"] and abs(out["V3"]["better_z"]) < 4
-        print(f"V3: f_buenas en [0.001, 0.009]: {out['V3']['f_good_in_range']}; "
-              f"mejores frente a DNY: z = {out['V3']['better_z']:+.2f}  -> {out['V3']['ok']}")
+        print(f"V3: f_good in [0.001, 0.009]: {out['V3']['f_good_in_range']}; "
+              f"better versus DNY: z = {out['V3']['better_z']:+.2f}  -> {out['V3']['ok']}")
     if len(out["models"]) == 2:
         a, b = out["models"]["bd"], out["models"]["model1"]
         z = (a["f_good"][0] - b["f_good"][0]) / np.hypot(a["f_good"][1], b["f_good"][1])
         out["comparison"] = dict(z=float(z), verdict="BD mejor" if z > 4 else "BD peor" if z < -4 else "indistinguibles")
-        print(f"Comparación (fracción de buenas): z = {z:+.2f} -> {out['comparison']['verdict']}")
+        print(f"Comparison (fraction of good seeds): z = {z:+.2f} -> {out['comparison']['verdict']}")
     ax1.axvline(0, color=INK_MUTED, linestyle="--", linewidth=1)
     ax1.axvline(GOOD_MARGIN, color=INK_MUTED, linestyle=":", linewidth=1)
     ax1.set_xlim(-30, 300)
     ax1.set_yscale("log")
-    ax1.set_xlabel("χ²_min(semilla) − χ²_ΛCDM  (Pantheon+SH0ES)", color=INK)
-    ax1.set_ylabel("fracción de semillas por debajo", color=INK)
-    ax1.set_title("Distribución del mejor ajuste por semilla", color=INK, fontsize=10)
+    ax1.set_xlabel("χ²_min(seed) − χ²_ΛCDM  (Pantheon+SH0ES)", color=INK)
+    ax1.set_ylabel("fraction of seeds below", color=INK)
+    ax1.set_title("Distribution of the best fit per seed", color=INK, fontsize=10)
     ax2.axhline(100 * ref["h"], color=INK_MUTED, linestyle="--", linewidth=1)
-    ax2.axvline(ref["Omega_m"], color=INK_MUTED, linestyle="--", linewidth=1, label="ΛCDM (mejor ajuste)")
+    ax2.axvline(ref["Omega_m"], color=INK_MUTED, linestyle="--", linewidth=1, label="ΛCDM (best fit)")
     ax2.set_xlabel("Ω_m0", color=INK)
     ax2.set_ylabel("H0 (km/s/Mpc)", color=INK)
-    ax2.set_title(f"Semillas buenas (χ² < χ²_ΛCDM + {GOOD_MARGIN})", color=INK, fontsize=10)
+    ax2.set_title(f"Good seeds (χ² < χ²_ΛCDM + {GOOD_MARGIN})", color=INK, fontsize=10)
     for ax in (ax1, ax2):
         ax.grid(True, color=GRID, linewidth=0.8)
         for side in ("top", "right"):
@@ -249,7 +249,7 @@ def fit():
     (ROOT / "figures" / "goal4c_results.json").write_text(json.dumps(out, indent=1, ensure_ascii=False))
     path = ROOT / "figures" / "goal4c_sn.png"
     fig.savefig(path, dpi=150, facecolor="#fcfcfb")
-    print("figura", path)
+    print("figure", path)
 
 
 if __name__ == "__main__":

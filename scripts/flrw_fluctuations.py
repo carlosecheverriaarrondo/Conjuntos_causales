@@ -1,33 +1,33 @@
-"""Punto 1b: fluctuaciones de la acción BD en el cono de luz pasado hasta el
-big bang de un FLRW plano 2D, a(eta) = eta^alpha (``FLRWConeGeometry``),
-con alpha = 1 y 2. Es la región de Everpresent Λ.
+"""Point 1b: fluctuations of the BD action in the past light cone down to the
+big bang of a flat 2D FLRW spacetime, a(eta) = eta^alpha (``FLRWConeGeometry``),
+with alpha = 1 and 2. This is the region used by Everpresent Λ.
 
-Hipótesis (formulada ANTES de calcular): en coordenadas conformes un par casi
-nulo con lados Δu, Δv en eta tiene volumen físico ≈ a(eta)² Δu Δv / 2. A
-volumen físico mu fijo, el rango de rapidez es ln(rho a(eta)² ... / mu): el
-coeficiente de ln rho sigue siendo rho ∫ dV sum h, y a(eta) sólo aporta
-rho ∫ ln a² dV a la constante (finito para potencias de eta). Predicción:
-(Delta S)² = b rho V ln(rho V) + O(rho V) con el MISMO b que en Minkowski
-(24 por J¹, 24.43 ± 0.24 total en el diamante). El riesgo es el big bang
-(a -> 0): si el corte de rapidez cambiara allí, b cambiaría.
+Hypothesis (formulated BEFORE computing): in conformal coordinates an almost
+null pair with sides Δu, Δv in eta has physical volume ≈ a(eta)² Δu Δv / 2. At
+fixed physical volume mu, the rapidity range is ln(rho a(eta)² ... / mu): the
+coefficient of ln rho is still rho ∫ dV sum h, and a(eta) only contributes
+rho ∫ ln a² dV to the constant (finite for powers of eta). Prediction:
+(Delta S)² = b rho V ln(rho V) + O(rho V) with the SAME b as in Minkowski
+(24 from J¹, 24.43 ± 0.24 in total in the diamond). The risk is the big bang
+(a -> 0): if the rapidity cut-off changed there, b would change.
 
-Criterios de éxito (fijados antes de ver los resultados), eps = 1:
-  F1  volúmenes de intervalos e intersecciones en forma cerrada frente a
-      integración numérica: relativo 1e-9 (test).
-  F2  <N_k> (MC del formalismo) frente a sprinklings: |z| < 4.
-  F3  predicción MYZ frente a la varianza de los sprinklings, alpha = 1, 2 y
-      rho V = 50, 200, 800, 3200: todos los puntos con |z| < 4.
-  F4  ajuste (Delta S)²/rho V = c + b ln(rho V) de las predicciones MYZ
-      (rho V = 50 .. 12800), para cada alpha: b compatible a 4σ con el del
-      diamante (24.43 ± 0.24).
+Success criteria (fixed before looking at the results), eps = 1:
+  F1  interval and intersection volumes in closed form versus numerical
+      integration: relative 1e-9 (test).
+  F2  <N_k> (MC of the formalism) versus sprinklings: |z| < 4.
+  F3  MYZ prediction versus the variance of the sprinklings, alpha = 1, 2 and
+      rho V = 50, 200, 800, 3200: all points with |z| < 4.
+  F4  fit (Delta S)²/rho V = c + b ln(rho V) of the MYZ predictions
+      (rho V = 50 .. 12800), for each alpha: b compatible at 4σ with that of
+      the diamond (24.43 ± 0.24).
 
-Fases:
+Phases:
   sim      sprinklings -> figures/flrw_sim.json
-  pred     predicción MYZ (medias por MC) -> figures/flrw_pred.json
-  fit      criterios, ajustes y figura -> figures/flrw_results.json,
+  pred     MYZ prediction (means by MC) -> figures/flrw_pred.json
+  fit      criteria, fits and figure -> figures/flrw_results.json,
            figures/flrw_fluctuations.png
 
-Uso:  python scripts/flrw_fluctuations.py sim | pred | fit
+Usage:  python scripts/flrw_fluctuations.py sim | pred | fit
 """
 
 from __future__ import annotations
@@ -68,7 +68,7 @@ ALPHAS = (1.0, 2.0)
 SIM_LAMS = {50: 4000, 200: 4000, 800: 3000, 3200: 2000}  # rho V: sprinklings
 PRED_LAMS = (50, 200, 800, 3200, 12800)
 M_TERMS, M_MEANS = 4_000_000, 4_000_000
-DIAMOND_B = (24.43, 0.24)  # b total del diamante de Minkowski, eps = 1 (Goal 3d)
+DIAMOND_B = (24.43, 0.24)  # total b of the Minkowski diamond, eps = 1 (Goal 3d)
 B_J1 = 24.0  # sum_k a_k²
 K_SIGMA = 4.0
 INK, INK_MUTED, GRID = "#0b0b0b", "#52514e", "#e4e3df"
@@ -102,7 +102,7 @@ def pred():
             t0 = time.time()
             K = FluctuationKernel(g, lam / g.volume, 3, np.random.default_rng(97_000 + lam + int(10 * alpha)))
             P = K.predict(m_terms=M_TERMS, m_means=M_MEANS, batch=100_000)
-            L, L_se = K._batched_means(M_MEANS, 4, 100_000)  # medias independientes para F2
+            L, L_se = K._batched_means(M_MEANS, 4, 100_000)  # independent means for F2
             parts = decompose(P, 1.0)
             total = sum(p["value"] for p in parts.values())
             row = dict(alpha=alpha, rhoV=lam, variance=P.variance, variance_se=P.variance_se, parts=parts,
@@ -139,23 +139,23 @@ def fit():
                                        z_vs_diamond=(b - DIAMOND_B[0]) / np.hypot(b_se, DIAMOND_B[1]))
     RESULTS.write_text(json.dumps(out, indent=1))
 
-    print("F2 (|z| de <N_k>):", max(max(abs(v) for v in r["z"]) for r in out["F2"]))
+    print("F2 (|z| of <N_k>):", max(max(abs(v) for v in r["z"]) for r in out["F2"]))
     for r in out["F3"]:
         print(f"F3 alpha={r['alpha']:<3} rhoV={r['rhoV']:>5}: sim {r['sim']:.5g} ± {r['sim_se']:.2g}   "
               f"pred {r['pred']:.5g} ± {r['pred_se']:.2g}   z = {r['z']:+.2f}")
     for alpha, f in out["fits"].items():
-        print(f"alpha={alpha}: b = {f['b']:.4g} ± {f['b_se']:.2g} (chi2/dof {f['chi2dof']:.2f}), z frente al diamante {f['z_vs_diamond']:+.2f}")
-        print("   aumentos de J¹/rhoV por unidad de ln rhoV:", [f"{v:.4g}" for v in f["J1_increase_over_ln"]])
+        print(f"alpha={alpha}: b = {f['b']:.4g} ± {f['b_se']:.2g} (chi2/dof {f['chi2dof']:.2f}), z versus the diamond {f['z_vs_diamond']:+.2f}")
+        print("   increases of J¹/rhoV per unit of ln rhoV:", [f"{v:.4g}" for v in f["J1_increase_over_ln"]])
         print("   J6c/rhoV:", [f"{v:.4g}" for v in f["J6c_over_rhoV"]])
-        print("   exponente local de ΔS:", [f"{v:.3f}" for v in f["local_exponent_of_DeltaS"]])
+        print("   local exponent of ΔS:", [f"{v:.3f}" for v in f["local_exponent_of_DeltaS"]])
 
     fig, axes = plt.subplots(1, 2, figsize=(11, 4.2), constrained_layout=True)
     for ax, alpha in zip(axes, ALPHAS):
         sel = sorted((p for p in preds if p["alpha"] == alpha), key=lambda r: r["rhoV"])
         lam = np.array([r["rhoV"] for r in sel], float)
         ax.errorbar(lam, [r["variance"] / r["rhoV"] for r in sel], [r["variance_se"] / r["rhoV"] for r in sel],
-                    fmt="o-", color=BLUE, label="predicción MYZ", markersize=4, linewidth=1.4, capsize=2)
-        ax.plot(lam, [r["parts"]["J1"]["value"] / r["rhoV"] for r in sel], "--", color=INK_MUTED, label="sólo J¹", linewidth=1.2)
+                    fmt="o-", color=BLUE, label="MYZ prediction", markersize=4, linewidth=1.4, capsize=2)
+        ax.plot(lam, [r["parts"]["J1"]["value"] / r["rhoV"] for r in sel], "--", color=INK_MUTED, label="J¹ only", linewidth=1.2)
         ss = sorted((s for s in sims if s["alpha"] == alpha), key=lambda r: r["rhoV"])
         ax.errorbar([s["rhoV"] for s in ss], [s["variance"] / s["rhoV"] for s in ss], [s["variance_se"] / s["rhoV"] for s in ss],
                     fmt="s", color=ORANGE, label="sprinklings", markersize=5, capsize=2)
@@ -168,11 +168,11 @@ def fit():
             ax.spines[side].set_visible(False)
         ax.set_xlabel("ρV", color=INK)
         ax.set_ylabel("(ΔS)² / ρV", color=INK)
-        ax.set_title(f"cono pasado hasta el big bang, FLRW 2D, a ∝ η^{alpha:g}", color=INK, fontsize=10)
+        ax.set_title(f"past cone down to the big bang, 2D FLRW, a ∝ η^{alpha:g}", color=INK, fontsize=10)
         ax.legend(frameon=False, fontsize=8)
     path = ROOT / "figures" / "flrw_fluctuations.png"
     fig.savefig(path, dpi=150, facecolor="#fcfcfb")
-    print("figura", path)
+    print("figure", path)
 
 
 if __name__ == "__main__":

@@ -1,7 +1,7 @@
-"""Goal 1: convergencia de la dimensión de Myrheim-Meyer en Minkowski 2D y 4D.
+"""Goal 1: convergence of the Myrheim-Meyer dimension in 2D and 4D Minkowski.
 
-Genera ``figures/goal1_mm_convergence.png`` y una tabla por consola.
-Uso:  python scripts/goal1_convergence.py [--samples M] [--seed S]
+Produces ``figures/goal1_mm_convergence.png`` and a table on the console.
+Usage:  python scripts/goal1_convergence.py [--samples M] [--seed S]
 """
 
 from __future__ import annotations
@@ -66,8 +66,8 @@ def plot(results: dict[int, np.ndarray], samples: int, path: Path) -> None:
         ax.fill_between(n, mean - std, mean + std, color=COLORS[d], alpha=0.18, linewidth=0)
         ax.plot(n, mean, color=COLORS[d], linewidth=2, marker="o", markersize=5)
         _style(ax)
-        ax.set_title(f"Minkowski {d}D: $d_{{MM}}$ (media ± 1σ, M={samples})", color=INK, fontsize=11)
-        ax.set_xlabel("N (puntos en el diamante causal)", color=INK)
+        ax.set_title(f"Minkowski {d}D: $d_{{MM}}$ (mean ± 1σ, M={samples})", color=INK, fontsize=11)
+        ax.set_xlabel("N (points in the causal diamond)", color=INK)
         ax.set_ylabel("$d_{MM}$", color=INK)
         ax.text(n[-1], d, f" d = {d}", color=INK_MUTED, va="bottom", ha="right", fontsize=9)
 
@@ -80,14 +80,14 @@ def plot(results: dict[int, np.ndarray], samples: int, path: Path) -> None:
         ax.plot(n, guide, color=COLORS[d], linewidth=1, linestyle=":", alpha=0.9)
     _style(ax)
     ax.set_yscale("log")
-    ax.set_title("Dispersión de $d_{MM}$ (punteado: $\\propto N^{-1/2}$)", color=INK, fontsize=11)
+    ax.set_title("Spread of $d_{MM}$ (dotted: $\\propto N^{-1/2}$)", color=INK, fontsize=11)
     ax.set_xlabel("N", color=INK)
     ax.set_ylabel("std($d_{MM}$)", color=INK)
     ax.legend(frameon=False, labelcolor=INK)
 
     path.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(path, dpi=150, facecolor="#fcfcfb")
-    print(f"figura guardada en {path}")
+    print(f"figure saved to {path}")
 
 
 def main():

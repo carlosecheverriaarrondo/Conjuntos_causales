@@ -63,6 +63,11 @@ confirmación aunque haya progreso, en vez de seguir sin decir nada.
   Planck), compara cocientes o pasa `abs=0`.
 - Los cálculos largos van en scripts que guardan resultados intermedios
   (p. ej. JSON en `figures/`), lanzados en segundo plano.
+- Idioma (desde 2026-11-06): el repositorio es público y acompaña a un paper
+  en inglés. Mensajes de commit, docstrings, comentarios, mensajes por pantalla
+  y etiquetas de figuras en INGLÉS (ortografía británica). El historial
+  anterior queda en español (no reescribir). CLAUDE.md y README.es.md siguen
+  en español.
 
 ## Referencias principales
 

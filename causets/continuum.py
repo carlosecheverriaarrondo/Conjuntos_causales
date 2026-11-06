@@ -1,29 +1,28 @@
-"""Valores esperados exactos (a densidad finita) para sprinklings de intervalos planos.
+"""Exact expected values (at finite density) for sprinklings of flat intervals.
 
-Resultado central (derivación en el README, sec. Goal 2): sea x el vértice
-superior de un intervalo causal plano de volumen Lambda (en unidades de 1/rho).
-Para cualquier función h de n(y, x), por las propiedades del proceso de
-Poisson,
+Central result (derivation in the README, sec. Goal 2): let x be the top
+vertex of a flat causal interval of volume Lambda (in units of 1/rho).
+For any function h of n(y, x), by the properties of the Poisson process,
 
     E[ sum_{y ≺ x} h(n(y, x)) ] = W[H](Lambda),   H(z) = E[h(Poisson(z))],
 
     W[H](Lambda) = (Omega_{d-2} / (d c_d)) int_0^Lambda H(z) K_d(Lambda / z) dz,
 
-donde c_d tau^d es el volumen de un intervalo de tiempo propio tau,
-Omega_{d-2} el área de la esfera S^{d-2} y K_d(u) = int_0^{ln(u)/d} sinh^{d-2}.
-Explícitamente:
+where c_d tau^d is the volume of an interval of proper time tau,
+Omega_{d-2} the area of the sphere S^{d-2} and K_d(u) = int_0^{ln(u)/d} sinh^{d-2}.
+Explicitly:
 
     d = 2:  W[H] = int_0^Lambda H(z) ln(Lambda / z) dz
     d = 4:  W[H] = 3 int_0^Lambda H(z) [sqrt(Lambda/z) - sqrt(z/Lambda) - ln(Lambda/z)] dz
 
-(se obtiene parametrizando y = x + tau (-cosh chi, sinh chi n) e integrando
-el ángulo hiperbólico chi hasta el borde pasado del intervalo). La misma
-distribución de volúmenes describe los puntos x de un diamante según el
-volumen de I(p, x), lo que da las abundancias esperadas del diamante entero:
+(obtained by parametrising y = x + tau (-cosh chi, sinh chi n) and integrating
+the hyperbolic angle chi up to the past edge of the interval). The same
+distribution of volumes describes the points x of a diamond according to the
+volume of I(p, x), which gives the expected abundances of the whole diamond:
 
     E[N_k] = (Omega_{d-2} / (d c_d)) int_0^Lambda K_d(Lambda / lam) W[p_k](lam) d lam,
 
-con p_k(z) = z^k e^{-z} / k!.
+with p_k(z) = z^k e^{-z} / k!.
 """
 
 from __future__ import annotations
@@ -35,7 +34,7 @@ from scipy.special import gammaln
 
 from .action import coefficients
 
-# Por encima de este z, e^{-z} z^k es despreciable para las k que usamos.
+# Above this z, e^{-z} z^k is negligible for the k we use.
 _Z_CUT = 200.0
 
 
@@ -47,7 +46,7 @@ def poisson_pmf(k: int, z):
 
 
 def layer_mean(z, dim: int, eps: float = 1.0):
-    """H(z) = E[eps * f_d(n, eps)] con n ~ Poisson(z) = eps * sum_k C_k p_k(eps z)."""
+    """H(z) = E[eps * f_d(n, eps)] with n ~ Poisson(z) = eps * sum_k C_k p_k(eps z)."""
     return eps * sum(c * poisson_pmf(k, eps * np.asarray(z, float)) for k, c in enumerate(coefficients(dim).layers))
 
 
@@ -59,14 +58,14 @@ def _kernel(dim: int, u):
     if dim == 4:
         s = np.sqrt(u)
         return 3.0 * (s - 1.0 / s - np.log(u))
-    raise ValueError("núcleo implementado sólo para d = 2 y d = 4")
+    raise ValueError("kernel implemented only for d = 2 and d = 4")
 
 
 def past_weight(H, dim: int, lam: float, decay: float = 1.0) -> float:
-    """W[H](lam) para un intervalo de volumen ``lam`` (unidades de 1/rho).
+    """W[H](lam) for an interval of volume ``lam`` (units of 1/rho).
 
-    Se integra en u = sqrt(z) para suavizar la singularidad integrable en z = 0.
-    H debe decaer como e^{-decay * z} (se corta en z = 200 / decay).
+    Integrated in u = sqrt(z) to smooth the integrable singularity at z = 0.
+    H must decay as e^{-decay * z} (cut off at z = 200 / decay).
     """
     upper = np.sqrt(min(lam, _Z_CUT / decay))
 
@@ -79,21 +78,21 @@ def past_weight(H, dim: int, lam: float, decay: float = 1.0) -> float:
 
 
 def expected_bd_bracket_at_top(dim: int, lam: float, eps: float = 1.0) -> float:
-    """E[ l_eps^2 (B_eps 1)(x) ] / alpha_d en el vértice superior de un intervalo
-    plano de volumen ``lam`` (unidades de 1/rho). Tiende a 0 cuando eps*lam -> inf."""
+    """E[ l_eps^2 (B_eps 1)(x) ] / alpha_d at the top vertex of a flat interval
+    of volume ``lam`` (units of 1/rho). Tends to 0 as eps*lam -> inf."""
     c = coefficients(dim)
     return c.beta + past_weight(lambda z: layer_mean(z, dim, eps), dim, lam, decay=eps)
 
 
 def expected_bd_on_constant_at_top(dim: int, density: float, volume: float, eps: float = 1.0) -> float:
-    """E[(B_eps 1)(x)] en el vértice superior de un intervalo plano."""
+    """E[(B_eps 1)(x)] at the top vertex of a flat interval."""
     c = coefficients(dim)
     lsq = (eps * density) ** (-2.0 / dim)
     return c.alpha * expected_bd_bracket_at_top(dim, density * volume, eps) / lsq
 
 
 def _diamond_pair_integral(H, dim: int, lam: float, decay: float = 1.0) -> float:
-    """E[ sum_{pares y ≺ x} H(n(y,x)) ] en un diamante de volumen ``lam``."""
+    """E[ sum_{pairs y ≺ x} H(n(y,x)) ] in a diamond of volume ``lam``."""
 
     def outer(u):
         v = u * u
@@ -106,21 +105,21 @@ def _diamond_pair_integral(H, dim: int, lam: float, decay: float = 1.0) -> float
 
 
 def expected_abundance(dim: int, lam: float, k: int) -> float:
-    """E[N_k] para un sprinkling de Poisson de un diamante plano con rho V = lam."""
+    """E[N_k] for a Poisson sprinkling of a flat diamond with rho V = lam."""
     return _diamond_pair_integral(lambda z: poisson_pmf(k, z), dim, lam)
 
 
 def _cone_position_integral(mu, lam: float):
-    """I(mu) = ∫ (c - a - k/a)^2 da / a sobre a- <= a <= a+ (raíces de
-    a^2 - c a + k = 0), con c = 2 sqrt(lam), k = 2 mu: rango de rapidez
-    de los pares de volumen mu en un cono truncado 2D de volumen lam (rho = 1).
-    Primitiva: (c^2 + 2k) ln a + a^2/2 - k^2/(2a^2) - 2ca + 2ck/a."""
+    """I(mu) = ∫ (c - a - k/a)^2 da / a over a- <= a <= a+ (roots of
+    a^2 - c a + k = 0), with c = 2 sqrt(lam), k = 2 mu: rapidity range of
+    the pairs of volume mu in a 2D truncated cone of volume lam (rho = 1).
+    Antiderivative: (c^2 + 2k) ln a + a^2/2 - k^2/(2a^2) - 2ca + 2ck/a."""
     mu = np.asarray(mu, dtype=float)
     c = 2.0 * np.sqrt(lam)
     k = 2.0 * mu
     disc = np.sqrt(np.maximum(c * c - 4 * k, 0.0))
     ap = (c + disc) / 2
-    am = np.where(k > 0, 2 * k / np.where(c + disc > 0, c + disc, 1.0), 1.0)  # = (c - disc)/2 sin cancelación
+    am = np.where(k > 0, 2 * k / np.where(c + disc > 0, c + disc, 1.0), 1.0)  # = (c - disc)/2 without cancellation
 
     def F(a):
         return a * a / 2 - k * k / (2 * a * a) - 2 * c * a + 2 * c * k / a
@@ -129,19 +128,19 @@ def _cone_position_integral(mu, lam: float):
 
 
 def cone_pair_integral_2d(H, lam: float, decay: float = 1.0) -> float:
-    """E[ sum_{pares y ≺ x} H(rho V(y, x)) ] en el cono de luz pasado truncado
-    J^-(q) ∩ {t >= 0} de Minkowski 2D con rho V = lam (``TruncatedPastCone``).
+    """E[ sum_{pairs y ≺ x} H(rho V(y, x)) ] in the truncated past light cone
+    J^-(q) ∩ {t >= 0} of 2D Minkowski with rho V = lam (``TruncatedPastCone``).
 
-    Derivación (punto 1a, ver README): en coordenadas de cono de luz
-    u = t + x, v = t - x la región es {u, v <= h, u + v >= 0} (V = h^2) y un
-    par con lados Δu = a, Δv = b tiene sus extremos dentro si y sólo si
-    el vértice inferior está en un triángulo de área física (2h - a - b)^2 / 4.
-    Con medida de pares da db / 2 y rho = 1:
+    Derivation (item 1a, see README): in light-cone coordinates
+    u = t + x, v = t - x the region is {u, v <= h, u + v >= 0} (V = h^2) and a
+    pair with sides Δu = a, Δv = b has both endpoints inside if and only if
+    the bottom vertex lies in a triangle of physical area (2h - a - b)^2 / 4.
+    With pair measure da db / 2 and rho = 1:
         E[sum h] = (1/8) ∫∫_{a + b <= 2h} (2h - a - b)^2 H(ab/2) da db
                  = (1/4) ∫_0^{lam/2} H(mu) I(mu) dmu      (b = 2 mu / a),
-    con I(mu) de ``_cone_position_integral``. A mu fijo y lam -> ∞,
-    I(mu) = 4 lam ln(lam / mu) + O(lam): el mismo rango de rapidez
-    logarítmico que en el diamante, y por tanto el mismo coeficiente
+    with I(mu) from ``_cone_position_integral``. At fixed mu and lam -> ∞,
+    I(mu) = 4 lam ln(lam / mu) + O(lam): the same logarithmic rapidity range
+    as in the diamond, and therefore the same coefficient
     E[sum h] = lam ln(lam) ∫ H + O(lam)."""
     upper = min(lam / 2, _Z_CUT / decay)
     edges = np.unique(np.concatenate([[0.0], np.geomspace(1e-8, upper, 60)]))
@@ -154,26 +153,26 @@ def cone_pair_integral_2d(H, lam: float, decay: float = 1.0) -> float:
 
 
 def expected_abundance_cone(lam: float, k: int, eps: float = 1.0) -> float:
-    """E[Ñ_k] en el cono truncado 2D con rho V = lam (Ñ_k = N_k con eps = 1):
-    H(mu) = P_k(eps mu) (adelgazamiento de Poisson)."""
+    """E[Ñ_k] in the 2D truncated cone with rho V = lam (Ñ_k = N_k for eps = 1):
+    H(mu) = P_k(eps mu) (Poisson thinning)."""
     return cone_pair_integral_2d(lambda mu: float(poisson_pmf(k, eps * mu)), lam, decay=eps)
 
 
 def cone_pair_integral(H, dim: int, lam: float, decay: float = 1.0) -> float:
-    """E[ sum_{pares y ≺ x} H(rho V(y, x)) ] en el cono pasado truncado
-    J^-(q) ∩ {t >= 0} de Minkowski (``TruncatedPastCone``), d = 2 o 4, con
+    """E[ sum_{pairs y ≺ x} H(rho V(y, x)) ] in the truncated past cone
+    J^-(q) ∩ {t >= 0} of Minkowski (``TruncatedPastCone``), d = 2 or 4, with
     rho V = lam (rho = 1).
 
-    Derivación (punto 1c, ver README): el pasado de x ya está en J^-(q), así que
-    y = x - tau (cosh chi, sinh chi n) está en el cono si y sólo si
-    tau cosh chi <= t_x. Con d^d y = tau^(d-1) dtau sinh^(d-2)chi dchi dOmega,
-        E[sum H] = Omega_{d-2} ∫_cono dV_x ∫_0^{t_x} tau^(d-1) S_d(arccosh(t_x/tau)) H(c_d tau^d) dtau,
-    S_d(X) = ∫_0^X sinh^(d-2), y dV_x = V_{d-1}(1) (h - t)^(d-1) dt. Sólo
-    depende de t_x: integral doble. En 2D coincide con ``cone_pair_integral_2d``."""
+    Derivation (item 1c, see README): the past of x is already in J^-(q), so
+    y = x - tau (cosh chi, sinh chi n) lies in the cone if and only if
+    tau cosh chi <= t_x. With d^d y = tau^(d-1) dtau sinh^(d-2)chi dchi dOmega,
+        E[sum H] = Omega_{d-2} ∫_cone dV_x ∫_0^{t_x} tau^(d-1) S_d(arccosh(t_x/tau)) H(c_d tau^d) dtau,
+    S_d(X) = ∫_0^X sinh^(d-2), and dV_x = V_{d-1}(1) (h - t)^(d-1) dt. It only
+    depends on t_x: a double integral. In 2D it agrees with ``cone_pair_integral_2d``."""
     from .regions import TruncatedPastCone, unit_ball_volume, unit_sphere_area
 
     h = (lam / TruncatedPastCone(dim, 1.0).volume) ** (1.0 / dim)
-    c = 2 * 0.5**dim * unit_ball_volume(dim - 1) / dim  # c_d: volumen del intervalo de tiempo propio 1
+    c = 2 * 0.5**dim * unit_ball_volume(dim - 1) / dim  # c_d: volume of the interval of unit proper time
     omega = unit_sphere_area(dim - 2) if dim > 2 else 2.0
     tau_cut = (_Z_CUT / decay / c) ** (1.0 / dim)
 
@@ -191,19 +190,19 @@ def cone_pair_integral(H, dim: int, lam: float, decay: float = 1.0) -> float:
     def outer(t):
         return unit_ball_volume(dim - 1) * (h - t) ** (dim - 1) * inner(t)
 
-    # inner(t) crece como t^(d-2) para t >> tau_cut: la integral es suave salvo cerca de t = 0
+    # inner(t) grows as t^(d-2) for t >> tau_cut: the integral is smooth except near t = 0
     edges = np.unique(np.concatenate([[0.0], np.geomspace(min(1e-3, h / 10), h, 30)]))
     tot = sum(quad(outer, a, b, limit=200, epsabs=0, epsrel=1e-10)[0] for a, b in zip(edges[:-1], edges[1:]))
     return float(omega * tot)
 
 
 def expected_abundance_cone_d(dim: int, lam: float, k: int, eps: float = 1.0) -> float:
-    """E[Ñ_k] en el cono truncado d-dimensional con rho V = lam."""
+    """E[Ñ_k] in the d-dimensional truncated cone with rho V = lam."""
     return cone_pair_integral(lambda mu: float(poisson_pmf(k, eps * mu)), dim, lam, decay=eps)
 
 
 def expected_bd_action_diamond(dim: int, lam: float, eps: float = 1.0) -> float:
-    """E[S_eps] para un sprinkling de Poisson de un diamante plano con rho V = lam."""
+    """E[S_eps] for a Poisson sprinkling of a flat diamond with rho V = lam."""
     c = coefficients(dim)
     weighted = _diamond_pair_integral(lambda z: layer_mean(z, dim, eps), dim, lam, decay=eps)
     return -c.action_scale * eps ** (2.0 / dim) * c.alpha * (c.beta * lam + weighted)
@@ -215,7 +214,7 @@ def expected_bd_action_diamond(dim: int, lam: float, eps: float = 1.0) -> float:
 
 
 def _gauss_panels(lo: float, hi: float, n_panels: int, order: int) -> tuple[np.ndarray, np.ndarray]:
-    """Nodos y pesos de Gauss-Legendre compuesta en [lo, hi]."""
+    """Nodes and weights of composite Gauss-Legendre quadrature on [lo, hi]."""
     x, w = np.polynomial.legendre.leggauss(order)
     edges = np.linspace(lo, hi, n_panels + 1)
     half = np.diff(edges)[:, None] / 2
@@ -226,25 +225,25 @@ def _gauss_panels(lo: float, hi: float, n_panels: int, order: int) -> tuple[np.n
 def expected_bd_bracket_de_sitter(
     dim: int, hubble: float, density: float, h_tau_px: float, eps: float = 1.0, resolution: int = 1
 ) -> float:
-    """E[ l_eps^2 (B_eps 1)(x) ] / alpha_d en de Sitter, cuando el pasado
-    sprinkleado de x es el intervalo I(p, x) con tiempo propio tau(p, x).
+    """E[ l_eps^2 (B_eps 1)(x) ] / alpha_d in de Sitter, when the sprinkled
+    past of x is the interval I(p, x) with proper time tau(p, x).
 
-    Fórmula de Mecke para el proceso de Poisson:
+    Mecke formula for the Poisson process:
 
         E[bracket] = beta + int_{I(p,x)} rho dV_y  H(rho V(y, x))
 
-    con H = ``layer_mean``. Por simetría máxima sólo depende de tau(p, x), así
-    que se evalúa con p, x sobre el eje: x = (-1/H, 0), p = (-e^{H tau}/H, 0).
+    with H = ``layer_mean``. By maximal symmetry it only depends on tau(p, x),
+    so it is evaluated with p, x on the axis: x = (-1/H, 0), p = (-e^{H tau}/H, 0).
 
-    Coordenadas: eta (tiempo conforme de y) y w = H tau(y, x). A eta fijo,
-    r^2 = eta^2 + eta_x^2 - 2 eta eta_x cosh(w), y
+    Coordinates: eta (conformal time of y) and w = H tau(y, x). At fixed eta,
+    r^2 = eta^2 + eta_x^2 - 2 eta eta_x cosh(w), and
     dV = a(eta)^d Omega_{d-2} r^{d-3} eta eta_x sinh(w) dw d eta.
-    En w sólo se integra la capa w <= w_cut con eps rho V(w_cut) = 200, junto
-    al cono de luz pasado de x (fuera, H es despreciable). Para absorber la
-    singularidad integrable r^{d-3} en r = 0 (d = 2) se integra en
-    s = sqrt(w0 - w), con w0 = H tau sobre el eje (r = 0).
-    Cuadratura de Gauss-Legendre compuesta; ``resolution`` multiplica el
-    número de paneles (para comprobar la convergencia).
+    In w only the layer w <= w_cut with eps rho V(w_cut) = 200 is integrated,
+    next to the past light cone of x (outside it, H is negligible). To absorb
+    the integrable singularity r^{d-3} at r = 0 (d = 2) one integrates in
+    s = sqrt(w0 - w), with w0 = H tau on the axis (r = 0).
+    Composite Gauss-Legendre quadrature; ``resolution`` multiplies the number
+    of panels (to check convergence).
     """
     from .regions import DeSitterIntervalVolume, de_sitter_scale_factor, unit_sphere_area
 
@@ -259,11 +258,11 @@ def expected_bd_bracket_de_sitter(
     z_vals = eps * density * vol.from_h_tau(grid)
     w_cut = grid[-1] if z_vals[-1] <= _Z_CUT else grid[np.searchsorted(z_vals, _Z_CUT)]
 
-    # Variable exterior w0 = ln(eta / eta_x) = H tau sobre el eje, en [0, W].
-    # El integrando tiene esquinas donde w0 = w_cut (capa que alcanza x),
-    # en eta_mid (r_max pasa de eta_x - eta a eta - eta_p) y donde
-    # w_lo = w_cut (la capa deja de caber sobre la frontera pasada): se
-    # usan como bordes de segmento.
+    # Outer variable w0 = ln(eta / eta_x) = H tau on the axis, in [0, W].
+    # The integrand has corners where w0 = w_cut (layer reaching x),
+    # at eta_mid (r_max switches from eta_x - eta to eta - eta_p) and where
+    # w_lo = w_cut (the layer no longer fits over the past boundary): they
+    # are used as segment edges.
     W = hubble * h_tau_px
     eta_mid = (eta_x + eta_p) / 2
 
@@ -289,13 +288,13 @@ def expected_bd_bracket_de_sitter(
     w_eta = (np.concatenate(weights) * np.abs(eta[:, 0]))[:, None]  # d eta = |eta| d w0
 
     prod = eta * eta_x
-    w0 = np.arccosh((eta**2 + eta_x**2) / (2 * prod))  # w sobre el eje (r = 0)
+    w0 = np.arccosh((eta**2 + eta_x**2) / (2 * prod))  # w on the axis (r = 0)
     r_max = np.minimum(eta_x - eta, eta - eta_p)
     w_lo = np.arccosh(np.maximum((eta**2 + eta_x**2 - r_max**2) / (2 * prod), 1.0))
     w_hi = np.minimum(w0, w_cut)
     valid = w_hi > w_lo
 
-    # s = sqrt(w0 - w): s en [sqrt(w0 - w_hi), sqrt(w0 - w_lo)]
+    # s = sqrt(w0 - w): s in [sqrt(w0 - w_hi), sqrt(w0 - w_lo)]
     s_lo = np.sqrt(np.maximum(w0 - w_hi, 0))
     s_hi = np.sqrt(np.maximum(w0 - w_lo, 0))
     u, wu = _gauss_panels(0.0, 1.0, 8 * resolution, 16)
@@ -316,8 +315,8 @@ def expected_bd_bracket_de_sitter(
 def expected_bd_on_constant_de_sitter(
     dim: int, hubble: float, density: float, h_tau_px: float, eps: float = 1.0, resolution: int = 1
 ) -> float:
-    """E[(B_eps 1)(x)] en de Sitter (ver ``expected_bd_bracket_de_sitter``).
-    En el límite rho -> infinito tiende a -R/2 = -d(d-1)H^2/2."""
+    """E[(B_eps 1)(x)] in de Sitter (see ``expected_bd_bracket_de_sitter``).
+    In the limit rho -> infinity it tends to -R/2 = -d(d-1)H^2/2."""
     c = coefficients(dim)
     lsq = (eps * density) ** (-2.0 / dim)
     return c.alpha * expected_bd_bracket_de_sitter(dim, hubble, density, h_tau_px, eps, resolution) / lsq

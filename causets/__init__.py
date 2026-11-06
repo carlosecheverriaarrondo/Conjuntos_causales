@@ -1,4 +1,4 @@
-"""Simulador de conjuntos causales por sprinkling de Poisson."""
+"""Causal-set simulator based on Poisson sprinkling."""
 
 from .causal import is_partial_order, minkowski_causal_matrix, partial_order_violations
 from .dimension import (

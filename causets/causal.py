@@ -1,15 +1,15 @@
-"""Relación causal entre puntos de un sprinkling.
+"""Causal relation between the points of a sprinkling.
 
-Convención: ``C[i, j] = True`` si y sólo si i ≺ j estrictamente (i está en el
-pasado causal de j, i != j). Se usa la relación causal cerrada J+ (incluye
-separaciones nulas), aunque con probabilidad 1 ningún par de un sprinkling es
-exactamente nulo.
+Convention: ``C[i, j] = True`` if and only if i ≺ j strictly (i lies in the
+causal past of j, i != j). The closed causal relation J+ is used (it includes
+null separations), although with probability 1 no pair of a sprinkling is
+exactly null.
 
-En Minkowski, i ≺ j  <=>  t_j - t_i > 0  y  (t_j - t_i)^2 >= |x_j - x_i|^2.
+In Minkowski, i ≺ j  <=>  t_j - t_i > 0  and  (t_j - t_i)^2 >= |x_j - x_i|^2.
 
-Nota para fases posteriores: de Sitter y FLRW son conformemente planos, así que
-en coordenadas conformes la relación causal es la de Minkowski y esta función
-se reutiliza tal cual (lo que cambia es la medida de volumen del sprinkling).
+Note for later phases: de Sitter and FLRW are conformally flat, so in conformal
+coordinates the causal relation is that of Minkowski and this function is
+reused as is (what changes is the volume measure of the sprinkling).
 """
 
 from __future__ import annotations
@@ -20,10 +20,10 @@ _CHUNK = 1024
 
 
 def minkowski_causal_matrix(coords: np.ndarray) -> np.ndarray:
-    """Matriz causal (bool, N x N) de puntos en Minkowski d-dimensional.
+    """Causal matrix (bool, N x N) of points in d-dimensional Minkowski.
 
-    Se calcula por bloques de filas para acotar la memoria (O(N * chunk)
-    temporales en lugar de O(N^2 * d)).
+    Computed in blocks of rows to bound the memory (O(N * chunk) temporaries
+    instead of O(N^2 * d)).
     """
     coords = np.asarray(coords, dtype=float)
     n = len(coords)
@@ -40,12 +40,12 @@ def minkowski_causal_matrix(coords: np.ndarray) -> np.ndarray:
 
 
 def minkowski_future_counts(coords: np.ndarray) -> np.ndarray:
-    """Para cada punto y, el número de puntos z del conjunto con y ≺ z.
+    """For each point y, the number of points z of the set with y ≺ z.
 
-    Equivale a ``minkowski_causal_matrix(coords).sum(axis=1)`` pero sin
-    almacenar la matriz N x N (memoria O(N * chunk)). Si todos los puntos
-    están en el pasado de un vértice x (sprinkling del intervalo J-(x)), este
-    número es la cardinalidad del intervalo abierto entre y y x.
+    Equivalent to ``minkowski_causal_matrix(coords).sum(axis=1)`` but without
+    storing the N x N matrix (memory O(N * chunk)). If all the points lie in
+    the past of a vertex x (sprinkling of the interval J-(x)), this number is
+    the cardinality of the open interval between y and x.
     """
     coords = np.asarray(coords, dtype=float)
     n = len(coords)
@@ -62,17 +62,17 @@ def minkowski_future_counts(coords: np.ndarray) -> np.ndarray:
 
 
 def partial_order_violations(C: np.ndarray) -> dict[str, int]:
-    """Cuenta las violaciones de los axiomas de orden parcial estricto.
+    """Count the violations of the axioms of a strict partial order.
 
-    - reflexividad: elementos con i ≺ i
-    - antisimetría: pares con i ≺ j y j ≺ i
-    - transitividad: pares (i, k) con i ≺ j ≺ k para algún j pero no i ≺ k
+    - reflexivity: elements with i ≺ i
+    - antisymmetry: pairs with i ≺ j and j ≺ i
+    - transitivity: pairs (i, k) with i ≺ j ≺ k for some j but not i ≺ k
 
-    Un orden parcial válido da cero en las tres.
+    A valid partial order gives zero in all three.
     """
     C = np.asarray(C, dtype=bool)
     Ci = C.astype(np.float32)
-    # (C @ C)[i, k] = número de j con i ≺ j ≺ k (exacto en float32 para N < 2^24)
+    # (C @ C)[i, k] = number of j with i ≺ j ≺ k (exact in float32 for N < 2^24)
     two_step = (Ci @ Ci) > 0
     return {
         "reflexive": int(np.trace(C)),

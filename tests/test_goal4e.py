@@ -1,7 +1,7 @@
-"""Goal 4e: variantes de la dinámica de Λ (``scripts/goal4e_robustness.py``).
+"""Goal 4e: variants of the Λ dynamics (``scripts/goal4e_robustness.py``).
 
-Tolerancias fijadas antes de ejecutar estos tests. Necesita los datos
-(``scripts/get_pantheon.sh``) y los resultados del Goal 4d; si faltan, se salta.
+Tolerances fixed before running these tests. Requires the data
+(``scripts/get_pantheon.sh``) and the Goal 4d results; skipped if missing.
 """
 
 import importlib.util
@@ -35,7 +35,7 @@ def test_reference_volume_matches_planck_lcdm():
     assert abs(real.extra["V_today"][0] / g4e.V_REF - 1) < 1e-3
 
 
-@pytest.mark.skipif(not HAVE, reason="faltan datos o resultados del Goal 4d")
+@pytest.mark.skipif(not HAVE, reason="data or Goal 4d results missing")
 def test_E0_reproduces_goal4d_per_seed():
     rows4d = json.loads(SEEDS_4D.read_text())["rows"][:4]
     v = g4e.Variant()

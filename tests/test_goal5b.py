@@ -1,5 +1,5 @@
-"""Goal 5b: estadísticos de la descomposición de MYZ (``scripts/goal5b_decomposition.py``)
-frente a un recuento explícito de pares de pares. Exactos (sin tolerancia estadística)."""
+"""Goal 5b: statistics of the MYZ decomposition (``scripts/goal5b_decomposition.py``)
+vs. an explicit count of pairs of pairs. Exact (no statistical tolerance)."""
 
 import importlib.util
 from itertools import product

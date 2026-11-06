@@ -1,13 +1,13 @@
-"""Tests del Goal 2 en de Sitter: el operador BD recupera R = d(d-1) H^2.
+"""Goal 2 tests in de Sitter: the BD operator recovers R = d(d-1) H^2.
 
-Estrategia (ver README, Goal 2):
-1. Valor esperado exacto a densidad finita, E[(B_eps 1)(x)], por la fórmula de
-   Mecke (integral numérica determinista, sin ruido de muestreo).
-2. Convergencia: E[B 1] -> -R/2 cuando l H -> 0 (rho -> infinito) con la
-   región fija. Tolerancias: |E + R/2| < 4 % de R/2 (4D) y < 1.5 % (2D) en
-   l H = 0.05, y la distancia a -R/2 decrece monótonamente con l H.
-3. Simulación: la media de B_eps 1 sobre los puntos de un sprinkling de
-   de Sitter coincide con el valor exacto dentro de 4 SEM.
+Strategy (see README, Goal 2):
+1. Exact expected value at finite density, E[(B_eps 1)(x)], by the Mecke
+   formula (deterministic numerical integral, no sampling noise).
+2. Convergence: E[B 1] -> -R/2 as l H -> 0 (rho -> infinity) with the region
+   fixed. Tolerances: |E + R/2| < 4 % of R/2 (4D) and < 1.5 % (2D) at
+   l H = 0.05, and the distance to -R/2 decreases monotonically with l H.
+3. Simulation: the mean of B_eps 1 over the points of a de Sitter sprinkling
+   matches the exact value within 4 SEM.
 """
 
 import numpy as np
@@ -30,7 +30,7 @@ H = 1.0
 
 @pytest.mark.parametrize("dim", [2, 4])
 def test_conformal_diamond_volume(dim):
-    """Volumen en de Sitter frente a integración Monte Carlo con peso a^d."""
+    """De Sitter volume vs. Monte Carlo integration with weight a^d."""
     a = de_sitter_scale_factor(H)
     region = ConformalDiamond(dim, 0.8, -1.5, a)
     rng = np.random.default_rng(60)
@@ -41,8 +41,8 @@ def test_conformal_diamond_volume(dim):
 
 
 def test_de_sitter_interval_volume_off_axis():
-    """El volumen de I(y, x) sólo depende del invariante Z (simetría máxima):
-    se comprueba un par fuera del eje contra Monte Carlo directo."""
+    """The volume of I(y, x) depends only on the invariant Z (maximal
+    symmetry): an off-axis pair is checked against direct Monte Carlo."""
     a = de_sitter_scale_factor(H)
     x, y = np.array([-1.0, 0.0, 0.0, 0.0]), np.array([-2.0, 0.5, 0.0, 0.0])
     rng = np.random.default_rng(61)
@@ -60,17 +60,17 @@ def test_de_sitter_interval_volume_off_axis():
 
 @pytest.mark.parametrize("dim", [2, 4])
 def test_exact_expectation_reduces_to_flat_for_small_region(dim):
-    """Región pequeña frente a 1/H (H tau = 0.02): la integral de de Sitter
-    debe diferir de la plana (misma rho V) en aproximadamente -R/2. Es una
-    comprobación de coherencia entre las dos implementaciones; la precisión
-    de la aproximación a -R/2 se testea aparte."""
+    """Region small compared with 1/H (H tau = 0.02): the de Sitter integral
+    must differ from the flat one (same rho V) by approximately -R/2. This is
+    a consistency check between the two implementations; the accuracy of the
+    approach to -R/2 is tested separately."""
     h_tau = 0.02
     vol = float(DeSitterIntervalVolume(H, dim, h_tau * 1.01).from_h_tau(h_tau))
     rho = 50.0 / vol
     ds = expected_bd_on_constant_de_sitter(dim, H, rho, h_tau)
     flat = expected_bd_on_constant_at_top(dim, rho, vol)
     r_half = dim * (dim - 1) * H**2 / 2
-    # la diferencia es la curvatura: -R/2 con precisión O(1) a esta densidad
+    # the difference is the curvature: -R/2 to O(1) accuracy at this density
     assert -1.5 * r_half < ds - flat < -0.5 * r_half
 
 
@@ -83,7 +83,7 @@ def test_exact_expectation_converges_to_minus_half_ricci(dim, final_tol):
         rho = l_h ** (-dim)
         e1 = expected_bd_on_constant_de_sitter(dim, H, rho, h_tau, 1.0, resolution=1)
         e2 = expected_bd_on_constant_de_sitter(dim, H, rho, h_tau, 1.0, resolution=2)
-        assert abs(e1 - e2) < 1e-3 * r_half, "cuadratura no convergida"
+        assert abs(e1 - e2) < 1e-3 * r_half, "quadrature not converged"
         distances.append(abs(e2 + r_half))
     assert all(np.diff(distances) < 0), distances
     assert distances[-1] < final_tol * r_half, distances
@@ -111,11 +111,11 @@ def test_sprinkled_de_sitter_matches_exact_expectation(dim, n, eps, eta_bot, eta
         pts = sprinkle(region, rho, rng)
         B = bd_operator(minkowski_causal_matrix(pts), np.ones(len(pts)), dim, rho, eps)
         h_tau = np.arccosh(np.maximum(de_sitter_invariant(np.broadcast_to(p, pts.shape), pts), 1.0))
-        # sólo puntos cuyo pasado sprinkleado es grande frente a l_eps
+        # only points whose sprinkled past is large compared with l_eps
         sel = eps * rho * vol.from_h_tau(h_tau) >= 30
         sim.append(B[sel].mean())
         pred.append(np.interp(h_tau[sel], taus, exact_table).mean())
     sim = np.array(sim)
     sem = sim.std(ddof=1) / np.sqrt(m)
     target = np.mean(pred)
-    assert abs(sim.mean() - target) < K_SIGMA * sem, f"sim={sim.mean():.4f} ± {sem:.4f}, exacto={target:.4f}"
+    assert abs(sim.mean() - target) < K_SIGMA * sem, f"sim={sim.mean():.4f} ± {sem:.4f}, exact={target:.4f}"

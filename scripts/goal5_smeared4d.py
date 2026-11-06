@@ -1,41 +1,41 @@
-"""Goal 5: escalado de las fluctuaciones de la acción BD SUAVIZADA en Minkowski 4D.
+"""Goal 5: scaling of the fluctuations of the SMEARED BD action in 4D Minkowski.
 
-Pregunta: ¿el exponente asintótico p = 0.75 (ΔS ∝ (ρV)^p) del Paso 2, medido
-con la acción local, se mantiene con la acción suavizada (Sorkin 2007,
-arXiv:gr-qc/0703099; Benincasa & Dowker 2010), que es la que usa el Goal 4a?
+Question: does the asymptotic exponent p = 0.75 (ΔS ∝ (ρV)^p) of Step 2,
+measured with the local action, survive with the smeared action (Sorkin 2007,
+arXiv:gr-qc/0703099; Benincasa & Dowker 2010), which is the one used in Goal 4a?
 
-Notación. S_eps = a_N N + F, F = sum_pares f_eps(n) (``pair_weight``).
-  J¹_eps = E[sum_pares f_eps(n)²]              (``smeared_pair_moment``, power 2)
+Notation. S_eps = a_N N + F, F = sum_pairs f_eps(n) (``pair_weight``).
+  J¹_eps = E[sum_pairs f_eps(n)²]              (``smeared_pair_moment``, power 2)
   g      = dE[F]/d(ρV), Cov(N, F) = ρV g        (Mecke, ``smeared_pair_mecke_slope``)
-  Var(S) = a_N² ρV + 2 a_N ρV g + Var(F), así que el "resto" de correlaciones
-  (J², J³, J⁴, J⁶ de MYZ) es  resto = Var(F) − J¹  (como en el Paso 2), y el
-  resto PROYECTADO, sin la parte lineal en N (de tipo Poisson, que con eps
-  pequeño domina a densidades bajas), es
-      resto_⊥ = Var(F − g N) − J¹ = resto − ρV g².
-  Var(F − g N) se mide directamente (menos ruido que restar).
+  Var(S) = a_N² ρV + 2 a_N ρV g + Var(F), so the "rest" of correlations
+  (J², J³, J⁴, J⁶ of MYZ) is  rest = Var(F) − J¹  (as in Step 2), and the
+  PROJECTED rest, without the part linear in N (Poisson-like, which for small
+  eps dominates at low densities), is
+      rest_⊥ = Var(F − g N) − J¹ = rest − ρV g².
+  Var(F − g N) is measured directly (less noise than subtracting).
 
-Simulación: diamante de Minkowski 4D, ρV = 400, 800, 1600, 3200, 6400 con
-2000, 2000, 1000, 1000, 500 sprinklings. Se guarda el histograma completo de
-cardinalidades de intervalo de cada sprinkling (data/goal5/, no versionado),
-así todos los eps salen de los mismos sprinklings: eps = 1, 0.5, 0.2, 0.1.
-(eps = 0.05 queda fuera: a ρV ≤ 6400 la parte en N es 3-55 veces J¹.)
+Simulation: 4D Minkowski diamond, ρV = 400, 800, 1600, 3200, 6400 with
+2000, 2000, 1000, 1000, 500 sprinklings. The full histogram of interval
+cardinalities of each sprinkling is stored (data/goal5/, not versioned),
+so all eps come from the same sprinklings: eps = 1, 0.5, 0.2, 0.1.
+(eps = 0.05 is left out: at ρV ≤ 6400 the part in N is 3-55 times J¹.)
 
-CRITERIOS PRERREGISTRADOS (fijados el 2026-10-12, antes de simular; 4σ):
-  F0 (exactitud): para cada eps y ρV, la media simulada de F y Cov(N, F)
-     coinciden con E[F] y ρV g exactos con |z| < 4 (40 comparaciones).
-  F1 (reproducción): con eps = 1, la media ponderada de resto/J¹ sobre las 5
-     densidades es compatible con la del Paso 2, 0.317 ± 0.014, a 4σ
-     combinada (son semillas nuevas).
-  F2 (principal): para eps = 0.5, 0.2 y 0.1, la pendiente de un ajuste lineal
-     ponderado de resto_⊥/J¹ frente a ln ρV es compatible con 0 a 4σ. Si se
-     cumple, Var(S) − (parte lineal en N) ∝ J¹ ∝ (ρV)^1.5 asintóticamente
-     (exponente 0.75, Paso 2) también con suavizado.
-  F3 (descriptivo, sin criterio): resto_⊥/J¹ en función de eps (el Goal 4a
-     usó r = 0.33; ℓ_k sólo depende de r como (1 + r)^0.1).
-Límite: eps ≥ 0.1, lejos de eps ~ 10⁻⁴⁹ del Goal 4a.
+PREREGISTERED CRITERIA (fixed on 2026-10-12, before simulating; 4σ):
+  F0 (exactness): for each eps and ρV, the simulated mean of F and Cov(N, F)
+     agree with the exact E[F] and ρV g with |z| < 4 (40 comparisons).
+  F1 (reproduction): with eps = 1, the weighted mean of rest/J¹ over the 5
+     densities is compatible with that of Step 2, 0.317 ± 0.014, at 4σ
+     combined (these are new seeds).
+  F2 (main): for eps = 0.5, 0.2 and 0.1, the slope of a weighted linear fit
+     of rest_⊥/J¹ versus ln ρV is compatible with 0 at 4σ. If it holds,
+     Var(S) − (part linear in N) ∝ J¹ ∝ (ρV)^1.5 asymptotically
+     (exponent 0.75, Step 2) also with smearing.
+  F3 (descriptive, no criterion): rest_⊥/J¹ as a function of eps (Goal 4a
+     used r = 0.33; ℓ_k only depends on r as (1 + r)^0.1).
+Limit: eps ≥ 0.1, far from the eps ~ 10⁻⁴⁹ of Goal 4a.
 
-Uso:  python scripts/goal5_smeared4d.py sim LAM [LAM...] | pred | fit | plot
-      (plot rehace la figura desde figures/goal5_results.json, sin data/)
+Usage:  python scripts/goal5_smeared4d.py sim LAM [LAM...] | pred | fit | plot
+        (plot remakes the figure from figures/goal5_results.json, without data/)
 """
 
 from __future__ import annotations
@@ -73,13 +73,13 @@ FIT = ROOT / "figures" / "goal5_results.json"
 PLAN = {400: 2000, 800: 2000, 1600: 1000, 3200: 1000, 6400: 500}
 EPS = (1.0, 0.5, 0.2, 0.1)
 CHUNK = 50
-STEP2 = (0.317, 0.014)  # resto/J¹ del Paso 2 (README, "Paso 2")
+STEP2 = (0.317, 0.014)  # rest/J¹ of Step 2 (README, "Step 2")
 INK, INK_MUTED, GRID = "#0b0b0b", "#52514e", "#e4e3df"
 COLORS = {1.0: "#0b0b0b", 0.5: "#2a78d6", 0.2: "#1baf7a", 0.1: "#eb6834"}
 
 
 def histogram(C: np.ndarray) -> np.ndarray:
-    """hist[n] = número de pares relacionados con n elementos entre ellos."""
+    """hist[n] = number of related pairs with n elements between them."""
     return np.bincount(interval_cardinalities(C)[C])
 
 
@@ -135,7 +135,7 @@ def _var_se(x):
 
 
 def _slope(x, y, se):
-    """Ajuste lineal ponderado y = a + b x: (b, error de b, chi², dof)."""
+    """Weighted linear fit y = a + b x: (b, error of b, chi², dof)."""
     w = 1 / se**2
     A = np.vstack([np.ones_like(x), x]).T
     cov = np.linalg.inv(A.T @ (A * w[:, None]))
@@ -178,7 +178,7 @@ def fit():
     m_se = float(1 / np.sqrt(w.sum()))
     zF1 = (m - STEP2[0]) / np.hypot(m_se, STEP2[1])
     res["F1"] = dict(mean=m, se=m_se, step2=STEP2, z=float(zF1), passed=bool(abs(zF1) < 4))
-    # F2 y F3
+    # F2 and F3
     res["F2"], res["F3"] = {}, {}
     for eps in EPS:
         sel = [r for r in rows if r["eps"] == eps]
@@ -196,8 +196,8 @@ def fit():
 
     for r in rows:
         print(f"ε={r['eps']:<4} ρV={r['rhoV']:<5} z_mean={r['z_mean']:+.2f} z_cov={r['z_cov']:+.2f} "
-              f"resto/J1={r['rest_over_J1']:+.3f}±{r['rest_over_J1_se']:.3f} "
-              f"resto⊥/J1={r['restP_over_J1']:+.3f}±{r['restP_over_J1_se']:.3f} ρVg²/J1={r['N_part_over_J1']:.3f}")
+              f"rest/J1={r['rest_over_J1']:+.3f}±{r['rest_over_J1_se']:.3f} "
+              f"rest⊥/J1={r['restP_over_J1']:+.3f}±{r['restP_over_J1_se']:.3f} ρVg²/J1={r['N_part_over_J1']:.3f}")
     print("F0", res["F0"])
     print("F1", res["F1"])
     for eps in EPS:
@@ -220,12 +220,12 @@ def plot(rows):
     ref = np.array([400, 6400.0])
     ax1.plot(ref, 0.5 * (ref / 400) ** 1.5, ":", color=INK_MUTED, label="∝ (ρV)^1.5 (p = 0.75)")
     ax1.set_yscale("log")
-    ax1.set_ylabel("(ΔS)² / J¹(400)   (líneas: J¹ exacto)", color=INK)
-    ax1.set_title("Varianza total frente al término mismo-par J¹", color=INK, fontsize=10)
+    ax1.set_ylabel("(ΔS)² / J¹(400)   (lines: exact J¹)", color=INK)
+    ax1.set_title("Total variance versus the same-pair term J¹", color=INK, fontsize=10)
     ax2.axhline(STEP2[0], color=INK_MUTED, linestyle=":", linewidth=1)
-    ax2.text(420, STEP2[0] + 0.01, "Paso 2 (ε = 1)", color=INK_MUTED, fontsize=8)
-    ax2.set_ylabel("resto⊥ / J¹", color=INK)
-    ax2.set_title("Correlaciones sin la parte lineal en N", color=INK, fontsize=10)
+    ax2.text(420, STEP2[0] + 0.01, "Step 2 (ε = 1)", color=INK_MUTED, fontsize=8)
+    ax2.set_ylabel("rest⊥ / J¹", color=INK)
+    ax2.set_title("Correlations without the part linear in N", color=INK, fontsize=10)
     for ax in (ax1, ax2):
         ax.set_xscale("log")
         ax.set_xlabel("ρV", color=INK)
@@ -235,7 +235,7 @@ def plot(rows):
             ax.spines[side].set_visible(False)
     path = ROOT / "figures" / "goal5_smeared4d.png"
     fig.savefig(path, dpi=150, facecolor="#fcfcfb")
-    print("figura", path)
+    print("figure", path)
 
 
 if __name__ == "__main__":

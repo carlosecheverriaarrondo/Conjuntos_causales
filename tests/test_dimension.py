@@ -1,10 +1,10 @@
-"""Tests del estimador de Myrheim-Meyer: convergencia a d = 2 y d = 4.
+"""Tests of the Myrheim-Meyer estimator: convergence to d = 2 and d = 4.
 
-Criterio de convergencia (tolerancia estadística explícita):
-  para un conjunto de M sprinklings independientes de N puntos,
-  (a) |<d_MM> - d| < 4 * SEM, con SEM = std(d_MM) / sqrt(M), y
-  (b) |<d_MM> - d| < TOL_ABS[d] (cota absoluta, por si la SEM fuese grande).
-Además, la dispersión debe decrecer con N como ~ N^(-1/2).
+Convergence criterion (explicit statistical tolerance):
+  for an ensemble of M independent sprinklings of N points,
+  (a) |<d_MM> - d| < 4 * SEM, with SEM = std(d_MM) / sqrt(M), and
+  (b) |<d_MM> - d| < TOL_ABS[d] (absolute bound, in case the SEM were large).
+In addition, the spread must decrease with N as ~ N^(-1/2).
 """
 
 import numpy as np
@@ -80,8 +80,8 @@ def test_myrheim_meyer_converges_to_manifold_dimension(dim, n):
 
 @pytest.mark.parametrize("dim", [2, 4])
 def test_myrheim_meyer_spread_shrinks_with_n(dim):
-    """std(d_MM) ~ N^(-1/2): al multiplicar N por 8, la std debe bajar
-    claramente (esperado factor ~0.35; exigimos < 0.6)."""
+    """std(d_MM) ~ N^(-1/2): multiplying N by 8, the std must drop clearly
+    (expected factor ~0.35; we require < 0.6)."""
     std_small = _ensemble(dim, 250, 40, seed=200 + dim).std(ddof=1)
     std_large = _ensemble(dim, 2000, 40, seed=300 + dim).std(ddof=1)
     assert std_large < 0.6 * std_small, (std_small, std_large)

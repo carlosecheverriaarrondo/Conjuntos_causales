@@ -1,21 +1,22 @@
-"""Paso 2: escalado de (Delta S)^2 de la acción BD local en Minkowski 4D.
+"""Step 2: scaling of (Delta S)^2 of the local BD action in 4D Minkowski.
 
-Predicción (derivada antes de calcular, ver README "Paso 2"): en d dimensiones
-    <sum_pares h(n)> ∝ (rho V)^(2-2/d) sum_n h(n) Γ(n+2/d)/n!,
-así que en 4D el término "mismo par" J¹ = sum_k a_k² <N_k> crece como
-(rho V)^1.5 (p = 0.75) y el término cruzado con N no crece (sum_k a_k Γ(k+½)/k! = 0).
-J¹ se calcula exactamente (``continuum.expected_abundance``); la varianza
-total se mide sobre sprinklings, y la diferencia es la suma de los términos
-de correlación (J², J³, J⁴, J⁶ de MYZ).
+Prediction (derived before computing, see README "Step 2"): in d dimensions
+    <sum_pairs h(n)> ∝ (rho V)^(2-2/d) sum_n h(n) Γ(n+2/d)/n!,
+so that in 4D the "same pair" term J¹ = sum_k a_k² <N_k> grows as
+(rho V)^1.5 (p = 0.75) and the cross term with N does not grow
+(sum_k a_k Γ(k+½)/k! = 0).
+J¹ is computed exactly (``continuum.expected_abundance``); the total variance
+is measured on sprinklings, and the difference is the sum of the correlation
+terms (J², J³, J⁴, J⁶ of MYZ).
 
-Fases:
+Phases:
   sim   rho V = 200 .. 3200 -> figures/step2_4d_sim.json (incremental)
-  extra segunda tanda: 1500 más con rho V = 3200 y 500 con 6400
+  extra second batch: 1500 more with rho V = 3200 and 500 with 6400
         -> figures/step2_4d_sim_extra.json
-  fit   comparación con J¹ exacto, figura figures/step2_4d_scaling.png y
-        resumen figures/step2_4d_results.json
+  fit   comparison with the exact J¹, figure figures/step2_4d_scaling.png and
+        summary figures/step2_4d_results.json
 
-Uso:  python scripts/step2_4d_scaling.py sim | fit
+Usage:  python scripts/step2_4d_scaling.py sim | fit
 """
 
 from __future__ import annotations
@@ -46,13 +47,13 @@ SIM = ROOT / "figures" / "step2_4d_sim.json"
 SIM_EXTRA = ROOT / "figures" / "step2_4d_sim_extra.json"
 FIT = ROOT / "figures" / "step2_4d_results.json"
 PLAN = {200: 2000, 400: 2000, 800: 2000, 1600: 1000, 3200: 500}  # rho V -> sprinklings
-PLAN_EXTRA = {3200: 1500, 6400: 500}  # segunda tanda (semillas distintas)
+PLAN_EXTRA = {3200: 1500, 6400: 500}  # second batch (different seeds)
 INK, INK_MUTED, GRID = "#0b0b0b", "#52514e", "#e4e3df"
 BLUE, ORANGE, GREEN = "#2a78d6", "#eb6834", "#1baf7a"
 
 
 def exact_parts(lam: float) -> dict:
-    """NN, cruzado N-k y J¹ exactos (acción local 4D)."""
+    """Exact NN, N-k cross term and J¹ (local 4D action)."""
     a = local_action_coefficients(4)
     aN, ak = a[0], a[1:]
     L = np.array([expected_abundance(4, lam, k) for k in range(5)])
@@ -77,8 +78,8 @@ def sim(plan=PLAN, out=SIM, seed=71_000):
 
 
 def _combine(rows):
-    """Une tandas de la misma densidad: media de las varianzas ponderada por el
-    número de sprinklings (errores combinados en consecuencia)."""
+    """Merges batches of the same density: mean of the variances weighted by the
+    number of sprinklings (errors combined accordingly)."""
     by = {}
     for r in rows:
         by.setdefault(r["rhoV"], []).append(r)
@@ -102,7 +103,7 @@ def fit():
         r["rest_over_J1"] = r["rest"] / r["J1"]
         r["rest_over_J1_se"] = r["sim_se"] / r["J1"]
     lam = np.array([r["rhoV"] for r in rows], float)
-    # exponentes locales (pares consecutivos) de la simulación y de J¹
+    # local exponents (consecutive pairs) of the simulation and of J¹
     p_sim = [dict(rhoV=(rows[i]["rhoV"], rows[i + 1]["rhoV"]),
                   p=float(np.log(rows[i + 1]["sim"] / rows[i]["sim"]) / np.log(lam[i + 1] / lam[i]) / 2),
                   se=float(np.hypot(rows[i]["sim_se"] / rows[i]["sim"], rows[i + 1]["sim_se"] / rows[i + 1]["sim"])
@@ -114,34 +115,34 @@ def fit():
                                    J1_curve=dict(rhoV=lam_j.tolist(), J1=j1.tolist())), indent=1))
     for r in rows:
         print(f"ρV={r['rhoV']:<5} total/ρV={r['sim']/r['rhoV']:9.1f}±{r['sim_se']/r['rhoV']:<6.1f} J1/ρV={r['J1']/r['rhoV']:9.1f}"
-              f"  resto/J1={r['rest_over_J1']:+.3f}±{r['rest_over_J1_se']:.3f}")
+              f"  rest/J1={r['rest_over_J1']:+.3f}±{r['rest_over_J1_se']:.3f}")
     for p in p_sim:
         print(f"p_local sim {p['rhoV']}: {p['p']:.3f} ± {p['se']:.3f}")
 
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 4.6), constrained_layout=True)
-    ax1.plot(lam_j, j1 / lam_j, "-", color=BLUE, linewidth=2, label="J¹ exacto (mismo par)")
+    ax1.plot(lam_j, j1 / lam_j, "-", color=BLUE, linewidth=2, label="exact J¹ (same pair)")
     ax1.errorbar(lam, [r["sim"] / r["rhoV"] for r in rows], yerr=[r["sim_se"] / r["rhoV"] for r in rows], fmt="o",
-                 color=INK, markerfacecolor="white", capsize=3, label="(ΔS)² total, simulación")
+                 color=INK, markerfacecolor="white", capsize=3, label="total (ΔS)², simulation")
     ref = lam_j[lam_j >= 1e4]
-    ax1.plot(ref, j1[-1] / lam_j[-1] * (ref / lam_j[-1]) ** 0.5, ":", color=INK_MUTED, label="pendiente p = 0.75")
+    ax1.plot(ref, j1[-1] / lam_j[-1] * (ref / lam_j[-1]) ** 0.5, ":", color=INK_MUTED, label="slope p = 0.75")
     ax1.set_xscale("log")
     ax1.set_yscale("log")
     ax1.set_xlabel("ρV", color=INK)
     ax1.set_ylabel("(ΔS)² / ρV", color=INK)
-    ax1.set_title("Minkowski 4D, acción BD local", color=INK, fontsize=10)
+    ax1.set_title("4D Minkowski, local BD action", color=INK, fontsize=10)
     ax1.legend(frameon=False, fontsize=8)
     mid = np.sqrt(lam_j[1:] * lam_j[:-1])
-    ax2.plot(mid, p_j1, "-", color=BLUE, linewidth=2, label="J¹ exacto")
+    ax2.plot(mid, p_j1, "-", color=BLUE, linewidth=2, label="exact J¹")
     ax2.errorbar([np.sqrt(p["rhoV"][0] * p["rhoV"][1]) for p in p_sim], [p["p"] for p in p_sim],
-                 yerr=[p["se"] for p in p_sim], fmt="o", color=INK, markerfacecolor="white", capsize=3, label="total, simulación")
+                 yerr=[p["se"] for p in p_sim], fmt="o", color=INK, markerfacecolor="white", capsize=3, label="total, simulation")
     ax2.axhline(0.75, color=BLUE, linestyle=":", linewidth=1.2)
     ax2.axhline(0.5, color=ORANGE, linestyle=":", linewidth=1.2)
-    ax2.text(1.2e5, 0.76, "0.75 (asintótico J¹)", color=BLUE, fontsize=8)
+    ax2.text(1.2e5, 0.76, "0.75 (asymptotic J¹)", color=BLUE, fontsize=8)
     ax2.text(1.2e5, 0.51, "0.5 (Poisson)", color=ORANGE, fontsize=8)
     ax2.set_xscale("log")
     ax2.set_xlabel("ρV", color=INK)
-    ax2.set_ylabel("exponente local p", color=INK)
-    ax2.set_title("Exponente local de ΔS ∝ (ρV)^p", color=INK, fontsize=10)
+    ax2.set_ylabel("local exponent p", color=INK)
+    ax2.set_title("Local exponent of ΔS ∝ (ρV)^p", color=INK, fontsize=10)
     ax2.legend(frameon=False, fontsize=8)
     for ax in (ax1, ax2):
         ax.grid(True, color=GRID, linewidth=0.8)
@@ -149,7 +150,7 @@ def fit():
             ax.spines[side].set_visible(False)
     path = ROOT / "figures" / "step2_4d_scaling.png"
     fig.savefig(path, dpi=150, facecolor="#fcfcfb")
-    print("figura", path)
+    print("figure", path)
 
 
 if __name__ == "__main__":

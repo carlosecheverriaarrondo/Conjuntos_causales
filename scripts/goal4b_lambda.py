@@ -1,18 +1,18 @@
-"""Goal 4b-2: Λ(t) estocástico con retroacción, Everpresent Λ (Model 1) frente
-a las fluctuaciones de la acción BD (``causets/stochastic_lambda.py``).
+"""Goal 4b-2: stochastic Λ(t) with back-reaction, Everpresent Λ (Model 1) versus
+the fluctuations of the BD action (``causets/stochastic_lambda.py``).
 
-Criterios (fijados antes de calcular):
-  C1  validación: Λ constante reproduce ΛCDM (h, Omega_Λ, d_L, E(z)) con error
-      relativo < 1e-3; V(a=1) frente a ``everpresent.past_cone_volume`` < 1e-3.
-  C2  validación: el proceso OU da corr = (V1/V2)^c (4σ).
-  Comparación (misma para los dos modelos): fracción de realizaciones "tipo
-  ΛCDM" (``stochastic_lambda.lcdm_like``: Omega_Λ0 en [0.6, 0.8], h en
-  [0.6, 0.8], forma de mu(z) a < 0.1 mag de ΛCDM en 0.01 < z < 2.3,
-  |E/E_ΛCDM - 1| < 5 % en z = 0.5, 1, 2) frente a la amplitud.
-  No es un ajuste a datos reales: compara los dos modelos con el mismo
-  criterio.
+Criteria (fixed before computing):
+  C1  validation: constant Λ reproduces ΛCDM (h, Omega_Λ, d_L, E(z)) with
+      relative error < 1e-3; V(a=1) versus ``everpresent.past_cone_volume`` < 1e-3.
+  C2  validation: the OU process gives corr = (V1/V2)^c (4σ).
+  Comparison (the same for both models): fraction of "ΛCDM-like"
+  realisations (``stochastic_lambda.lcdm_like``: Omega_Λ0 in [0.6, 0.8], h in
+  [0.6, 0.8], shape of mu(z) within 0.1 mag of ΛCDM in 0.01 < z < 2.3,
+  |E/E_ΛCDM - 1| < 5 % at z = 0.5, 1, 2) versus the amplitude.
+  This is not a fit to real data: it compares the two models with the same
+  criterion.
 
-Uso:  python scripts/goal4b_lambda.py run | plot
+Usage:  python scripts/goal4b_lambda.py run | plot
 """
 
 from __future__ import annotations
@@ -83,15 +83,15 @@ def plot():
                  fmt="o-", color=GREEN, capsize=3, label="Model 1 (DNY)")
     ax1.set_xscale("log")
     ax1.set_xlabel("α (Model 1)", color=INK)
-    ax1.set_ylabel("fracción de realizaciones tipo ΛCDM", color=INK)
+    ax1.set_ylabel("fraction of ΛCDM-like realisations", color=INK)
     ax1.set_title("Everpresent Λ, Model 1", color=INK, fontsize=10)
     for beta, col in zip(BETAS, (PURPLE, ORANGE, BLUE)):
         bd = [r for r in rows if r["model"] == "BD" and r["beta"] == beta]
         ax2.errorbar([r["lam"] for r in bd], [r["frac_lcdm_like"] for r in bd], [r["frac_se"] for r in bd],
-                     fmt="o-", color=col, capsize=3, label=f"acción BD, β = {beta:g}")
+                     fmt="o-", color=col, capsize=3, label=f"BD action, β = {beta:g}")
     ax2.set_xscale("log")
-    ax2.set_xlabel("λ (amplitud de la acción BD; λ ↔ ℓ_k)", color=INK)
-    ax2.set_title("Fluctuaciones de la acción BD", color=INK, fontsize=10)
+    ax2.set_xlabel("λ (amplitude of the BD action; λ ↔ ℓ_k)", color=INK)
+    ax2.set_title("Fluctuations of the BD action", color=INK, fontsize=10)
     top = ax2.secondary_xaxis("top", functions=(lambda x: x, lambda x: x))
     ticks = [0.3, 1.0, 6.0]
     top.set_xticks(ticks)
@@ -105,7 +105,7 @@ def plot():
         ax.legend(frameon=False, fontsize=8)
     path = ROOT / "figures" / "goal4b_lambda.png"
     fig.savefig(path, dpi=150, facecolor="#fcfcfb")
-    print("figura", path)
+    print("figure", path)
 
 
 if __name__ == "__main__":

@@ -1,35 +1,35 @@
-"""Punto 1a: fluctuaciones de la acción BD en el cono de luz pasado truncado
-J^-(q) ∩ {t >= 0} de Minkowski 2D (``TruncatedPastCone``), el análogo plano
-de la región que usa Everpresent Λ.
+"""Point 1a: fluctuations of the BD action in the truncated past light cone
+J^-(q) ∩ {t >= 0} of 2D Minkowski (``TruncatedPastCone``), the flat analogue
+of the region used by Everpresent Λ.
 
-Hipótesis (formulada ANTES de calcular): el término "mismo par" (J¹) da
-<sum_pares h(n)> = rho V ln(rho V) sum_n h(n) + O(rho V) para cualquier
-región compacta: el coeficiente del logaritmo sale del rango de rapidez
-ln(rho) de los intervalos casi nulos, y la forma de la región sólo cambia la
-constante. Por tanto, en el cono, (Delta S)² ⊇ b(eps) rho V ln(rho V) con el
-mismo b(eps) = sum_n f_eps(n)² que en el diamante.
+Hypothesis (formulated BEFORE computing): the "same pair" term (J¹) gives
+<sum_pairs h(n)> = rho V ln(rho V) sum_n h(n) + O(rho V) for any compact
+region: the coefficient of the logarithm comes from the rapidity range
+ln(rho) of the almost-null intervals, and the shape of the region only changes
+the constant. Hence, in the cone, (Delta S)² ⊇ b(eps) rho V ln(rho V) with the
+same b(eps) = sum_n f_eps(n)² as in the diamond.
 
-Criterios de éxito (fijados antes de ver los resultados):
-  C1  <N_k> exacto en el cono (``continuum.expected_abundance_cone``) frente a
-      sprinklings: |z| < 4 para k = 0..3 en cada densidad.
-  C2  aumento por década de <sum f_eps²>/rho V entre rho V = 1e5 y 1e6
-      (integral exacta en el cono) dividido por ln 10 = b(eps), tolerancia
-      relativa 1e-3 (test).
-  C3  predicción MYZ (``FluctuationKernel`` sobre ``MinkowskiConeGeometry``)
-      frente a la varianza de los sprinklings, eps = 1 y 0.5,
-      rho V = 50, 200, 800, 3200: todos los puntos con |z| < 4 (error combinado).
-  C4  ajuste (Delta S)²/rho V = c + b ln(rho V) de las predicciones MYZ con
-      eps = 1, rho V = 50 .. 12800: b compatible a 4σ con el del diamante
+Success criteria (fixed before looking at the results):
+  C1  exact <N_k> in the cone (``continuum.expected_abundance_cone``) versus
+      sprinklings: |z| < 4 for k = 0..3 at each density.
+  C2  increase per decade of <sum f_eps²>/rho V between rho V = 1e5 and 1e6
+      (exact integral in the cone) divided by ln 10 = b(eps), relative
+      tolerance 1e-3 (test).
+  C3  MYZ prediction (``FluctuationKernel`` on ``MinkowskiConeGeometry``)
+      versus the variance of the sprinklings, eps = 1 and 0.5,
+      rho V = 50, 200, 800, 3200: all points with |z| < 4 (combined error).
+  C4  fit (Delta S)²/rho V = c + b ln(rho V) of the MYZ predictions with
+      eps = 1, rho V = 50 .. 12800: b compatible at 4σ with that of the diamond
       (24.43 ± 0.24, Goal 3d).
 
-Fases:
-  sim      sprinklings del cono; abundancias con eps = 1 y 0.5 de los mismos
-           sprinklings -> figures/cone_sim.json
-  pred     predicción MYZ y descomposición por términos -> figures/cone_pred.json
-  fit      criterios, ajustes y figura -> figures/cone_results.json,
+Phases:
+  sim      sprinklings of the cone; abundances with eps = 1 and 0.5 from the
+           same sprinklings -> figures/cone_sim.json
+  pred     MYZ prediction and decomposition by terms -> figures/cone_pred.json
+  fit      criteria, fits and figure -> figures/cone_results.json,
            figures/cone_fluctuations.png
 
-Uso:  python scripts/cone_fluctuations.py sim | pred | fit
+Usage:  python scripts/cone_fluctuations.py sim | pred | fit
 """
 
 from __future__ import annotations
@@ -72,7 +72,7 @@ EPS = (1.0, 0.5)
 SIM_LAMS = {50: 4000, 200: 4000, 800: 3000, 3200: 2000}  # rho V: sprinklings
 PRED_LAMS = (50, 200, 800, 3200, 12800)
 M_TERMS = {1.0: 2_000_000, 0.5: 4_000_000}
-DIAMOND_B = (24.43, 0.24)  # b total del diamante, eps = 1 (Goal 3d)
+DIAMOND_B = (24.43, 0.24)  # total b of the diamond, eps = 1 (Goal 3d)
 K_SIGMA = 4.0
 INK, INK_MUTED, GRID = "#0b0b0b", "#52514e", "#e4e3df"
 BLUE, ORANGE = "#2a78d6", "#eb6834"
@@ -151,25 +151,25 @@ def fit():
                      z=(f1["b"] - DIAMOND_B[0]) / np.hypot(f1["b_se"], DIAMOND_B[1]))
     RESULTS.write_text(json.dumps(out, indent=1))
 
-    print("C1 (|z| de <N_k>):", max(max(abs(v) for v in r["z"]) for r in out["C1"]))
+    print("C1 (|z| of <N_k>):", max(max(abs(v) for v in r["z"]) for r in out["C1"]))
     for r in out["C3"]:
         print(f"C3 eps={r['eps']:<4} rhoV={r['rhoV']:>5}: sim {r['sim']:.5g} ± {r['sim_se']:.2g}   "
               f"pred {r['pred']:.5g} ± {r['pred_se']:.2g}   z = {r['z']:+.2f}")
     for eps, f in out["fits"].items():
-        print(f"eps={eps}: b = {f['b']:.4g} ± {f['b_se']:.2g} (chi2/dof {f['chi2dof']:.2f}), b(J¹) predicho {f['b_pred_J1']:.4g}")
-        print("   aumentos de J¹/rhoV / ln4:", [f"{v:.4g}" for v in f["J1_increase_over_ln4"]])
-        print("   resto/rhoV:", [f"{v:.4g}" for v in f["rest_over_rhoV"]])
-        print("   exponente local de ΔS:", [f"{v:.3f}" for v in f["local_exponent_of_DeltaS"]])
+        print(f"eps={eps}: b = {f['b']:.4g} ± {f['b_se']:.2g} (chi2/dof {f['chi2dof']:.2f}), predicted b(J¹) {f['b_pred_J1']:.4g}")
+        print("   increases of J¹/rhoV / ln4:", [f"{v:.4g}" for v in f["J1_increase_over_ln4"]])
+        print("   rest/rhoV:", [f"{v:.4g}" for v in f["rest_over_rhoV"]])
+        print("   local exponent of ΔS:", [f"{v:.3f}" for v in f["local_exponent_of_DeltaS"]])
     print("C4:", out["C4"])
 
-    # figura: (Delta S)²/rho V frente a rho V, cono (MYZ y simulación)
+    # figure: (Delta S)²/rho V versus rho V, cone (MYZ and simulation)
     fig, axes = plt.subplots(1, 2, figsize=(11, 4.2), constrained_layout=True)
     for ax, eps in zip(axes, EPS):
         sel = sorted((p for p in preds if p["eps"] == eps), key=lambda r: r["rhoV"])
         lam = np.array([r["rhoV"] for r in sel], float)
         ax.errorbar(lam, [r["variance"] / r["rhoV"] for r in sel], [r["variance_se"] / r["rhoV"] for r in sel],
-                    fmt="o-", color=BLUE, label="predicción MYZ", markersize=4, linewidth=1.4, capsize=2)
-        ax.plot(lam, [r["parts"]["J1"]["value"] / r["rhoV"] for r in sel], "--", color=INK_MUTED, label="sólo J¹", linewidth=1.2)
+                    fmt="o-", color=BLUE, label="MYZ prediction", markersize=4, linewidth=1.4, capsize=2)
+        ax.plot(lam, [r["parts"]["J1"]["value"] / r["rhoV"] for r in sel], "--", color=INK_MUTED, label="J¹ only", linewidth=1.2)
         ss = sorted((s for s in sims if s["eps"] == eps), key=lambda r: r["rhoV"])
         ax.errorbar([s["rhoV"] for s in ss], [s["variance"] / s["rhoV"] for s in ss], [s["variance_se"] / s["rhoV"] for s in ss],
                     fmt="s", color=ORANGE, label="sprinklings", markersize=5, capsize=2)
@@ -182,11 +182,11 @@ def fit():
             ax.spines[side].set_visible(False)
         ax.set_xlabel("ρV", color=INK)
         ax.set_ylabel("(ΔS)² / ρV", color=INK)
-        ax.set_title(f"cono pasado truncado 2D, ε = {eps:g}  (Σf² = {f['b_pred_J1']:.3g})", color=INK, fontsize=10)
+        ax.set_title(f"2D truncated past cone, ε = {eps:g}  (Σf² = {f['b_pred_J1']:.3g})", color=INK, fontsize=10)
         ax.legend(frameon=False, fontsize=8)
     path = ROOT / "figures" / "cone_fluctuations.png"
     fig.savefig(path, dpi=150, facecolor="#fcfcfb")
-    print("figura", path)
+    print("figure", path)
 
 
 if __name__ == "__main__":

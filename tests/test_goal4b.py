@@ -1,14 +1,14 @@
-"""Goal 4b: Λ(t) estocástico con retroacción (``causets/stochastic_lambda.py``).
+"""Goal 4b: stochastic Λ(t) with back-reaction (``causets/stochastic_lambda.py``).
 
-Márgenes fijados ANTES de ver los resultados del barrido:
-  C1  Λ constante reproduce ΛCDM: relativo 1e-3 (h, Omega_Λ, d_L, E(z));
-  C2  correlación del proceso OU: 4σ;
-  C3  V(a = 1) frente a ``everpresent.past_cone_volume``: relativo 1e-3.
-Comprobación externa añadida DESPUÉS de ver los resultados (no es un criterio
-previo): tasas de finalización de Model 1 frente a las publicadas por DNY
-(sec. 5.1: 9990, 3228 y 535 de 10 000 para alpha = 0.005, 0.01, 0.012), a 4σ
-binomial combinada. DNY documentan que la tasa depende del paso temporal; el
-proceso de este módulo es el límite continuo.
+Tolerances fixed BEFORE seeing the results of the sweep:
+  C1  constant Λ reproduces ΛCDM: relative 1e-3 (h, Omega_Λ, d_L, E(z));
+  C2  correlation of the OU process: 4σ;
+  C3  V(a = 1) vs. ``everpresent.past_cone_volume``: relative 1e-3.
+External check added AFTER seeing the results (not a pre-registered
+criterion): completion rates of Model 1 vs. those published by DNY
+(sec. 5.1: 9990, 3228 and 535 out of 10 000 for alpha = 0.005, 0.01, 0.012),
+at 4σ combined binomial. DNY document that the rate depends on the time step;
+the process in this module is the continuum limit.
 """
 
 import numpy as np
@@ -42,7 +42,7 @@ def test_C3_volume_matches_past_cone_volume(constant_lambda):
 
 @pytest.mark.parametrize("c", [0.5, 0.75, 0.6])
 def test_C2_ou_correlation(c):
-    """Tras pasos que suman Δu = ln(V2/V1), corr = e^(-c Δu) = (V1/V2)^c."""
+    """After steps adding up to Δu = ln(V2/V1), corr = e^(-c Δu) = (V1/V2)^c."""
     rng = np.random.default_rng(11)
     n = 200_000
     s0 = rng.standard_normal(n)
@@ -65,10 +65,10 @@ def test_model1_completion_matches_dny(alpha, completed):
 
 
 def test_bd_lambda_to_lk_inverts_goal4a():
-    """Con la amplitud que da Λ_obs hoy, l_k coincide con el del Goal 4a (FLRW
-    materia, r = 0.33, l = l_p): 2.63e-23 m (orden de magnitud, ±10 %)."""
+    """With the amplitude that gives Λ_obs today, l_k matches that of Goal 4a
+    (matter FLRW, r = 0.33, l = l_p): 2.63e-23 m (order of magnitude, ±10 %)."""
     from causets.everpresent import past_cone_volume as pcv
 
-    v0 = pcv(1.0, 0.315, 9.1e-5, 1 - 0.315 - 9.1e-5) / H**4  # V hoy en unidades H_100^-4
-    lam = 3 * OL * H**2 * v0**0.25  # Λ_env(hoy) = Λ_obs
+    v0 = pcv(1.0, 0.315, 9.1e-5, 1 - 0.315 - 9.1e-5) / H**4  # V today in units of H_100^-4
+    lam = 3 * OL * H**2 * v0**0.25  # Λ_env(today) = Λ_obs
     assert sl.bd_lambda_to_lk(lam) == pytest.approx(2.63e-23, rel=0.1)

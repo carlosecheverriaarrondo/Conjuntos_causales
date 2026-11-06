@@ -1,10 +1,10 @@
-"""Tests de las fluctuaciones de la acción BD SUAVIZADA (eps < 1): extensión
-del formalismo de Moradi, Yazdi & Zilhão (arXiv:2407.03395) con abundancias
-adelgazadas (ver ``causets/fluctuations.py``).
+"""Tests of the fluctuations of the SMEARED BD action (eps < 1): extension of
+the formalism of Moradi, Yazdi & Zilhão (arXiv:2407.03395) with thinned
+abundances (see ``causets/fluctuations.py``).
 
-Margen estadístico fijado a priori (igual que en el Goal 3):
-  |simulación - predicción| < 4 sqrt(se_sim^2 + se_pred^2).
-Semillas fijas.
+Statistical tolerance fixed a priori (as in Goal 3):
+  |simulation - prediction| < 4 sqrt(se_sim^2 + se_pred^2).
+Fixed seeds.
 """
 
 import numpy as np
@@ -48,8 +48,8 @@ def test_expected_thinned_abundances_give_mean_action(dim):
 
 
 def test_thinned_joint_probability_against_sprinklings():
-    """<B_i(n_A, eps) B_j(n_B, eps)> con un extremo de B dentro de A (sA = 1):
-    la fórmula de adelgazamiento contra sprinklings directos."""
+    """<B_i(n_A, eps) B_j(n_B, eps)> with one endpoint of B inside A (sA = 1):
+    the thinning formula against direct sprinklings."""
     g = MinkowskiDiamondGeometry(2)
     rho, eps, n = 20.0, 0.4, 4
     y1, x1 = np.array([-0.6, -0.1]), np.array([0.2, -0.1])
@@ -90,7 +90,7 @@ def test_smeared_action_variance_2d(smeared_2d):
 
 
 def test_smeared_covariance_with_N(smeared_2d):
-    """M_{-1,k} = (k+2) L_k - (k+1) L_{k+1} también para las abundancias adelgazadas."""
+    """M_{-1,k} = (k+2) L_k - (k+1) L_{k+1} also for the thinned abundances."""
     pred, sim = smeared_2d
     for j in range(4):
         assert abs(sim.covariance[0, j] - pred.covariance[0, j]) < K_SIGMA * sim.covariance_se[0, j], j
