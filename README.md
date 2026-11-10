@@ -4,7 +4,8 @@ Code and results for the paper
 
 > C. Echeverría-Arrondo, *Boost-range scaling of the fluctuations of the
 > Benincasa–Dowker action and its consequences for Everpresent Λ* (2026,
-> submitted to *Classical and Quantum Gravity*; arXiv number to follow).
+> submitted to *Classical and Quantum Gravity*, manuscript CQG-118069;
+> arXiv number to follow).
 
 The package simulates causal sets by Poisson sprinkling, evaluates the
 Benincasa–Dowker (BD) action and its fluctuations (formalism of Moradi, Yazdi &

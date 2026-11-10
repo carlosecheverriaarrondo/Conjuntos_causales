@@ -250,9 +250,11 @@ con las comparaciones MYZ-sprinklings; figura 3 con 10⁴ semillas donde existen
 Envío (2026-11-03): revisión de estilo por un agente externo sin contexto
 (informe en `paper/revision_estilo_2026-11-03.md`, 38 hallazgos, sólo prosa)
 aplicada entera en `paper/main.tex`; carta de presentación para CQG en
-`paper/cover_letter.tex`. Release v1.1.0 = versión enviada. Pendiente: envío a
-CQG (ScholarOne, revisión simple anónima) y a arXiv (gr-qc; desde el 21-1-2026
-hace falta endorser personal si no hay artículos previos en la categoría).
+`paper/cover_letter.tex`. Release v1.1.0 = versión enviada. Enviado a CQG el
+2026-11-10 (ScholarOne, revisión simple anónima): manuscrito CQG-118069.
+Pendiente: arXiv (gr-qc; desde el 21-1-2026 hace falta endorser personal si no
+hay artículos previos en la categoría; peticiones a Yazdi y Zilhão sin
+respuesta).
 Documentación (2026-10-15): el cuaderno detallado en español pasó a
 README.es.md (los "ver README" de arriba se refieren a él); README.md es el
 resumen en inglés para los lectores del paper. Licencia MIT; CITATION.cff y
